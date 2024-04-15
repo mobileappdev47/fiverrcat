@@ -1,0 +1,136 @@
+name: pokercat
+description: A new Flutter application.
+
+
+
+# The following line prevents the package from being accidentally published to
+# pub.dev using `flutter pub publish`. This is preferred for private packages.
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.2.3 <4.0.0'
+
+
+dependencies:
+  fl_chart: ^0.66.2
+  intl: ^0.18.1
+  sqflite: ^2.0.0+4
+  uuid: ^4.3.3
+  bloc: ^8.1.2
+  flutter_bloc: ^8.1.3
+  flutter_colorpicker: ^1.0.3
+  day_night_time_picker: ^1.0.3+1
+  flutter_material_pickers: ^3.1.0
+  sliding_up_panel: ^2.0.0+1
+  keyboard_actions: ^4.2.0
+  hive: ^2.0.4
+  hive_flutter: ^1.1.0
+  ionicons: 0.2.2
+  currency_picker: ^2.0.16
+  currency_text_input_formatter: ^2.1.11
+  table_calendar: ^3.0.9
+  lite_rolling_switch: ^1.0.1
+
+  animated_splash_screen: ^1.3.0
+  flutter:
+    sdk: flutter
+  flutter_screenutil: ^5.9.0
+  lottie: ^1.4.2
+  page_transition: ^2.0.9
+  firebase_core_platform_interface: ^5.0.0 #나중에 지루지워
+  equatable: any
+  firebase_auth: any
+  shared_preferences: any
+  cloud_firestore: any
+  cloud_functions: any
+  google_sign_in: any
+  sign_in_with_apple: any
+  poker: any
+  firebase_core: any
+  cloud_firestore_web: any
+  cloud_functions_web: any
+  firebase_auth_web: any
+  firebase_core_web: any
+  google_sign_in_web: any
+  shared_preferences_web: any
+  sign_in_with_apple_web: any
+  url_launcher_web: any
+  bot_toast: any
+
+  get: any
+  google_fonts: any
+  logger: any
+  google_mobile_ads: ^4.0.0
+
+
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+
+  cupertino_icons: ^1.0.3
+  bot_toast: ^4.0.3
+  cloud_firestore: ^4.15.0
+  cloud_functions: ^4.6.6
+  firebase_core: ^2.24.0
+  get: ^4.6.5
+  logger: 1.0.0
+  keyboard_dismisser: ^2.0.0
+  google_fonts: ^6.2.1
+  url_launcher: ^6.1.12
+  shared_preferences: ^2.0.15
+  poker: 0.2.5
+  provider: ^6.0.3
+  google_sign_in: ^5.3.3
+  sign_in_with_apple: ^4.0.0
+  flutter_lints: ^2.0.0
+  change_app_package_name: ^1.1.0
+  flutter_swipe_action_cell: ^3.1.0
+  table_calendar: ^3.0.2
+  material_design_icons_flutter: ^7.0.7296
+  icofont_flutter: ^1.4.0
+  outline_material_icons: ^1.0.0
+  flutter_boxicons: ^3.0.0
+  font_awesome_flutter: ^10.7.0
+
+
+flutter:
+
+  uses-material-design: true
+
+
+  assets:
+    - assets/
+    - assets/images/
+    - assets/images/login/
+    - assets/images/dice/
+
+
+  # An image asset can refer to one or more resolution-specific "variants", see
+  # https://flutter.dev/assets-and-images/#resolution-aware
+
+  # For details regarding adding assets from package dependencies, see
+  # https://flutter.dev/assets-and-images/#from-packages
+
+  # To add custom fonts to your application, add a fonts section here,
+  # in this "flutter" section. Each entry in this list should have a
+  # "family" key with the font family name, and a "fonts" key with a
+  # list giving the asset and other descriptors for the font. For
+  # example:
+  fonts:
+    - family: Quasimoda
+      fonts:
+        - asset: assets/fonts/quasimoda-light.otf
+        - asset: assets/fonts/Quasimoda Regular.ttf
+        - asset: assets/fonts/Quasimoda Medium.ttf
+
+    - family: PokerIcon
+      fonts:
+        - asset: assets/fonts/PokerIcon.ttf
+
+  #
+  # For details regarding fonts from package dependencies,
+  # see https://flutter.dev/custom-fonts/#from-packages
