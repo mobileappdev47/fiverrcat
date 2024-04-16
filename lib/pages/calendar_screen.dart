@@ -1,5 +1,5 @@
-import 'dart:collection';
-import 'package:flutter/cupertino.dart';
+import 'package:pokercat/calander.dart';
+import 'package:syncfusion_flutter_calendar/calendar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:hive/hive.dart';
@@ -28,21 +28,47 @@ class CalendarScreen extends StatefulWidget {
 }
 
 class _CalendarScreenState extends State<CalendarScreen> {
+  bool manage = false;
+
+  //late final GlobalKey _calendarKey;
+  double incomeData = 0;
+  double expenseData = 0;
+
+  List<Meeting> _getDataSource(DateTime selectedDate) {
+    final List<Meeting> meetings = <Meeting>[];
+    //final DateTime today = DateTime.now();
+    final DateTime startTime = DateTime(selectedDate.year, selectedDate.month, selectedDate.day, 9);
+    final DateTime endTime = startTime.add(const Duration(hours: 2));
+    meetings.add(Meeting(
+        '${currencySymboleUpdate.value} ${formatter.format(incomeData - expenseData)}',
+        startTime,
+        endTime,
+        Colors.transparent,
+        false));
+
+    return meetings;
+  }
+
   int myNumber = 0;
+  final CalendarController _calendarController = CalendarController();
+
   //-----------calendar ----------------
   late final ValueNotifier<List<Event>> _selectedEvents;
-  CalendarFormat _calendarFormat = CalendarFormat.month;
-  RangeSelectionMode _rangeSelectionMode = RangeSelectionMode
-      .toggledOff; // Can be toggled on/off by longpressing a date
+  final CalendarFormat _calendarFormat = CalendarFormat.month;
+  RangeSelectionMode _rangeSelectionMode = RangeSelectionMode.toggledOff;
   DateTime _focusedDay = DateTime.now();
+  DateTime select = DateTime.now();
   DateTime? _selectedDay;
   DateTime? _rangeStart;
   DateTime? _rangeEnd;
 
+  bool click= false;
+
   //-----------------------------------
 
   NumberFormat formatter = NumberFormat('#,##0');
-  DateTimeRange selectedDateRange = SelectDate().currentDateForCalenderSelection();
+  DateTimeRange selectedDateRange =
+      SelectDate().currentDateForCalenderSelection();
 
   DateTime myChosenDate = DateTime.now();
 
@@ -51,6 +77,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
     _selectedDay = _focusedDay;
     _selectedEvents = ValueNotifier(_getEventsForDay(_selectedDay!));
     TransactionDB.instance.refresh();
+
     super.initState();
   }
 
@@ -63,7 +90,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
 
   Map<DateTime, List<Event>> events = {
-    DateTime.utc(2024,3,14) : [ Event('title3') ],
+    DateTime.utc(2024, 3, 14): [const Event('title3')],
   };
 
   Future<List<TransactionModel>> getTransactions() async {
@@ -93,7 +120,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
     String dayString = DateFormat('yyyy-MM-dd').format(day).toString();
 
     // return events[day] ?? [];
-     return  [];
+    return [];
   }
 
 
@@ -112,13 +139,11 @@ class _CalendarScreenState extends State<CalendarScreen> {
     ];
   }
 
-
-  void _onDaySelected(DateTime selectedDay, DateTime focusedDay) {
+  void onDaySelected(DateTime selectedDay, DateTime focusedDay) {
     if (!isSameDay(_selectedDay, selectedDay)) {
       setState(() {
-
-          myNumber = myNumber+1;
-       print('myNumber= ${myNumber}');
+        myNumber = myNumber + 1;
+        print('myNumber= ${myNumber}');
         _selectedDay = selectedDay;
         _focusedDay = focusedDay;
         _rangeStart = null; // Important to clean those
@@ -129,22 +154,22 @@ class _CalendarScreenState extends State<CalendarScreen> {
       });
       _selectedEvents.value = _getEventsForDay(selectedDay);
     }
-    TransactionDB.instance.filterByDate(selectedDateRange.start, selectedDateRange.end);
+    TransactionDB.instance
+        .filterByDate(selectedDateRange.start, selectedDateRange.end);
     // print('selectedDate.start=${selectedDate.start},,fjsxkdla ==${selectedDate.runtimeType},,,selectedDate.end=${selectedDate.end}');
     // TransactionDB.instance.getTransactionsForCurrentMonth();
-print('myChosenDate==${myChosenDate}');
-print('selectedDate==${selectedDateRange}');
-
+    print('myChosenDate==${myChosenDate}');
+    print('selectedDate==${selectedDateRange}');
   }
 
   void _onRangeSelected(DateTime? start, DateTime? end, DateTime focusedDay) {
-    setState(() {
-      _selectedDay = null;
-      _focusedDay = focusedDay;
-      _rangeStart = start;
-      _rangeEnd = end;
-      _rangeSelectionMode = RangeSelectionMode.toggledOn;
-    });
+    // setState(() {
+    _selectedDay = null;
+    _focusedDay = focusedDay;
+    _rangeStart = start;
+    _rangeEnd = end;
+    _rangeSelectionMode = RangeSelectionMode.toggledOn;
+    // });
 
     // `start` or `end` could be null
     if (start != null && end != null) {
@@ -169,9 +194,6 @@ print('selectedDate==${selectedDateRange}');
     if (screenWidth > 350) {
       fontSize = 16;
     }
-
-    //Unhandled Exception: HiveError: Box not found. Did you forget to call Hive.openBox()? 나와서 잠시 지움
-    //TransactionDB.instance.getTransactionsForCurrentMonth();
     CategoryDB.instance.getAllCategory();
 
     getCurrency();
@@ -179,441 +201,482 @@ print('selectedDate==${selectedDateRange}');
     return Scaffold(
       resizeToAvoidBottomInset: false,
       backgroundColor: AppTheme.pcPrimaryColor,
-      body: Column(
-        children: [
-          //---------------------------------------------------calendar-------------------------------------------------------------
-          TableCalendar<Event>(
-            firstDay: kFirstDay,
-            lastDay: kLastDay,
-            focusedDay: _focusedDay,
-            selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
-            rangeStartDay: _rangeStart,
-            rangeEndDay: _rangeEnd,
-            calendarFormat: _calendarFormat,
-            rangeSelectionMode: _rangeSelectionMode,
-            eventLoader: _getEventsForDay,
-            startingDayOfWeek: StartingDayOfWeek.monday,
-            daysOfWeekStyle: const DaysOfWeekStyle(
-              weekdayStyle: TextStyle(color: AppTheme.calendarTextColor),
-              weekendStyle: TextStyle(color: AppTheme.calendarWeekendColor),
-            ),
-            headerStyle: const HeaderStyle(
-              leftChevronIcon: Icon(
-                color: AppTheme.calendarHeaderColor,
-                Icons.arrow_left,
-                size: 20.0,
-              ),
-              rightChevronIcon: Icon(
-                color: AppTheme.calendarHeaderColor,
-                Icons.arrow_right,
-                size: 20.0,
-              ),
-              formatButtonVisible: false,
-              titleTextStyle: TextStyle(
-                fontSize: 18.0,
-                color: AppTheme.calendarHeaderColor,
-              ),
-            ),
-            calendarStyle: const CalendarStyle(
-              markerDecoration: BoxDecoration(
-                  color: AppTheme.calendarMarkerColor, shape: BoxShape.circle),
-              //---------주말텍스트스타일
-              weekendTextStyle: TextStyle(color: AppTheme.calendarTextColor),
-              //---------평일텍스트스타일
-              defaultTextStyle: TextStyle(color: AppTheme.calendarTextColor),
+      body: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              height: 750,
+              child: SfCalendar(
+                cellBorderColor: Colors.purple,
+                // key: _calendarKey,
+                controller: _calendarController,
+                appointmentTextStyle: const TextStyle(color: Colors.green),
+                todayTextStyle: const TextStyle(color: Colors.black),
+                monthViewSettings: const MonthViewSettings(
+                  appointmentDisplayMode:
+                      MonthAppointmentDisplayMode.appointment,
+                  monthCellStyle: MonthCellStyle(
+                    textStyle: TextStyle(color: Colors.white),
+                  ),
+                ),
 
-              outsideTextStyle:
-                  TextStyle(color: AppTheme.calendarOutsideTextColor),
-              outsideDaysVisible: true,
+                onViewChanged: (viewChangedDetails) {
+                if(click) {
+                  final DateTime firstVisibleDate = viewChangedDetails
+                      .visibleDates.first;
+                  _calendarController.selectedDate = DateTime(
+                      firstVisibleDate.year, firstVisibleDate.month, 1);
+                }else{
+                  click=true;
+                }
+                },
+
+                onSelectionChanged: (selectionDetails) {
+                  final DateTime selectedDay =
+                      selectionDetails.date ?? DateTime.now();
+                  final DateTime focusedDay =
+                      selectionDetails.date ?? DateTime.now();
+                  onDaySelected(selectedDay, focusedDay);
+                },
+                 todayHighlightColor: Colors.blue,
+                view: CalendarView.month,
+                dataSource: MeetingDataSource(
+                  _getDataSource(_selectedDay!),
+                ),
+              ),
             ),
-            onDaySelected: _onDaySelected,
-            onRangeSelected: _onRangeSelected,
-            onFormatChanged: (format) {
-              if (_calendarFormat != format) {
-                setState(() {
-                  _calendarFormat = format;
+            //---------------------------------------------------calendar-------------------------------------------------------------
+            // TableCalendar<Event>(
+            //   firstDay: kFirstDay,
+            //   lastDay: kLastDay,
+            //   focusedDay: _focusedDay,
+            //   selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
+            //   rangeStartDay: _rangeStart,
+            //   rangeEndDay: _rangeEnd,
+            //   calendarFormat: _calendarFormat,
+            //   rangeSelectionMode: _rangeSelectionMode,
+            //   eventLoader: _getEventsForDay,
+            //   startingDayOfWeek: StartingDayOfWeek.monday,
+            //   daysOfWeekStyle: const DaysOfWeekStyle(
+            //     weekdayStyle: TextStyle(color: AppTheme.calendarTextColor),
+            //     weekendStyle: TextStyle(color: AppTheme.calendarWeekendColor),
+            //   ),
+            //   headerStyle: const HeaderStyle(
+            //     leftChevronIcon: Icon(
+            //       color: AppTheme.calendarHeaderColor,
+            //       Icons.arrow_left,
+            //       size: 20.0,
+            //     ),
+            //     rightChevronIcon: Icon(
+            //       color: AppTheme.calendarHeaderColor,
+            //       Icons.arrow_right,
+            //       size: 20.0,
+            //     ),
+            //     formatButtonVisible: false,
+            //     titleTextStyle: TextStyle(
+            //       fontSize: 18.0,
+            //       color: AppTheme.calendarHeaderColor,
+            //     ),
+            //   ),
+            //   calendarStyle: const CalendarStyle(
+            //     markerDecoration: BoxDecoration(
+            //         color: AppTheme.calendarMarkerColor,
+            //         shape: BoxShape.circle),
+            //     //---------주말텍스트스타일
+            //     weekendTextStyle: TextStyle(color: AppTheme.calendarTextColor),
+            //     //---------평일텍스트스타일
+            //     defaultTextStyle: TextStyle(color: AppTheme.calendarTextColor),
+            //
+            //     outsideTextStyle:
+            //         TextStyle(color: AppTheme.calendarOutsideTextColor),
+            //     outsideDaysVisible: true,
+            //   ),
+            //   onDaySelected: onDaySelected,
+            //   onRangeSelected: _onRangeSelected,
+            //   onFormatChanged: (format) {
+            //     if (_calendarFormat != format) {
+            //       setState(() {
+            //         _calendarFormat = format;
+            //       });
+            //     }
+            //   },
+            //   onPageChanged: (focusedDay) {
+            //     _focusedDay = focusedDay;
+            //   },
+            // ),
+            //---------------------------------------------------divider-------------------------------------------------------------
+            const Padding(
+              padding: EdgeInsets.all(8.0),
+              child: SizedBox(
+                width: 350.0,
+                child: Divider(
+                  thickness: 1.0,
+                  height: 1.0,
+                  color: AppTheme.dark_grey,
+                ),
+              ),
+            ),
+            //---------------------
+            ValueListenableBuilder(
+              valueListenable:
+                  TransactionDB.instance.transactionMonthListNotifier,
+              builder: (context, value, child) {
+                Map<String, List<TransactionModel>> mapList =
+                    SelectDate().sortByDate(value);
+                incomeData = mapList.values.fold(0, (previousValue, element) {
+                  for (var transaction in element) {
+                    if (transaction.categoryType == CategoryType.income) {
+                      previousValue += transaction.amount;
+                    }
+                  }
+                  return previousValue;
                 });
-              }
-            },
-            onPageChanged: (focusedDay) {
-              _focusedDay = focusedDay;
-            },
-          ),
-          //---------------------------------------------------divider-------------------------------------------------------------
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Container(
-              width: 350.0,
-              child: const Divider(
-                thickness: 1.0,
-                height: 1.0,
-                color: AppTheme.dark_grey,
-              ),
+                expenseData = mapList.values.fold(0, (previousValue, element) {
+                  for (var transaction in element) {
+                    if (transaction.categoryType == CategoryType.expense) {
+                      previousValue += transaction.amount;
+                    }
+                  }
+                  return previousValue;
+                });
+                return Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        const Icon(
+                          Icons.arrow_drop_up_outlined,
+                          color: AppTheme.pcTextIncomeColor,
+                        ),
+                        Text(
+                          '${currencySymboleUpdate.value} ${formatter.format(incomeData)}',
+                          style: TextStyle(
+                              color: AppTheme.pcTextIncomeColor, fontSize: 13),
+                        )
+                      ],
+                    ),
+                    //------------------------------Expense-------------------------
+                    Row(
+                      children: [
+                        const Icon(Icons.arrow_drop_down_outlined,
+                            color: AppTheme.pcTextExpenseColor),
+                        Text(
+                          '${currencySymboleUpdate.value} ${formatter.format(expenseData)}',
+                          style: TextStyle(
+                            color: AppTheme.pcTextExpenseColor,
+                            fontSize: 13,
+                          ),
+                        )
+                      ],
+                    ),
+                    // -------------------------------- Balance Start ----------------------------------------------
+                    Row(
+                      children: [
+                        Text(
+                          '=  ${currencySymboleUpdate.value} ${formatter.format(incomeData - expenseData)}',
+                          style: const TextStyle(
+                            color: AppTheme.pcTextTertiaryColor,
+                            fontSize: 13,
+                          ),
+                        )
+                      ],
+                    ),
+
+                    //------------------------------------Income, Expense and Balance Preview End --------------------------
+                  ],
+                );
+              },
             ),
-          ),
-          //---------------------
-          ValueListenableBuilder(
-            valueListenable:
-            TransactionDB.instance.transactionMonthListNotifier,
-            builder: (context, value, child) {
-              Map<String, List<TransactionModel>> mapList =
-              SelectDate().sortByDate(value);
-              incomeData = mapList.values.fold(0, (previousValue, element) {
-                for (var transaction in element) {
-                  if (transaction.categoryType == CategoryType.income) {
-                    previousValue += transaction.amount;
-                  }
-                }
-                return previousValue;
-              });
-              expenseData = mapList.values.fold(0, (previousValue, element) {
-                for (var transaction in element) {
-                  if (transaction.categoryType == CategoryType.expense) {
-                    previousValue += transaction.amount;
-                  }
-                }
-                return previousValue;
-              });
-              return Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.arrow_drop_up_outlined
-                        ,color: AppTheme.pcTextIncomeColor,
-                      ),
+            //  ---------------table calendar event 날짜클릭시 보이는 event 부분 패키지 예시부분임 ---------------
+            // Expanded(
+            //   child: ValueListenableBuilder<List<Event>>(
+            //     valueListenable: _selectedEvents,
+            //     builder: (context, value, _) {
+            //       return ListView.builder(
+            //         itemCount: 1,
+            //         itemBuilder: (context, index) {
+            //
+            //           return Container(
+            //
+            //
+            //             child: ListTile(
+            //               onTap: () {
+            //                 print('${value[index]}');
+            //               },
+            //               title: Text(
+            //                 '${value[index]}',
+            //                 style: TextStyle(color: AppTheme.allInColor),
+            //               ),
+            //             ),
+            //           );
+            //         },
+            //       );
+            //     },
+            //   ),
+            // ),
 
-                      Text(
-                        '${currencySymboleUpdate.value} ${formatter.format(incomeData)}',
-                        style: TextStyle(
-                            color: AppTheme.pcTextIncomeColor, fontSize: 13),
-                      )
-                    ],
-                  ),
-                  //------------------------------Expense-------------------------
-                  Row(
-                    children: [
-                      const Icon(Icons.arrow_drop_down_outlined
-                          ,color: AppTheme.pcTextExpenseColor
-                      ),
+            // ----------------------------------- Transaction History ----------------------------------------
+            ValueListenableBuilder(
+              valueListenable: TransactionDB.instance.transactionListNotifier,
+              builder: (context, newList, child) {
+                /////maplist 는 2024-03-24: [Instance of 'TransactionModel', Instance of 'TransactionModel']같은  [날짜:TransactionModel]의 나열
+                //newList는 [Instance of 'TransactionModel', Instance of 'TransactionModel'] 같은 TransactionModel 객채의 나열
+                String myChosenDateString =
+                    DateFormat('yyyy-MM-dd').format(myChosenDate).toString();
 
-                      Text(
-                        '${currencySymboleUpdate.value} ${formatter.format(expenseData)}',
-                        style: TextStyle(
-                          color: AppTheme.pcTextExpenseColor,
-                          fontSize: 13,
-                        ),
-                      )
-                    ],
-                  ),
-                  // -------------------------------- Balance Start ----------------------------------------------
-                  Column(
-                    children: [
-                      Row(
-                        children: [
+                Map<String, List<TransactionModel>> mapList =
+                    SelectDate().sortByDate(newList);
+                //keys는 2024-03-24, 2024-03-21, 2024-03-12, 2024-03-01 같은 날짜의 나열.
+                List<String> keys = mapList.keys.toList();
+                keys = ['${myChosenDateString}'];
 
-                          Text(
-                            '=  ${currencySymboleUpdate.value} ${formatter.format(incomeData - expenseData)}',
-                            style: const TextStyle(
-                              color: AppTheme.pcTextTertiaryColor,
-                              fontSize: 13,
-                            ),
-                          )
-                        ],
-                      ),
-                    ],
-                  ),
+                // 예 고민의 흔적 일단놔둠
+                print('keys = ${keys}');
+                print(
+                    'List<TransactionModel> = ${mapList['${myChosenDateString}']}');
+                print('myChosenDateString = ${myChosenDateString}');
 
-                  //------------------------------------Income, Expense and Balance Preview End --------------------------
-                ],
-              );
-            },
-          ),
-          //  ---------------table calendar event 날짜클릭시 보이는 event 부분 패키지 예시부분임 ---------------
-          // Expanded(
-          //   child: ValueListenableBuilder<List<Event>>(
-          //     valueListenable: _selectedEvents,
-          //     builder: (context, value, _) {
-          //       return ListView.builder(
-          //         itemCount: 1,
-          //         itemBuilder: (context, index) {
-          //
-          //           return Container(
-          //
-          //
-          //             child: ListTile(
-          //               onTap: () {
-          //                 print('${value[index]}');
-          //               },
-          //               title: Text(
-          //                 '${value[index]}',
-          //                 style: TextStyle(color: AppTheme.allInColor),
-          //               ),
-          //             ),
-          //           );
-          //         },
-          //       );
-          //     },
-          //   ),
-          // ),
-
-          // ----------------------------------- Transaction History ----------------------------------------
-          ValueListenableBuilder(
-            valueListenable: TransactionDB.instance.transactionListNotifier,
-            builder: (context, newList, child) {
-
-
-              /////maplist 는 2024-03-24: [Instance of 'TransactionModel', Instance of 'TransactionModel']같은  [날짜:TransactionModel]의 나열
-              //newList는 [Instance of 'TransactionModel', Instance of 'TransactionModel'] 같은 TransactionModel 객채의 나열
-              String myChosenDateString = DateFormat('yyyy-MM-dd').format(myChosenDate).toString();
-
-              Map<String, List<TransactionModel>> mapList = SelectDate().sortByDate(newList);
-              //keys는 2024-03-24, 2024-03-21, 2024-03-12, 2024-03-01 같은 날짜의 나열.
-              List<String> keys = mapList.keys.toList();
-              keys = ['${myChosenDateString}'];
-
-              // 예 고민의 흔적 일단놔둠
-              print('keys = ${keys}');
-              print('List<TransactionModel> = ${mapList['${myChosenDateString}']}');
-              print('myChosenDateString = ${myChosenDateString}');
-
-              return mapList['${myChosenDateString}']!= null
-                  ? Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 9),
-                  child: ListView.builder(
-                    shrinkWrap: true,
-                    physics: const BouncingScrollPhysics(),
-                    itemCount: keys.length,
-                    itemBuilder: (context, index) {
-                      List<TransactionModel> calculationList =
-                      mapList[keys[index]]!;
-                      double incomeData = calculationList.fold(0,
-                              (previousValue, transaction) {
-                            if (transaction.categoryType ==
-                                CategoryType.income) {
-                              return previousValue + transaction.amount;
-                            }
-                            return previousValue;
-                          });
-                      double expenseData = calculationList.fold(0,
-                              (previousValue, transaction) {
-                            if (transaction.categoryType ==
-                                CategoryType.expense) {
-                              previousValue += transaction.amount;
-                            }
-                            return previousValue;
-                          }
-                          );
-                      return Padding(
-                        padding: EdgeInsets.symmetric(
-                          horizontal:
-                          MediaQuery.of(context).size.width * 0.04,
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.only(bottom: 8.8),
-                          child: Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(10),
-                              color: AppTheme.pcTransactionColor,
-                              boxShadow: const [
-                                BoxShadow(
-                                  color: AppTheme.pcShadowColor,
-                                  spreadRadius: 0,
-                                  blurRadius: 5,
-                                  offset: Offset(0, 3),
-                                ),
-                              ],
-                            ),
-                            child: Column(
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.only(
-                                      left: 10, right: 10, top: 10),
+                return mapList['${myChosenDateString}'] != null
+                    ? Padding(
+                        padding: const EdgeInsets.only(top: 9),
+                        child: ListView.builder(
+                          shrinkWrap: true,
+                          physics: const BouncingScrollPhysics(),
+                          itemCount: keys.length,
+                          itemBuilder: (context, index) {
+                            List<TransactionModel> calculationList =
+                                mapList[keys[index]]!;
+                            double incomeData = calculationList.fold(0,
+                                (previousValue, transaction) {
+                              if (transaction.categoryType ==
+                                  CategoryType.income) {
+                                return previousValue + transaction.amount;
+                              }
+                              return previousValue;
+                            });
+                            double expenseData = calculationList.fold(0,
+                                (previousValue, transaction) {
+                              if (transaction.categoryType ==
+                                  CategoryType.expense) {
+                                previousValue += transaction.amount;
+                              }
+                              return previousValue;
+                            });
+                            return Padding(
+                              padding: EdgeInsets.symmetric(
+                                horizontal:
+                                    MediaQuery.of(context).size.width * 0.04,
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.only(bottom: 8.8),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(10),
+                                    color: AppTheme.pcTransactionColor,
+                                    boxShadow: const [
+                                      BoxShadow(
+                                        color: AppTheme.pcShadowColor,
+                                        spreadRadius: 0,
+                                        blurRadius: 5,
+                                        offset: Offset(0, 3),
+                                      ),
+                                    ],
+                                  ),
                                   child: Column(
                                     children: [
-                                      Row(
-                                        children: [
-                                          Container(
-                                            width: 105,
-                                            //width: 65,
-                                            decoration:
-                                            const BoxDecoration(
-                                              color: AppTheme
-                                                  .pcTextLinkColor2,
-                                              borderRadius:
-                                              BorderRadius.all(
-                                                  Radius.circular(5)),
-                                            ),
-                                            child: Padding(
-                                              padding:
-                                              const EdgeInsets.all(
-                                                  8.0),
-                                              child: Text(
-                                                DateFormat('yyyy.MM.dd ').format(DateTime
-                                                    .parse(keys[
-                                                index]))
-                                                    .toString() +
-                                                    DateFormat('EEE')
-                                                        .format(DateTime
-                                                        .parse(keys[
-                                                    index]))
-                                                        .toString(),
-                                                style: const TextStyle(
+                                      Padding(
+                                        padding: const EdgeInsets.only(
+                                            left: 10, right: 10, top: 10),
+                                        child: Column(
+                                          children: [
+                                            Row(
+                                              children: [
+                                                Container(
+                                                  width: 105,
+                                                  //width: 65,
+                                                  decoration:
+                                                      const BoxDecoration(
                                                     color: AppTheme
-                                                        .pcTextSecondayColor,
-                                                    fontWeight:
-                                                    FontWeight.bold),
-                                              ),
+                                                        .pcTextLinkColor2,
+                                                    borderRadius:
+                                                        BorderRadius.all(
+                                                            Radius.circular(5)),
+                                                  ),
+                                                  child: Padding(
+                                                    padding:
+                                                        const EdgeInsets.all(
+                                                            8.0),
+                                                    child: Text(
+                                                      DateFormat('yyyy.MM.dd ')
+                                                              .format(DateTime
+                                                                  .parse(keys[
+                                                                      index]))
+                                                              .toString() +
+                                                          DateFormat('EEE')
+                                                              .format(DateTime
+                                                                  .parse(keys[
+                                                                      index]))
+                                                              .toString(),
+                                                      style: const TextStyle(
+                                                          color: AppTheme
+                                                              .pcTextSecondayColor,
+                                                          fontWeight:
+                                                              FontWeight.bold),
+                                                    ),
+                                                  ),
+                                                ),
+                                                IconButton(
+                                                  onPressed: () {
+                                                    resetTransactionsOnly(
+                                                        context,
+                                                        mapList[keys[index]]?[index].id);
+                                                    setState(() {});
+                                                  },
+                                                  icon: const Icon(
+                                                      Icons.delete_forever,
+                                                      color: AppTheme
+                                                          .pcTextTertiaryColor),
+                                                ),
+                                                const Spacer(),
+                                                Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.end,
+                                                  children: [
+                                                    Text(
+                                                      '+ ${currencySymboleUpdate.value} ${formatter.format(incomeData)}',
+                                                      style: const TextStyle(
+                                                        color: AppTheme
+                                                            .pcTextIncomeColor,
+                                                        fontSize: 13,
+                                                      ),
+                                                    ),
+                                                    const SizedBox(
+                                                      height: 5,
+                                                    ),
+                                                    Text(
+                                                      '- ${currencySymboleUpdate.value} ${formatter.format(expenseData)}',
+                                                      style: const TextStyle(
+                                                        color: AppTheme
+                                                            .pcTextExpenseColor,
+                                                        fontSize: 13,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ],
                                             ),
-                                          ),
-
-                                          IconButton(
-                                            onPressed: () {
-
-                                              resetTransactionsOnly(context);
-
-                                            },
-                                            icon: const Icon(Icons.delete_forever,
-                                                color: AppTheme.pcTextTertiaryColor),
-                                          ),
-                                          const Spacer(),
-                                          Column(
-                                            crossAxisAlignment:
-                                            CrossAxisAlignment.end,
-                                            children: [
-                                              Text(
-                                                '+ ${currencySymboleUpdate.value} ${formatter.format(incomeData)}',
-                                                style: const TextStyle(
-                                                  color: AppTheme
-                                                      .pcTextIncomeColor,
-                                                  fontSize: 13,
-                                                ),
-                                              ),
-                                              const SizedBox(
-                                                height: 5,
-                                              ),
-                                              Text(
-                                                '- ${currencySymboleUpdate.value} ${formatter.format(expenseData)}',
-                                                style: const TextStyle(
-                                                  color: AppTheme
-                                                      .pcTextExpenseColor,
-                                                  fontSize: 13,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ],
+                                            const Divider(
+                                              color: AppTheme
+                                                  .pcSecondaryDividerColor,
+                                              thickness: 2,
+                                            ),
+                                          ],
+                                        ),
                                       ),
-                                      const Divider(
-                                        color: AppTheme
-                                            .pcSecondaryDividerColor,
-                                        thickness: 2,
+                                      Padding(
+                                        padding: const EdgeInsets.only(
+                                            left: 10, right: 10),
+                                        child: TransactionsCategory(
+                                          newList: mapList[keys[index]]!,
+                                        ),
                                       ),
                                     ],
                                   ),
                                 ),
-                                Padding(
-                                  padding: const EdgeInsets.only(
-                                      left: 10, right: 10),
-                                  child: TransactionsCategory(
-                                    newList: mapList[keys[index]]!,
-                                  ),
-                                ),
-                              ],
-                            ),
+                              ),
+                            );
+                          },
+                        ),
+                      )
+                    : Center(
+                        child: Padding(
+                          padding:
+                              const EdgeInsets.fromLTRB(0.0, 50.0, 0.0, 0.0),
+                          child: Column(
+                            children: [
+                              SizedBox(
+                                width: 150,
+                                child:
+                                    Lottie.asset('assets/searchNotFound.json'),
+                              ),
+                              const Text(
+                                "No data available..!",
+                                style: TextStyle(
+                                    fontSize: 15,
+                                    color: AppTheme.pcTextTertiaryColor),
+                              ),
+                            ],
                           ),
                         ),
                       );
-                    },
-                  ),
-                ),
-              )
-                  : Center(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(0.0, 50.0, 0.0, 0.0),
-                  child: Column(
-                    children: [
-                      SizedBox(
-                        width: 150,
-                        child: Lottie.asset('assets/searchNotFound.json'),
-                      ),
-                      const Text(
-                        "No data available..!",
-                        style: TextStyle(
-                            fontSize: 15,
-                            color: AppTheme.pcTextTertiaryColor),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            },
-          ),
-          // ----------------------------------- Transaction History End----------------------------------------
-        ],
+              },
+            ),
+            // ----------------------------------- Transaction History End----------------------------------------
+          ],
+        ),
       ),
     );
   }
 
-  resetTransactionsOnly(value) {
+  resetTransactionsOnly(value, id) {
     showDialog(
       context: value,
       builder: (context) {
-            return AlertDialog(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(15),
-              ),
-              backgroundColor: AppTheme.pcWaveColor,
-              content: const Text(
-                  'Reseting transaction will erase all your transaction data.'),
-              title: const Text(
-                'Do you want to delete all transactions?',
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
+          backgroundColor: AppTheme.pcWaveColor,
+          content: const Text(
+              'Reseting transaction will erase all your transaction data.'),
+          title: const Text(
+            'Do you want to delete all transactions?',
+            style: TextStyle(
+              color: AppTheme.pcTextQuaternaryColor,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () async {
+                setState(() {
+                  myNumber = myNumber + 1;
+                });
+                print(myNumber);
+                final transactionDB =
+                    await Hive.openBox<TransactionModel>(TRANSACTION_DB_NAME);
+
+               // final keys = transactionDB.values.toList();
+                transactionDB.delete(id);
+                setState(() {});
+                Navigator.of(context).pop();
+              },
+              child: const Text(
+                'Yes',
                 style: TextStyle(
                   color: AppTheme.pcTextQuaternaryColor,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              actions: [
-                TextButton(
-                  onPressed: () async {
-
-                    setState(() {
-                      myNumber = myNumber+1;
-
-                    });
-                    print(myNumber);
-                    final transactionDB =
-                    await Hive.openBox<TransactionModel>(TRANSACTION_DB_NAME);
-                    transactionDB.clear();
-                    Navigator.of(context).pop();
-
-                  },
-                  child: const Text(
-                    'Yes',
-                    style: TextStyle(
-                      color: AppTheme.pcTextQuaternaryColor,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text(
+                'No',
+                style: TextStyle(
+                  color: AppTheme.pcTextQuaternaryColor,
+                  fontWeight: FontWeight.bold,
                 ),
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  child: const Text(
-                    'No',
-                    style: TextStyle(
-                      color: AppTheme.pcTextQuaternaryColor,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ],
-            );
+              ),
+            ),
+          ],
+        );
       },
     );
   }
