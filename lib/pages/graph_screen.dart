@@ -23,7 +23,7 @@ List<ChartData> chartData = [
 ];
 final List<Color> color = <Color>[];
 final List<double> stops = <double>[];
-initialize(){
+  initialize(){
   chartData = [
     ChartData('jan', double.parse(monthChartDataGraph!['jan']['total'])),
     ChartData('feb', double.parse(monthChartDataGraph!['feb']['total'])),
@@ -73,9 +73,10 @@ class _GraphScreenState extends State<GraphScreen> {
 
   @override
   Widget build(BuildContext context) {
-    print(monthChartDataGraph!);
+
 
     print(TransactionDB.instance.transactionMonthListNotifier.value);
+
 
     final LinearGradient gradientColors =
     LinearGradient(colors: color, stops: stops);
