@@ -34,10 +34,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
   double incomeData = 0;
   double expenseData = 0;
 
-  List<Meeting> _getDataSource(DateTime selectedDate) {
+  List<Meeting> _getDataSource() {
     final List<Meeting> meetings = <Meeting>[];
-    //final DateTime today = DateTime.now();
-    final DateTime startTime = DateTime(selectedDate.year, selectedDate.month, selectedDate.day, 9);
+    final DateTime today = DateTime.now();
+    final DateTime startTime = DateTime(today.year, today.month, today.day, 9);
     final DateTime endTime = startTime.add(const Duration(hours: 2));
     meetings.add(Meeting(
         '${currencySymboleUpdate.value} ${formatter.format(incomeData - expenseData)}',
@@ -242,7 +242,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                  todayHighlightColor: Colors.blue,
                 view: CalendarView.month,
                 dataSource: MeetingDataSource(
-                  _getDataSource(_selectedDay!),
+                  _getDataSource(),
                 ),
               ),
             ),
