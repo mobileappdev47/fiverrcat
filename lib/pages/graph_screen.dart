@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:currency_picker/currency_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -7,6 +8,7 @@ import 'package:intl/intl.dart';
 import 'package:pokercat/addexpense/db/functions/category_functions.dart';
 import 'package:pokercat/addexpense/db/functions/currency_function.dart';
 import 'package:pokercat/addexpense/db/functions/transaction_function.dart';
+import 'package:pokercat/addexpense/db/models/account_group/account_group_model_db.dart';
 import 'package:pokercat/addexpense/db/models/category/category_model_db.dart';
 import 'package:pokercat/addexpense/db/models/transactions/transaction_model_db.dart';
 import 'package:pokercat/addexpense/widget/transaction_helper.dart';
@@ -17,13 +19,13 @@ import 'package:pokercat/pages/sf_line_chart_screen.dart';
 import '../constant.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import '../global/component/appbar.dart';
-  Map monthChartDataGraph={};
-List<ChartData> chartData = [
 
-];
+Map monthChartDataGraph = {};
+List<ChartData> chartData = [];
 final List<Color> color = <Color>[];
 final List<double> stops = <double>[];
-  initialize(){
+
+initialize() {
   chartData = [
     ChartData('jan', double.parse(monthChartDataGraph!['jan']['total'])),
     ChartData('feb', double.parse(monthChartDataGraph!['feb']['total'])),
@@ -31,7 +33,7 @@ final List<double> stops = <double>[];
     ChartData('apr', double.parse(monthChartDataGraph!['apr']['total'])),
     ChartData('may', double.parse(monthChartDataGraph!['may']['total'])),
     ChartData('jun', double.parse(monthChartDataGraph!['jun']['total'])),
-    ChartData('july',double.parse(monthChartDataGraph!['july']['total'])),
+    ChartData('july', double.parse(monthChartDataGraph!['july']['total'])),
     ChartData('Aug', double.parse(monthChartDataGraph!['aug']['total'])),
     ChartData('Sep', double.parse(monthChartDataGraph!['sep']['total'])),
     ChartData('Oct', double.parse(monthChartDataGraph!['oct']['total'])),
@@ -51,6 +53,7 @@ final List<double> stops = <double>[];
   stops.add(0.5);
   stops.add(1.0);
 }
+
 class GraphScreen extends StatefulWidget {
   const GraphScreen({super.key});
 
@@ -61,7 +64,7 @@ class GraphScreen extends StatefulWidget {
 class _GraphScreenState extends State<GraphScreen> {
   String selected = 'All';
 
-
+  List<TransactionModel>  filterList = [];
 
   @override
   void initState() {
@@ -69,245 +72,650 @@ class _GraphScreenState extends State<GraphScreen> {
     super.initState();
   }
 
-
-
   @override
   Widget build(BuildContext context) {
-
-
     print(TransactionDB.instance.transactionMonthListNotifier.value);
 
-
     final LinearGradient gradientColors =
-    LinearGradient(colors: color, stops: stops);
+        LinearGradient(colors: color, stops: stops);
 
     return Scaffold(
         backgroundColor: AppTheme.pcScafoldColor,
-        body: Column(
-          children: [
-            // LineChartSample2(),
-            // SfChartScreen(
-            //   monthChartData: monthChartDataGraph!,
-            // ),
-            Container(
-              height: 300,
-              // width: 200,
-              child: SfCartesianChart(
-                primaryYAxis:
-                NumericAxis(),
-                primaryXAxis: CategoryAxis(),
-                series: <CartesianSeries>[
-                  AreaSeries<ChartData, String>(
-                      borderColor: AppTheme.contentColorCyan,
-                      borderWidth: 4,
-                      dataSource: chartData,
-                      xValueMapper: (ChartData data, _) => data.x,
-                      yValueMapper: (ChartData data, _) => data.y,
-                      gradient: gradientColors),
-                ],
+        body: SingleChildScrollView(
+          child: Column(
+            children: [
+              // LineChartSample2(),
+              // SfChartScreen(
+              //   monthChartData: monthChartDataGraph!,
+              // ),
+              Container(
+                height: 300,
+                // width: 200,
+                child: SfCartesianChart(
+                  primaryYAxis: NumericAxis(),
+                  primaryXAxis: CategoryAxis(),
+                  series: <CartesianSeries>[
+                    AreaSeries<ChartData, String>(
+                        borderColor: AppTheme.contentColorCyan,
+                        borderWidth: 4,
+                        dataSource: chartData,
+                        xValueMapper: (ChartData data, _) => data.x,
+                        yValueMapper: (ChartData data, _) => data.y,
+                        gradient: gradientColors),
+                  ],
+                ),
               ),
-            ),
 
-            SizedBox(
-              height: 10,
-            ),
+              SizedBox(
+                height: 10,
+              ),
 
+              // Center(child: Text('developing..',
+              // style: TextStyle(color: AppTheme.allInColor,fontSize: 20.0),))
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                child: Container(
+                  height: 55,
+                  decoration: BoxDecoration(
+                      color: Colors.grey.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(10)),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              selected = 'All';
+                              chartData = [
+                                ChartData(
+                                    'jan',
+                                    double.parse(
+                                        monthChartDataGraph!['jan']['total'])),
+                                ChartData(
+                                    'feb',
+                                    double.parse(
+                                        monthChartDataGraph!['feb']['total'])),
+                                ChartData(
+                                    'mar',
+                                    double.parse(
+                                        monthChartDataGraph!['mar']['total'])),
+                                ChartData(
+                                    'apr',
+                                    double.parse(
+                                        monthChartDataGraph!['apr']['total'])),
+                                ChartData(
+                                    'may',
+                                    double.parse(
+                                        monthChartDataGraph!['may']['total'])),
+                                ChartData(
+                                    'jun',
+                                    double.parse(
+                                        monthChartDataGraph!['jun']['total'])),
+                                ChartData(
+                                    'july',
+                                    double.parse(
+                                        monthChartDataGraph!['july']['total'])),
+                                ChartData(
+                                    'Aug',
+                                    double.parse(
+                                        monthChartDataGraph!['aug']['total'])),
+                                ChartData(
+                                    'Sep',
+                                    double.parse(
+                                        monthChartDataGraph!['sep']['total'])),
+                                ChartData(
+                                    'Oct',
+                                    double.parse(
+                                        monthChartDataGraph!['oct']['total'])),
+                                ChartData(
+                                    'Nov',
+                                    double.parse(
+                                        monthChartDataGraph!['nov']['total'])),
+                                ChartData(
+                                    'Dec',
+                                    double.parse(
+                                        monthChartDataGraph!['dec']['total'])),
+                              ];
+                            });
+                          },
+                          child: Container(
+                            alignment: Alignment.center,
+                            height: 55,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(
+                                10,
+                              ),
+                              color: selected == 'All'
+                                  ? Colors.white.withOpacity(0.1)
+                                  : Colors.transparent,
+                            ),
+                            child: Text(
+                              'All',
+                              style: TextStyle(
+                                  color: selected == 'All'
+                                      ? Colors.white
+                                      : Colors.black38,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 16),
+                            ),
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              selected = 'Expense';
 
-            // Center(child: Text('developing..',
-            // style: TextStyle(color: AppTheme.allInColor,fontSize: 20.0),))
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10.0),
-              child: Container(
-                height: 55,
-                decoration: BoxDecoration(
-                    color: Colors.grey.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(10)),
+                              chartData = [
+                                ChartData(
+                                    'jan',
+                                    double.parse(monthChartDataGraph!['jan']
+                                        ['expense'])),
+                                ChartData(
+                                    'feb',
+                                    double.parse(monthChartDataGraph!['feb']
+                                        ['expense'])),
+                                ChartData(
+                                    'mar',
+                                    double.parse(monthChartDataGraph!['mar']
+                                        ['expense'])),
+                                ChartData(
+                                    'apr',
+                                    double.parse(monthChartDataGraph!['apr']
+                                        ['expense'])),
+                                ChartData(
+                                    'may',
+                                    double.parse(monthChartDataGraph!['may']
+                                        ['expense'])),
+                                ChartData(
+                                    'jun',
+                                    double.parse(monthChartDataGraph!['jun']
+                                        ['expense'])),
+                                ChartData(
+                                    'july',
+                                    double.parse(monthChartDataGraph!['july']
+                                        ['expense'])),
+                                ChartData(
+                                    'Aug',
+                                    double.parse(monthChartDataGraph!['aug']
+                                        ['expense'])),
+                                ChartData(
+                                    'Sep',
+                                    double.parse(monthChartDataGraph!['sep']
+                                        ['expense'])),
+                                ChartData(
+                                    'Oct',
+                                    double.parse(monthChartDataGraph!['oct']
+                                        ['expense'])),
+                                ChartData(
+                                    'Nov',
+                                    double.parse(monthChartDataGraph!['nov']
+                                        ['expense'])),
+                                ChartData(
+                                    'Dec',
+                                    double.parse(monthChartDataGraph!['dec']
+                                        ['expense'])),
+                              ];
+                            });
+                          },
+                          child: Container(
+                            alignment: Alignment.center,
+                            height: 55,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(
+                                10,
+                              ),
+                              color: selected == "Expense"
+                                  ? Colors.white.withOpacity(0.1)
+                                  : Colors.transparent,
+                            ),
+                            child: Text(
+                              'Expense',
+                              style: TextStyle(
+                                  color: selected == "Expense"
+                                      ? Colors.white
+                                      : Colors.black38,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 16),
+                            ),
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              selected = 'Income';
+                              chartData = [
+                                ChartData(
+                                    'jan',
+                                    double.parse(
+                                        monthChartDataGraph!['jan']['income'])),
+                                ChartData(
+                                    'feb',
+                                    double.parse(
+                                        monthChartDataGraph!['feb']['income'])),
+                                ChartData(
+                                    'mar',
+                                    double.parse(
+                                        monthChartDataGraph!['mar']['income'])),
+                                ChartData(
+                                    'apr',
+                                    double.parse(
+                                        monthChartDataGraph!['apr']['income'])),
+                                ChartData(
+                                    'may',
+                                    double.parse(
+                                        monthChartDataGraph!['may']['income'])),
+                                ChartData(
+                                    'jun',
+                                    double.parse(
+                                        monthChartDataGraph!['jun']['income'])),
+                                ChartData(
+                                    'july',
+                                    double.parse(monthChartDataGraph!['july']
+                                        ['income'])),
+                                ChartData(
+                                    'Aug',
+                                    double.parse(
+                                        monthChartDataGraph!['aug']['income'])),
+                                ChartData(
+                                    'Sep',
+                                    double.parse(
+                                        monthChartDataGraph!['sep']['income'])),
+                                ChartData(
+                                    'Oct',
+                                    double.parse(
+                                        monthChartDataGraph!['oct']['income'])),
+                                ChartData(
+                                    'Nov',
+                                    double.parse(
+                                        monthChartDataGraph!['nov']['income'])),
+                                ChartData(
+                                    'Dec',
+                                    double.parse(
+                                        monthChartDataGraph!['dec']['income'])),
+                              ];
+                            });
+                          },
+                          child: Container(
+                            alignment: Alignment.center,
+                            height: 55,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(
+                                10,
+                              ),
+                              color: selected == 'Income'
+                                  ? Colors.white.withOpacity(0.1)
+                                  : Colors.transparent,
+                            ),
+                            child: Text(
+                              'Income',
+                              style: TextStyle(
+                                  color: selected == 'Income'
+                                      ? Colors.white
+                                      : Colors.black38,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 16),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              SizedBox(
+                height: 20,
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10.0),
                 child: Row(
                   children: [
                     Expanded(
-                      child: GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            selected = 'All';
-                            chartData=[
-                              ChartData('jan', double.parse(monthChartDataGraph!['jan']['total'])),
-                              ChartData('feb', double.parse(monthChartDataGraph!['feb']['total'])),
-                              ChartData('mar', double.parse(monthChartDataGraph!['mar']['total'])),
-                              ChartData('apr', double.parse(monthChartDataGraph!['apr']['total'])),
-                              ChartData('may', double.parse(monthChartDataGraph!['may']['total'])),
-                              ChartData('jun', double.parse(monthChartDataGraph!['jun']['total'])),
-                              ChartData('july',double.parse(monthChartDataGraph!['july']['total'])),
-                              ChartData('Aug', double.parse(monthChartDataGraph!['aug']['total'])),
-                              ChartData('Sep', double.parse(monthChartDataGraph!['sep']['total'])),
-                              ChartData('Oct', double.parse(monthChartDataGraph!['oct']['total'])),
-                              ChartData('Nov', double.parse(monthChartDataGraph!['nov']['total'])),
-                              ChartData('Dec', double.parse(monthChartDataGraph!['dec']['total'])),
-                            ];
-                          });
-                        },
-                        child: Container(
-                          alignment: Alignment.center,
-                          height: 55,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(
-                              10,
+                      child: Container(
+                        height: 45,
+                        decoration: BoxDecoration(
+                            color: Colors.grey.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(10)),
+                        child: Row(
+                          children: [
+                            SizedBox(
+                              width: 10,
                             ),
-                            color: selected == 'All'
-                                ? Colors.white.withOpacity(0.1)
-                                : Colors.transparent,
-                          ),
-                          child: Text(
-                            'All',
-                            style: TextStyle(
-                                color: selected == 'All'
-                                    ? Colors.white
-                                    : Colors.black38,
-                                fontWeight: FontWeight.w600,
-                                fontSize: 16),
-                          ),
+                            Icon(
+                              Icons.replay_outlined,
+                              color: Colors.white,
+                            ),
+                            SizedBox(
+                              width: 10,
+                            ),
+                            Text(
+                              '1 day',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 16),
+                            ),
+                          ],
                         ),
                       ),
                     ),
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            selected = 'Expense';
-
-                            chartData =[
-                              ChartData('jan', double.parse(monthChartDataGraph!['jan']['expense'])),
-                              ChartData('feb', double.parse(monthChartDataGraph!['feb']['expense'])),
-                              ChartData('mar', double.parse(monthChartDataGraph!['mar']['expense'])),
-                              ChartData('apr', double.parse(monthChartDataGraph!['apr']['expense'])),
-                              ChartData('may', double.parse(monthChartDataGraph!['may']['expense'])),
-                              ChartData('jun', double.parse(monthChartDataGraph!['jun']['expense'])),
-                              ChartData('july', double.parse(monthChartDataGraph!['july']['expense'])),
-                              ChartData('Aug', double.parse(monthChartDataGraph!['aug']['expense'])),
-                              ChartData('Sep', double.parse(monthChartDataGraph!['sep']['expense'])),
-                              ChartData('Oct', double.parse(monthChartDataGraph!['oct']['expense'])),
-                              ChartData('Nov', double.parse(monthChartDataGraph!['nov']['expense'])),
-                              ChartData('Dec', double.parse(monthChartDataGraph!['dec']['expense'])),
-
-                            ];
-
-
-                          });
-                        },
-                        child: Container(
-                          alignment: Alignment.center,
-                          height: 55,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(
-                              10,
-                            ),
-                            color: selected == "Expense"
-                                ? Colors.white.withOpacity(0.1)
-                                : Colors.transparent,
-                          ),
-                          child: Text(
-                            'Expense',
-                            style: TextStyle(
-                                color: selected == "Expense"
-                                    ? Colors.white
-                                    : Colors.black38,
-                                fontWeight: FontWeight.w600,
-                                fontSize: 16),
-                          ),
-                        ),
-                      ),
+                    SizedBox(
+                      width: 10,
                     ),
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            selected = 'Income';
-                            chartData =[
-                              ChartData('jan', double.parse(monthChartDataGraph!['jan']['income'])),
-                              ChartData('feb', double.parse(monthChartDataGraph!['feb']['income'])),
-                              ChartData('mar', double.parse(monthChartDataGraph!['mar']['income'])),
-                              ChartData('apr', double.parse(monthChartDataGraph!['apr']['income'])),
-                              ChartData('may', double.parse(monthChartDataGraph!['may']['income'])),
-                              ChartData('jun', double.parse(monthChartDataGraph!['jun']['income'])),
-                              ChartData('july', double.parse(monthChartDataGraph!['july']['income'])),
-                              ChartData('Aug', double.parse(monthChartDataGraph!['aug']['income'])),
-                              ChartData('Sep', double.parse(monthChartDataGraph!['sep']['income'])),
-                              ChartData('Oct', double.parse(monthChartDataGraph!['oct']['income'])),
-                              ChartData('Nov', double.parse(monthChartDataGraph!['nov']['income'])),
-                              ChartData('Dec', double.parse(monthChartDataGraph!['dec']['income'])),
+                    GestureDetector(
+                      onTap: () {
+                        showModalBottomSheet(
+                          context: context,
+                          builder: (context) {
+                            var data = TransactionDB
+                                .instance.transactionListNotifier.value;
+                            print(data);
 
-                            ];
-                          });
-                        },
-                        child: Container(
-                          alignment: Alignment.center,
-                          height: 55,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(
-                              10,
-                            ),
-                            color: selected == 'Income'
-                                ? Colors.white.withOpacity(0.1)
-                                : Colors.transparent,
-                          ),
-                          child: Text(
-                            'Income',
-                            style: TextStyle(
-                                color: selected == 'Income'
-                                    ? Colors.white
-                                    : Colors.black38,
-                                fontWeight: FontWeight.w600,
-                                fontSize: 16),
-                          ),
+                            return Container(
+                              height: 180.0,
+                              width: MediaQuery.of(context).size.width,
+                              child: Container(
+                                padding: EdgeInsets.all(20.0),
+                                decoration: BoxDecoration(
+                                  color: AppTheme.pcPopUpColor,
+                                  borderRadius: BorderRadius.only(
+                                    topLeft: Radius.circular(20.0),
+                                    topRight: Radius.circular(20.0),
+                                  ),
+                                ),
+                                child: Column(
+                                  children: [
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Text(
+                                          'Filter',
+                                          style: TextStyle(
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.w600,
+                                              fontSize: 20),
+                                        ),
+                                      ],
+                                    ),
+                                    Container(
+                                      height: 1,
+                                      color: Colors.white,
+                                    ),
+                                    SizedBox(
+                                      height: 10,
+                                    ),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        GestureDetector(
+                                          onTap: () {
+                                            List<TransactionModel>  cashTransaction = [];
+                                            for (int i = 0;
+                                                i < data.length;
+                                                i++) {
+                                              if (data[i].category.name ==
+                                                  'Cash') {
+                                                cashTransaction.add(data[i]);
+                                              } else {}
+                                            }
+                                            filterList = cashTransaction;
+                                            setState(() {});
+                                            Navigator.pop(context);
+                                          },
+                                          child: Container(
+                                            width: 120,
+                                            decoration: BoxDecoration(
+                                              color:
+                                                  Colors.white.withOpacity(0.2),
+                                              border: Border.all(
+                                                  color: Colors.white,
+                                                  width: 0.5),
+                                              borderRadius:
+                                                  BorderRadius.circular(
+                                                7,
+                                              ),
+                                            ),
+                                            alignment: Alignment.center,
+                                            height: 40,
+                                            child: Text(
+                                              'Cash',
+                                              style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontWeight: FontWeight.w500,
+                                                  fontSize: 16),
+                                            ),
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          width: 15,
+                                        ),
+                                        GestureDetector(
+                                          onTap: () {
+                                            List<TransactionModel>  onlineTransaction = [];
+                                            for (int i = 0;
+                                                i < data.length;
+                                                i++) {
+                                              if (data[i].category.name ==
+                                                  'Online') {
+                                                onlineTransaction.add(data[i]);
+                                              } else {}
+                                            }
+                                            filterList = onlineTransaction;
+                                            setState(() {});
+                                            Navigator.pop(context);
+                                          },
+                                          child: Container(
+                                            width: 120,
+                                            decoration: BoxDecoration(
+                                              color:
+                                                  Colors.white.withOpacity(0.2),
+                                              border: Border.all(
+                                                  color: Colors.white,
+                                                  width: 0.5),
+                                              borderRadius:
+                                                  BorderRadius.circular(
+                                                7,
+                                              ),
+                                            ),
+                                            alignment: Alignment.center,
+                                            height: 40,
+                                            child: Text(
+                                              'Online',
+                                              style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontWeight: FontWeight.w500,
+                                                  fontSize: 16),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    SizedBox(
+                                      height: 10,
+                                    ),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        GestureDetector(
+                                          onTap: () {
+                                            List<TransactionModel>  otherTransaction = [];
+                                            for (int i = 0;
+                                                i < data.length;
+                                                i++) {
+                                              if (data[i].category.name ==
+                                                  'Other') {
+                                                otherTransaction.add(data[i]);
+                                              } else {}
+                                            }
+                                            filterList = otherTransaction;
+                                            setState(() {});
+                                            Navigator.pop(context);
+                                          },
+                                          child: Container(
+                                            width: 120,
+                                            decoration: BoxDecoration(
+                                              color:
+                                                  Colors.white.withOpacity(0.2),
+                                              border: Border.all(
+                                                  color: Colors.white,
+                                                  width: 0.5),
+                                              borderRadius:
+                                                  BorderRadius.circular(
+                                                7,
+                                              ),
+                                            ),
+                                            alignment: Alignment.center,
+                                            height: 40,
+                                            child: Text(
+                                              'Other',
+                                              style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontWeight: FontWeight.w500,
+                                                  fontSize: 16),
+                                            ),
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          width: 15,
+                                        ),
+                                        GestureDetector(
+                                          onTap: () {
+                                            List<TransactionModel>  tournamentTransaction = [];
+                                            for (int i = 0;
+                                                i < data.length;
+                                                i++) {
+                                              if (data[i].category.name ==
+                                                  'Tournament') {
+                                                tournamentTransaction
+                                                    .add(data[i]);
+                                              } else {}
+                                            }
+                                            filterList = tournamentTransaction;
+                                            setState(() {});
+                                            Navigator.pop(context);
+                                          },
+                                          child: Container(
+                                            width: 120,
+                                            decoration: BoxDecoration(
+                                              color:
+                                                  Colors.white.withOpacity(0.2),
+                                              border: Border.all(
+                                                  color: Colors.white,
+                                                  width: 0.5),
+                                              borderRadius:
+                                                  BorderRadius.circular(
+                                                7,
+                                              ),
+                                            ),
+                                            alignment: Alignment.center,
+                                            height: 40,
+                                            child: Text(
+                                              'Tournament',
+                                              style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontWeight: FontWeight.w500,
+                                                  fontSize: 16),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        );
+                      },
+                      child: Container(
+                        height: 45,
+                        width: 50,
+                        decoration: BoxDecoration(
+                            color: Colors.grey.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(10)),
+                        child: Icon(
+                          Icons.filter_alt_rounded,
+                          color: Colors.white,
                         ),
                       ),
                     ),
                   ],
                 ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10.0),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Container(
-                      height: 45,
-                      decoration: BoxDecoration(
-                          color: Colors.grey.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(10)),
-                      child: Row(
-                        children: [
-                          SizedBox(width: 10,),
-                          Icon(Icons.replay_outlined,color: Colors.white,),
-                          SizedBox(width: 10,)
-                    ,                    Text(         '1 day',
-                            style: TextStyle(
-                                color:  Colors.white,
 
-                                fontWeight: FontWeight.w600,
-                                fontSize: 16),),
+              SizedBox(
+                height: 10,
+              ),
+              ListView.separated(
+                  itemCount: filterList.length,
+                  shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
+                  separatorBuilder: (context, index) => SizedBox(
+                        height: 10,
+                      ),
+                  itemBuilder: (context, index) {
+                    return Container(
+                      padding: EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: Colors.white10,
+                        borderRadius: BorderRadius.circular(
+                          10,
+                        ),
+                      ),
+                      child: Column(
+                        children: [
+                          Row(
+                            children: [
+
+                              Text('Amount : ',style: TextStyle(color: Colors.white),),
+                              Text('${currencySymboleUpdate.value}${filterList[index].amount}',style: TextStyle(color:
+
+                              filterList[index].categoryType==CategoryType.income?
+                              Colors.green: Colors.red),),
+
+                            ],
+                          ),
+                          SizedBox(height: 5,),
+                          Row(
+                            children: [
+                              Text('Transaction Type : ',style: TextStyle(color: Colors.white),),
+                              Text('${filterList[index].category.name}',style: TextStyle(color: Colors.white),),
+
+                            ],
+                          ),
+                          SizedBox(height: 5,),
+                          Row(
+                            children: [
+                              Text('Date : ',style: TextStyle(color: Colors.white),),
+                              Text('${filterList[index].date}',style: TextStyle(color: Colors.white),),
+
+                            ],
+                          ),
+                          SizedBox(height: 5,),
+                          Row(
+                            children: [
+                              Text('Category : ',style: TextStyle(color: Colors.white),),
+                              filterList[index].categoryType==CategoryType.income? Text('Income',style: TextStyle(color: Colors.white),):
+                              Text('Expense',style: TextStyle(color: Colors.white),),
+                            ],
+                          ),
                         ],
                       ),
-                    ),
-                  ),
-                  SizedBox(width: 10,),
-                  Container(
-                    height: 45,
-                    width: 50,
-                    decoration: BoxDecoration(
-                        color: Colors.grey.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(10)),
-                    child:Icon(Icons.filter_alt_rounded,color: Colors.white,),
-                  ),
 
-                ],
-              ),
-            ),
-
-          ],
+                    );
+                  }),
+            ],
+          ),
         ));
   }
 }
+
 class ChartData {
   ChartData(this.x, this.y);
 
