@@ -1472,7 +1472,8 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
 
       var data = TransactionDB.instance.transactionListNotifier;
       print(data.value);
-    } else {
+    }
+    else {
       print('in side else case');
       final model = TransactionModel(
         id: widget.modelFromTransation!.id,

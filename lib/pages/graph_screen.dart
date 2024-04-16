@@ -63,7 +63,17 @@ class GraphScreen extends StatefulWidget {
 
 class _GraphScreenState extends State<GraphScreen> {
   String selected = 'All';
+  String dropdownvalue = '1 Day';
+  var items = [
+    '1 Day',
+    '1 Week',
+    '1 Month',
+    '1 Year',
 
+  ];
+
+
+  String selectedDate = DateFormat('dd-MM-yyyy').format(DateTime.now());
   List<TransactionModel>  filterList = [];
 
   @override
@@ -374,31 +384,293 @@ class _GraphScreenState extends State<GraphScreen> {
                 child: Row(
                   children: [
                     Expanded(
-                      child: Container(
-                        height: 45,
-                        decoration: BoxDecoration(
-                            color: Colors.grey.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(10)),
-                        child: Row(
-                          children: [
-                            SizedBox(
-                              width: 10,
-                            ),
-                            Icon(
-                              Icons.replay_outlined,
-                              color: Colors.white,
-                            ),
-                            SizedBox(
-                              width: 10,
-                            ),
-                            Text(
-                              '1 day',
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 16),
-                            ),
-                          ],
+                      child: GestureDetector(
+                        onTap: () {
+                          showModalBottomSheet(
+                            context: context,
+                            builder: (context) {
+                              var data = TransactionDB
+                                  .instance.transactionListNotifier.value;
+
+                              print(data);
+
+                              return
+                                StatefulBuilder(builder: (context, update) {
+                                  return Container(
+                                    height: 420.0,
+                                    width: MediaQuery.of(context).size.width,
+                                    child: Container(
+                                      padding: EdgeInsets.all(20.0),
+                                      decoration: BoxDecoration(
+                                        color: AppTheme.pcPopUpColor,
+                                        borderRadius: BorderRadius.only(
+                                          topLeft: Radius.circular(20.0),
+                                          topRight: Radius.circular(20.0),
+                                        ),
+                                      ),
+                                      child: Column(
+                                        children: [
+                                          Row(
+                                            mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                            children: [
+                                              Text(
+                                                'Select Period',
+                                                style: TextStyle(
+                                                    color: Colors.white,
+                                                    fontWeight: FontWeight.w600,
+                                                    fontSize: 20),
+                                              ),
+                                            ],
+                                          ),
+                                          Container(
+                                            height: 1,
+                                            color: Colors.white,
+                                          ),
+                                          SizedBox(
+                                            height: 10,
+                                          ),
+                                          Container(
+
+                                            decoration: BoxDecoration(
+                                              color:
+                                              Colors.white.withOpacity(0.2),
+                                              border: Border.all(
+                                                  color: Colors.white,
+                                                  width: 0.5),
+                                              borderRadius:
+                                              BorderRadius.circular(
+                                                7,
+                                              ),
+                                            ),
+                                            alignment: Alignment.center,
+                                            height: 50,
+                                            child: Row(
+                                              children: [
+                                                SizedBox(width: 10,),
+                                                Icon(Icons.grid_view,color: Colors.white,),
+
+                                                SizedBox(width: 10,),
+
+                                                Text(
+                                                  'All Time',
+                                                  style: TextStyle(
+                                                      color: Colors.white,
+                                                      fontWeight: FontWeight.w500,
+                                                      fontSize: 16),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          SizedBox(
+                                            height: 10,
+                                          ),
+                                          Container(
+                                            padding: EdgeInsets.all(10),
+                                            decoration: BoxDecoration(
+
+
+                                              border: Border.all(
+                                                  color: Colors.white,
+                                                  width: 0.5),
+                                              borderRadius:
+                                              BorderRadius.circular(
+                                                7,
+                                              ),
+                                            ),
+                                            alignment: Alignment.center,
+                                            height: 200,
+                                            child: Column(
+                                              children: [
+                                                Row(
+                                                  children: [
+                                                    Icon(Icons.autorenew_rounded,color:Colors.white ,),
+                                                    SizedBox(width: 10,),
+
+                                                    Text(
+                                                      'Cycle',
+                                                      style: TextStyle(
+                                                          color: Colors.white,
+                                                          fontWeight: FontWeight.w600,
+                                                          fontSize: 18),
+                                                    ),
+
+
+                                                  ],
+                                                ),
+                                                SizedBox(height: 10,),
+                                                Row(
+                                                  mainAxisAlignment: MainAxisAlignment.center,
+                                                  children: [
+                                                    Text(
+                                                      'Every',
+                                                      style: TextStyle(
+                                                          color: Colors.white,
+                                                          fontWeight: FontWeight.w500,
+                                                          fontSize: 16),
+                                                    ),
+                                                    SizedBox(width: 10,),
+                                                    DropdownButton(
+                                                      // Initial Value
+                                                      value: dropdownvalue,
+                                                      dropdownColor: Colors.black,
+                                                      style:  TextStyle(
+                                                          color: Colors.white,
+                                                          fontWeight: FontWeight.w600,
+                                                          fontSize: 18),
+                                                      // Down Arrow Icon
+                                                      icon: const Icon(Icons.keyboard_arrow_down),
+
+                                                      // Array list of items
+                                                      items: items.map((String items) {
+                                                        return DropdownMenuItem(
+                                                          value: items,
+                                                          child: Text(items),
+                                                        );
+                                                      }).toList(),
+                                                      // After selecting the desired option,it will
+                                                      // change button value to selected value
+                                                      onChanged: (String? newValue) {
+                                                        setState(() {
+                                                          dropdownvalue = newValue!;
+                                                        });
+                                                        update.call(() {
+
+                                                        },);
+                                                      },
+                                                    ),
+                                                  ],
+                                                ),
+                                                SizedBox(height: 10,),
+                                                Row(
+                                                  mainAxisAlignment: MainAxisAlignment.center,
+                                                  children: [
+                                                    Text(
+                                                      'beginning',
+                                                      style: TextStyle(
+                                                          color: Colors.white,
+                                                          fontWeight: FontWeight.w500,
+                                                          fontSize: 16),
+                                                    ),
+                                                    SizedBox(width: 10,),
+                                                    GestureDetector(
+                                                      onTap: () async {
+
+                                                        final DateTime? date = await showDatePicker(
+                                                          context: context,
+                                                          builder: (context, child) {
+                                                            return Theme(
+                                                              data: ThemeData.dark().copyWith(
+                                                                  colorScheme: const ColorScheme.dark(
+                                                                      onPrimary:
+                                                                      AppTheme.pcAppBarColor,
+                                                                      onSurface: AppTheme
+                                                                          .pcTextSecondayColor,
+                                                                      primary: AppTheme
+                                                                          .pcTextTertiaryColor),
+                                                                  dialogBackgroundColor:
+                                                                  AppTheme.pcAppBarColor),
+                                                              child: child!,
+                                                            );
+                                                          },
+                                                          initialDate: DateTime.now(),
+                                                          firstDate: DateTime.now()
+                                                              .subtract(const Duration(days: 90)),
+                                                          lastDate: DateTime.now(),
+                                                        );
+                                                        if(date!= null){
+                                                          selectedDate= DateFormat('dd-MM-yyyy').format(date);
+                                                          setState(() {
+
+                                                          });
+                                                          update.call(() {
+
+                                                          },);
+                                                        }
+
+                                                      },
+                                                      child: Column(
+                                                        children: [
+                                                          Text(
+                                                            selectedDate,
+                                                            style: TextStyle(
+                                                                color: Colors.white,
+                                                                fontWeight: FontWeight.w600,
+                                                                fontSize: 18),
+                                                          ),
+                                                          Container(height: 1,color: Colors.white,width: 100,),
+
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+
+                                              ],
+                                            ),
+                                          ),
+                                          SizedBox(
+                                            height: 10,
+                                          ),
+                                          Container(
+width: 100,
+                                            decoration: BoxDecoration(
+                                              color:
+                                              Colors.white.withOpacity(0.2),
+                                              border: Border.all(
+                                                  color: Colors.white,
+                                                  width: 0.5),
+                                              borderRadius:
+                                              BorderRadius.circular(
+                                                7,
+                                              ),
+                                            ),
+                                            alignment: Alignment.center,
+                                            height: 30,
+                                            child: Text(
+                                              'Done',
+                                              style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontWeight: FontWeight.w500,
+                                                  fontSize: 16),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                });
+
+
+                            },
+                          );
+                        },
+                        child: Container(
+                          height: 45,
+                          decoration: BoxDecoration(
+                              color: Colors.grey.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(10)),
+                          child: Row(
+                            children: [
+                              SizedBox(
+                                width: 10,
+                              ),
+                              Icon(
+                                Icons.replay_outlined,
+                                color: Colors.white,
+                              ),
+                              SizedBox(
+                                width: 10,
+                              ),
+                              Text(
+                                '1 day',
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 16),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
@@ -630,6 +902,7 @@ class _GraphScreenState extends State<GraphScreen> {
                                 ),
                               ),
                             );
+
                           },
                         );
                       },
