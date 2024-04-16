@@ -18,6 +18,39 @@ import '../constant.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import '../global/component/appbar.dart';
   Map monthChartDataGraph={};
+List<ChartData> chartData = [
+
+];
+final List<Color> color = <Color>[];
+final List<double> stops = <double>[];
+initialize(){
+  chartData = [
+    ChartData('jan', double.parse(monthChartDataGraph!['jan']['total'])),
+    ChartData('feb', double.parse(monthChartDataGraph!['feb']['total'])),
+    ChartData('mar', double.parse(monthChartDataGraph!['mar']['total'])),
+    ChartData('apr', double.parse(monthChartDataGraph!['apr']['total'])),
+    ChartData('may', double.parse(monthChartDataGraph!['may']['total'])),
+    ChartData('jun', double.parse(monthChartDataGraph!['jun']['total'])),
+    ChartData('july',double.parse(monthChartDataGraph!['july']['total'])),
+    ChartData('Aug', double.parse(monthChartDataGraph!['aug']['total'])),
+    ChartData('Sep', double.parse(monthChartDataGraph!['sep']['total'])),
+    ChartData('Oct', double.parse(monthChartDataGraph!['oct']['total'])),
+    ChartData('Nov', double.parse(monthChartDataGraph!['nov']['total'])),
+    ChartData('Dec', double.parse(monthChartDataGraph!['dec']['total'])),
+  ];
+  color.add(
+    AppTheme.contentColorCyan.withOpacity(0.2),
+  );
+  color.add(
+    AppTheme.contentColorBlue.withOpacity(0.5),
+  );
+  color.add(
+    AppTheme.contentColorCyan.withOpacity(0.5),
+  );
+  stops.add(0.0);
+  stops.add(0.5);
+  stops.add(1.0);
+}
 class GraphScreen extends StatefulWidget {
   const GraphScreen({super.key});
 
@@ -27,11 +60,8 @@ class GraphScreen extends StatefulWidget {
 
 class _GraphScreenState extends State<GraphScreen> {
   String selected = 'All';
-  List<ChartData> chartData = [
 
-  ];
-  final List<Color> color = <Color>[];
-  final List<double> stops = <double>[];
+
 
   @override
   void initState() {
@@ -39,38 +69,13 @@ class _GraphScreenState extends State<GraphScreen> {
     super.initState();
   }
 
-  initialize(){
-    chartData = [
-      ChartData('jan', double.parse(monthChartDataGraph!['jan']['total'])),
-      ChartData('feb', double.parse(monthChartDataGraph!['feb']['total'])),
-      ChartData('mar', double.parse(monthChartDataGraph!['mar']['total'])),
-      ChartData('apr', double.parse(monthChartDataGraph!['apr']['total'])),
-      ChartData('may', double.parse(monthChartDataGraph!['may']['total'])),
-      ChartData('jun', double.parse(monthChartDataGraph!['jun']['total'])),
-      ChartData('july',double.parse(monthChartDataGraph!['july']['total'])),
-      ChartData('Aug', double.parse(monthChartDataGraph!['aug']['total'])),
-      ChartData('Sep', double.parse(monthChartDataGraph!['sep']['total'])),
-      ChartData('Oct', double.parse(monthChartDataGraph!['oct']['total'])),
-      ChartData('Nov', double.parse(monthChartDataGraph!['nov']['total'])),
-      ChartData('Dec', double.parse(monthChartDataGraph!['dec']['total'])),
-    ];
-    color.add(
-      AppTheme.contentColorCyan.withOpacity(0.2),
-    );
-    color.add(
-      AppTheme.contentColorBlue.withOpacity(0.5),
-    );
-    color.add(
-      AppTheme.contentColorCyan.withOpacity(0.5),
-    );
-    stops.add(0.0);
-    stops.add(0.5);
-    stops.add(1.0);
-  }
+
 
   @override
   Widget build(BuildContext context) {
     print(monthChartDataGraph!);
+
+    print(TransactionDB.instance.transactionMonthListNotifier.value);
 
     final LinearGradient gradientColors =
     LinearGradient(colors: color, stops: stops);

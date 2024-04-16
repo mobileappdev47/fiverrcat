@@ -19,7 +19,6 @@ import 'db/functions/transaction_function.dart';
 import 'db/models/account_group/account_group_model_db.dart';
 import 'db/models/category/category_model_db.dart';
 
-
 class AddTaskScreen extends StatefulWidget {
   const AddTaskScreen({super.key, this.modelFromTransation});
 
@@ -96,18 +95,17 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
     }
   };
 
-  CategoryModel selectedcategoryModel =  CategoryModel(id: '', name: '', isDeleted: true, categoryType: CategoryType.income
-     );
+  CategoryModel selectedcategoryModel = CategoryModel(
+      id: '', name: '', isDeleted: true, categoryType: CategoryType.income);
+
   //빈 카테고리 모델
   TextEditingController _noteController = TextEditingController();
 
-
-
   TextEditingController dateController = TextEditingController();
+
   // DateTime selectDate = DateTime.now();
   late Expense expense;
   bool isLoading = false;
-
 
   final _FormKey = GlobalKey<FormState>();
   File? image;
@@ -120,7 +118,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
 
     if (widget.modelFromTransation != null) {
       String categoryFromTransaction =
-      widget.modelFromTransation!.category.id.toString();
+          widget.modelFromTransation!.category.id.toString();
       String accountTypeFromTransaction = '';
       if (widget.modelFromTransation!.account == AccountType.account) {
         accountTypeFromTransaction = 'account';
@@ -143,15 +141,13 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
 
   @override
   Widget build(BuildContext context) {
-
     TransactionDB.instance.refresh();
     CategoryDB.instance.getAllCategory();
     getAllAccountGroup();
     accountGroupBalanceAmount();
 
-
     return GestureDetector(
-      onTap: (){
+      onTap: () {
         FocusScopeNode currentFocus = FocusScope.of(context);
 
         if (!currentFocus.hasPrimaryFocus) {
@@ -174,9 +170,6 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-
-
-
                 Row(
                   children: <Widget>[
                     const SizedBox(
@@ -222,11 +215,13 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                                         data: ThemeData.dark().copyWith(
                                             colorScheme: const ColorScheme.dark(
                                                 onPrimary:
-                                                AppTheme.pcAppBarColor,
-                                                onSurface: AppTheme.pcTextSecondayColor,
-                                                primary: AppTheme.pcTextTertiaryColor),
+                                                    AppTheme.pcAppBarColor,
+                                                onSurface: AppTheme
+                                                    .pcTextSecondayColor,
+                                                primary: AppTheme
+                                                    .pcTextTertiaryColor),
                                             dialogBackgroundColor:
-                                            AppTheme.pcAppBarColor),
+                                                AppTheme.pcAppBarColor),
                                         child: child!,
                                       );
                                     },
@@ -237,7 +232,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                                   );
                                   if (date != null && date != selectedDate) {
                                     setState(
-                                          () {
+                                      () {
                                         selectedDate = date;
                                       },
                                     );
@@ -253,7 +248,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                         ),
                         controller: TextEditingController(
                           text:
-                          '${selectedDate.year}/${selectedDate.month}/${selectedDate.day}',// display selected date in text field
+                              '${selectedDate.year}/${selectedDate.month}/${selectedDate.day}', // display selected date in text field
                         ),
                         readOnly: true,
                         onTap: () async {
@@ -267,7 +262,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                                         onSurface: AppTheme.pcTextSecondayColor,
                                         primary: AppTheme.pcTextTertiaryColor),
                                     dialogBackgroundColor:
-                                    AppTheme.pcAppBarColor),
+                                        AppTheme.pcAppBarColor),
                                 child: child!,
                               );
                             },
@@ -277,7 +272,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                           );
                           if (date != null && date != selectedDate) {
                             setState(
-                                  () {
+                              () {
                                 selectedDate = date;
                               },
                             );
@@ -344,7 +339,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                                   // });
                                 },
                                 icon: const Icon(
-                                    FontAwesomeIcons.coins,
+                                  FontAwesomeIcons.coins,
                                   size: 20,
                                   color: AppTheme.pcTabBarSelectorColor,
                                 ))),
@@ -353,7 +348,6 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                     ),
                   ],
                 ),
-
                 Row(
                   children: [
                     const SizedBox(
@@ -370,66 +364,69 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                     ),
                     Expanded(
                         child: Theme(
-                          data: Theme.of(context).copyWith(
-                            splashColor: Colors.transparent,
-                            highlightColor: Colors.transparent,
+                      data: Theme.of(context).copyWith(
+                        splashColor: Colors.transparent,
+                        highlightColor: Colors.transparent,
+                      ),
+                      child: StatefulBuilder(builder: (context, setState2) {
+                        return DropdownButtonFormField<String>(
+                          decoration: const InputDecoration(
+                            enabledBorder: UnderlineInputBorder(
+                              borderSide: BorderSide(
+                                color: AppTheme.pcTabBarSelectorColor,
+                              ),
+                            ),
                           ),
-                          child: StatefulBuilder(
-                            builder: (context,setState2) {
-                              return DropdownButtonFormField<String>(
-                                decoration: const InputDecoration(
-                                  enabledBorder: UnderlineInputBorder(
-                                    borderSide: BorderSide(
-                                      color: AppTheme.pcTabBarSelectorColor,
+                          hint: const Text(
+                            'Select category',
+                            style: TextStyle(color: Colors.transparent),
+                          ),
+                          value: _categoryID,
+                          items: CategoryDB()
+                              .incomeCategoryNotifier
+                              .value
+                              .where(
+                                  (e) => e.categoryType == CategoryType.income)
+                              .map((e) => DropdownMenuItem(
+                                    value: e.id,
+                                    child: Text(
+                                      e.name,
+                                      style: const TextStyle(
+                                        color: AppTheme.pcTextSecondayColor,
+                                      ),
                                     ),
-                                  ),
-                                ),
-                                hint: const Text(
-                                  'Select category',
-                                  style: TextStyle(color: Colors.transparent),
-                                ),
-                                value: _categoryID,
-                                items: CategoryDB().incomeCategoryNotifier.value
-                                    .where((e) => e.categoryType == CategoryType.income)
-                                    .map((e) => DropdownMenuItem(
-                                  value: e.id,
-                                  child: Text(e.name,
-                                    style: const TextStyle(
-                                      color: AppTheme.pcTextSecondayColor,
-                                    ),
-                                  ),
-                                  onTap: () {
-                                    print(e.categoryType);
+                                    onTap: () {
+                                      print(e.categoryType);
 
-                                    selectedcategoryModel = e;
-                                  },
-                                )).toList(),
-                                onChanged: (selectedValue) {
-                                  setState(() {
-                                    _categoryID = selectedValue;
-                                  });
-                                },
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return 'Required Feild';
-                                  } else {
-                                    return null;
-                                  }
-                                },
-                                isExpanded: true,
-                                icon: Padding(
-                                  padding: const EdgeInsets.only(right: 12),
-                                  child: Container(
-                                    alignment: Alignment.centerLeft,
-                                    child: const Icon(Icons.arrow_drop_down,
-                                        color: AppTheme.pcTabBarSelectorColor),
-                                  ),
-                                ),
-                                dropdownColor: AppTheme.pcAppBarColor,
-                              );
+                                      selectedcategoryModel = e;
+                                    },
+                                  ))
+                              .toList(),
+                          onChanged: (selectedValue) {
+                            setState(() {
+                              _categoryID = selectedValue;
+                            });
+                          },
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Required Feild';
+                            } else {
+                              return null;
                             }
+                          },
+                          isExpanded: true,
+                          icon: Padding(
+                            padding: const EdgeInsets.only(right: 12),
+                            child: Container(
+                              alignment: Alignment.centerLeft,
+                              child: const Icon(Icons.arrow_drop_down,
+                                  color: AppTheme.pcTabBarSelectorColor),
+                            ),
                           ),
-                        )),
+                          dropdownColor: AppTheme.pcAppBarColor,
+                        );
+                      }),
+                    )),
                   ],
                 ),
                 Row(
@@ -450,8 +447,10 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                       child: TextFormField(
                         textCapitalization: TextCapitalization.sentences,
                         keyboardType: TextInputType.text,
-                        inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[a-z|A-Z|0-9|ㄱ-ㅎ|ㅏ-ㅣ|가-힣|ᆞ|ᆢ|ㆍ|ᆢ|ᄀᆞ|ᄂᆞ|ᄃᆞ|ᄅᆞ|ᄆᆞ|ᄇᆞ|ᄉᆞ|ᄋᆞ|ᄌᆞ|ᄎᆞ|ᄏᆞ|ᄐᆞ|ᄑᆞ|ᄒᆞ]'))],
-
+                        inputFormatters: [
+                          FilteringTextInputFormatter.allow(RegExp(
+                              r'[a-z|A-Z|0-9|ㄱ-ㅎ|ㅏ-ㅣ|가-힣|ᆞ|ᆢ|ㆍ|ᆢ|ᄀᆞ|ᄂᆞ|ᄃᆞ|ᄅᆞ|ᄆᆞ|ᄇᆞ|ᄉᆞ|ᄋᆞ|ᄌᆞ|ᄎᆞ|ᄏᆞ|ᄐᆞ|ᄑᆞ|ᄒᆞ]'))
+                        ],
                         controller: _noteController,
                         cursorColor: AppTheme.pcTextSecondayColor,
                         style: const TextStyle(
@@ -463,7 +462,9 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                               color: AppTheme.pcTabBarSelectorColor,
                             ),
                           ),
-                          suffixIcon: Icon(Icons.description_outlined,),
+                          suffixIcon: Icon(
+                            Icons.description_outlined,
+                          ),
                           suffixIconColor: AppTheme.pcTabBarSelectorColor,
                         ),
                         readOnly: false,
@@ -474,7 +475,6 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                 const SizedBox(
                   height: 16,
                 ),
-
                 SizedBox(
                   width: double.infinity,
                   child: Row(
@@ -497,410 +497,445 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                         ),
                         child: isLoading
                             ? const Center(child: CircularProgressIndicator())
-                            :
-
-
-                        ValueListenableBuilder(
-                          valueListenable: TransactionDB.instance.transactionListNotifier,
-                          builder: (context, newList, child) {
-
-                            return   TextButton(
-                                onPressed: () async {
-                                  setState(() {});
-                                  if (_FormKey.currentState!.validate()) {
-                                    if( _amountController.text!=''&&_categoryID!=null) {
-                                      //금액을임력안하면 빈 스트링이 돌아오기에 이렇게 내맘대로 썼음
-                                      print('_amountController.text==${_amountController.text.runtimeType}==');
-                                      Navigator.pop(context);
-                                    }
-                                    try {
-                                      await addIncomeTransaction();
-                                    }
-                                    catch(e){
-                                      print(e.toString());
-                                    }
-
-
-                                  }
-
-var data =TransactionDB.instance.transactionListNotifier;
-                                  print(data.value);
-
-                                  // context.read<CreateExpenseBloc>().add(CreateExpense(expense));
-                                  //임의로
-
-                                  Map<String, List<TransactionModel>> mapList =
-                                  SelectDate().sortByDate(newList);
-                                  List<String> keys = mapList.keys.toList();
-
-                                  print(mapList);
-
-
-
-                                  //january
-
-
-                                  double totalJan = 0.0;
-                                  double incomeMonthJan=  0.0;
-                                  double expenseMonthJan=  0.0;
-
-                                  //feb
-
-                                  double totalFeb = 0.0;
-                                  double incomeMonthFeb=  0.0;
-                                  double expenseMonthFeb=  0.0;
-
-                                  // march
-
-                                  double totalMarch = 0.0;
-                                  double incomeMonthMarch=  0.0;
-                                  double expenseMonthMarch=  0.0;
-
-                                  //april
-
-
-                                  double totalA = 0.0;
-                                  double incomeMonth=  0.0;
-                                  double expenseMonth=  0.0;
-
-                                  //may
-                                  double totalMay = 0.0;
-                                  double incomeMonthMay=  0.0;
-                                  double expenseMonthMay=  0.0;
-
-                                  //june
-
-                                  double totalJun = 0.0;
-                                  double incomeMonthJun=  0.0;
-                                  double expenseMonthJun=  0.0;
-
-                                  //july
-
-                                  double totalJul = 0.0;
-                                  double incomeMonthJul=  0.0;
-                                  double expenseMonthJul=  0.0;
-
-
-                                  //aug
-
-
-                                  double totalAug = 0.0;
-                                  double incomeMonthAug=  0.0;
-                                  double expenseMonthAug=  0.0;
-
-                                  //sep
-
-
-                                  double totalSep = 0.0;
-                                  double incomeMonthSep=  0.0;
-                                  double expenseMonthSep=  0.0;
-
-                                  //oct
-
-
-                                  double totalOct = 0.0;
-                                  double incomeMonthOct=  0.0;
-                                  double expenseMonthOct=  0.0;
-
-                                  //nov
-
-
-                                  double totalNov = 0.0;
-                                  double incomeMonthNov=  0.0;
-                                  double expenseMonthNov=  0.0;
-
-
-                                  //dec
-
-                                  double totalDec = 0.0;
-                                  double incomeMonthDec=  0.0;
-                                  double expenseMonthDec=  0.0;
-
-                                  print(mapList);
-
-                                  print(keys);
-
-                                  mapList.forEach((key, value) {
-                                    print('$key: $value');
-                                    DateTime date = DateTime.parse(key);
-                                    String month = DateFormat('MMMM').format(date);
-
-                                    print(month);
-
-                                    if (month == 'January') {
-
-
-
-                                      for (int i = 0; i < value.length; i++) {
-                                        totalJan = totalJan + value[i].amount;
-                                        if(value[i].categoryType == CategoryType.income){
-
-                                          incomeMonthJan= incomeMonthJan + value[i].amount;
-                                        }
-                                        else {
-                                          expenseMonthJan= expenseMonthJan + value[i].amount;
-                                        }
-                                      }
-
-                                      monthDataForGraph['jan']['total'] =
-                                          totalJan.toString();
-                                      monthDataForGraph['jan']['income'] =
-                                          incomeMonthJan.toString();
-                                      monthDataForGraph['jan']['expense'] =
-                                          expenseMonthJan.toString();
-
-                                    } else if (month == 'February') {
-
-
-                                      for (int i = 0; i < value.length; i++) {
-                                        totalFeb = totalFeb + value[i].amount;
-                                        if(value[i].categoryType == CategoryType.income){
-
-                                          incomeMonthFeb= incomeMonthFeb + value[i].amount;
-                                        }
-                                        else {
-                                          expenseMonthFeb= expenseMonthFeb + value[i].amount;
-                                        }
-                                      }
-
-                                      monthDataForGraph['feb']['total'] =
-                                          totalFeb.toString();
-                                      monthDataForGraph['feb']['income'] =
-                                          incomeMonthFeb.toString();
-                                      monthDataForGraph['feb']['expense'] =
-                                          expenseMonthFeb.toString();
-                                    } else if (month == 'March') {
-
-
-                                      for (int i = 0; i < value.length; i++) {
-                                        totalMarch = totalMarch + value[i].amount;
-                                        if(value[i].categoryType == CategoryType.income){
-
-                                          incomeMonthMarch= incomeMonthMarch+ value[i].amount;
-                                        }
-                                        else {
-                                          expenseMonthMarch= expenseMonthMarch + value[i].amount;
-                                        }
-                                      }
-
-                                      monthDataForGraph['mar']['total'] =
-                                          totalMarch.toString();
-                                      monthDataForGraph['mar']['income'] =
-                                          incomeMonthMarch.toString();
-                                      monthDataForGraph['mar']['expense'] =
-                                          expenseMonthMarch.toString();
-                                    } else if (month == 'April') {
-
-
-
-                                      for (int i = 0; i < value.length; i++) {
-                                        totalA = totalA + value[i].amount;
-
-                                        if(value[i].categoryType == CategoryType.income){
-
-                                          incomeMonth= incomeMonth + value[i].amount;
-                                        }
-                                        else {
-                                          expenseMonth= expenseMonth + value[i].amount;
+                            : ValueListenableBuilder(
+                                valueListenable: TransactionDB
+                                    .instance.transactionListNotifier,
+                                builder: (context, newList, child) {
+                                  return TextButton(
+                                      onPressed: () async {
+                                        setState(() {});
+                                        if (_FormKey.currentState!.validate()) {
+                                          if (_amountController.text != '' &&
+                                              _categoryID != null) {
+                                            //금액을임력안하면 빈 스트링이 돌아오기에 이렇게 내맘대로 썼음
+                                            print(
+                                                '_amountController.text==${_amountController.text.runtimeType}==');
+                                            Navigator.pop(context);
+                                          }
+                                          try {
+                                            await addIncomeTransaction();
+                                          } catch (e) {
+                                            print(e.toString());
+                                          }
                                         }
 
-                                      }
+                                        // context.read<CreateExpenseBloc>().add(CreateExpense(expense));
+                                        //임의로
+                                        var data = TransactionDB
+                                            .instance.transactionListNotifier;
+                                        print(data.value);
+                                        Map<String, List<TransactionModel>>
+                                            mapList =
+                                            SelectDate().sortByDate(newList);
+                                        List<String> keys =
+                                            mapList.keys.toList();
 
-                                      monthDataForGraph['apr']['total'] =
-                                          totalA.toString();
+                                        print(mapList);
 
-                                      monthDataForGraph['apr']['income'] =
-                                          incomeMonth.toString();
-                                      monthDataForGraph['apr']['expense'] =
-                                          expenseMonth.toString();
+                                        //january
 
+                                        double totalJan = 0.0;
+                                        double incomeMonthJan = 0.0;
+                                        double expenseMonthJan = 0.0;
 
-                                    } else if (month == 'May') {
+                                        //feb
 
+                                        double totalFeb = 0.0;
+                                        double incomeMonthFeb = 0.0;
+                                        double expenseMonthFeb = 0.0;
 
-                                      for (int i = 0; i < value.length; i++) {
-                                        totalMay = totalMay + value[i].amount;
-                                        if(value[i].categoryType == CategoryType.income){
+                                        // march
 
-                                          incomeMonthMay= incomeMonthMay + value[i].amount;
-                                        }
-                                        else {
-                                          expenseMonthMay= expenseMonthMay + value[i].amount;
-                                        }
-                                      }
+                                        double totalMarch = 0.0;
+                                        double incomeMonthMarch = 0.0;
+                                        double expenseMonthMarch = 0.0;
 
-                                      monthDataForGraph['may']['total'] =
-                                          totalMay.toString();
-                                      monthDataForGraph['may']['income'] =
-                                          incomeMonthMay.toString();
-                                      monthDataForGraph['may']['expense'] =
-                                          expenseMonthMay.toString();
-                                    } else if (month == 'June') {
+                                        //april
 
+                                        double totalA = 0.0;
+                                        double incomeMonth = 0.0;
+                                        double expenseMonth = 0.0;
 
-                                      for (int i = 0; i < value.length; i++) {
-                                        totalJun = totalJun + value[i].amount;
-                                        if(value[i].categoryType == CategoryType.income){
+                                        //may
+                                        double totalMay = 0.0;
+                                        double incomeMonthMay = 0.0;
+                                        double expenseMonthMay = 0.0;
 
-                                          incomeMonthJun= incomeMonthJun + value[i].amount;
-                                        }
-                                        else {
-                                          expenseMonthJun= expenseMonthJun + value[i].amount;
-                                        }
-                                      }
+                                        //june
 
-                                      monthDataForGraph['jun']['total'] =
-                                          totalJun.toString();
-                                      monthDataForGraph['jun']['income'] =
-                                          incomeMonthJun.toString();
-                                      monthDataForGraph['jun']['expense'] =
-                                          expenseMonthJun.toString();
-                                    } else if (month == 'July') {
+                                        double totalJun = 0.0;
+                                        double incomeMonthJun = 0.0;
+                                        double expenseMonthJun = 0.0;
 
+                                        //july
 
-                                      for (int i = 0; i < value.length; i++) {
-                                        totalJul = totalJul+ value[i].amount;
-                                        if(value[i].categoryType == CategoryType.income){
+                                        double totalJul = 0.0;
+                                        double incomeMonthJul = 0.0;
+                                        double expenseMonthJul = 0.0;
 
-                                          incomeMonthJul= incomeMonthJul + value[i].amount;
-                                        }
-                                        else {
-                                          expenseMonthJul= expenseMonthJul + value[i].amount;
-                                        }
-                                      }
+                                        //aug
 
-                                      monthDataForGraph['july']['total'] =
-                                          totalJul.toString();
-                                      monthDataForGraph['july']['income'] =
-                                          incomeMonthJul.toString();
-                                      monthDataForGraph['july']['expense'] =
-                                          expenseMonthJul.toString();
-                                    } else if (month == 'August') {
+                                        double totalAug = 0.0;
+                                        double incomeMonthAug = 0.0;
+                                        double expenseMonthAug = 0.0;
 
+                                        //sep
 
-                                      for (int i = 0; i < value.length; i++) {
-                                        totalAug = totalAug + value[i].amount;
-                                        if(value[i].categoryType == CategoryType.income){
+                                        double totalSep = 0.0;
+                                        double incomeMonthSep = 0.0;
+                                        double expenseMonthSep = 0.0;
 
-                                          incomeMonthAug= incomeMonthAug + value[i].amount;
-                                        }
-                                        else {
-                                          expenseMonthAug= expenseMonthAug + value[i].amount;
-                                        }
-                                      }
+                                        //oct
 
-                                      monthDataForGraph['aug']['total'] =
-                                          totalAug.toString();
+                                        double totalOct = 0.0;
+                                        double incomeMonthOct = 0.0;
+                                        double expenseMonthOct = 0.0;
 
-                                      monthDataForGraph['aug']['income'] =
-                                          incomeMonthAug.toString();
-                                      monthDataForGraph['aug']['expense'] =
-                                          expenseMonthAug.toString();
-                                    } else if (month == 'September') {
+                                        //nov
 
-                                      for (int i = 0; i < value.length; i++) {
-                                        totalSep= totalSep + value[i].amount;
-                                        if(value[i].categoryType == CategoryType.income){
+                                        double totalNov = 0.0;
+                                        double incomeMonthNov = 0.0;
+                                        double expenseMonthNov = 0.0;
 
-                                          incomeMonthSep= incomeMonthSep + value[i].amount;
-                                        }
-                                        else {
-                                          expenseMonthSep= expenseMonthSep + value[i].amount;
-                                        }
-                                      }
+                                        //dec
 
-                                      monthDataForGraph['sep']['total'] =
-                                          totalSep.toString();
-                                      monthDataForGraph['sep']['income'] =
-                                          incomeMonthSep.toString();
-                                      monthDataForGraph['sep']['expense'] =
-                                          expenseMonthSep.toString();
-                                    } else if (month == 'October') {
+                                        double totalDec = 0.0;
+                                        double incomeMonthDec = 0.0;
+                                        double expenseMonthDec = 0.0;
 
+                                        print(mapList);
 
-                                      for (int i = 0; i < value.length; i++) {
-                                        totalOct = totalOct + value[i].amount;
-                                        if(value[i].categoryType == CategoryType.income){
+                                        print(keys);
 
-                                          incomeMonthOct= incomeMonthOct + value[i].amount;
-                                        }
-                                        else {
-                                          expenseMonthOct= expenseMonthOct + value[i].amount;
-                                        }
-                                      }
+                                        mapList.forEach((key, value) {
+                                          print('$key: $value');
+                                          DateTime date = DateTime.parse(key);
+                                          String month =
+                                              DateFormat('MMMM').format(date);
 
-                                      monthDataForGraph['oct']['total'] =
-                                          totalOct.toString();
-                                      monthDataForGraph['oct']['income'] =
-                                          incomeMonthOct.toString();
-                                      monthDataForGraph['oct']['expense'] =
-                                          expenseMonthOct.toString();
-                                    } else if (month == 'November') {
+                                          print(month);
 
+                                          if (month == 'January') {
+                                            for (int i = 0;
+                                                i < value.length;
+                                                i++) {
+                                              totalJan =
+                                                  totalJan + value[i].amount;
+                                              if (value[i].categoryType ==
+                                                  CategoryType.income) {
+                                                incomeMonthJan =
+                                                    incomeMonthJan +
+                                                        value[i].amount;
+                                              } else {
+                                                expenseMonthJan =
+                                                    expenseMonthJan +
+                                                        value[i].amount;
+                                              }
+                                            }
 
-                                      for (int i = 0; i < value.length; i++) {
-                                        totalNov= totalNov + value[i].amount;
-                                        if(value[i].categoryType == CategoryType.income){
+                                            monthDataForGraph['jan']['total'] =
+                                                totalJan.toString();
+                                            monthDataForGraph['jan']['income'] =
+                                                incomeMonthJan.toString();
+                                            monthDataForGraph['jan']
+                                                    ['expense'] =
+                                                expenseMonthJan.toString();
+                                          } else if (month == 'February') {
+                                            for (int i = 0;
+                                                i < value.length;
+                                                i++) {
+                                              totalFeb =
+                                                  totalFeb + value[i].amount;
+                                              if (value[i].categoryType ==
+                                                  CategoryType.income) {
+                                                incomeMonthFeb =
+                                                    incomeMonthFeb +
+                                                        value[i].amount;
+                                              } else {
+                                                expenseMonthFeb =
+                                                    expenseMonthFeb +
+                                                        value[i].amount;
+                                              }
+                                            }
 
-                                          incomeMonthNov= incomeMonthNov+ value[i].amount;
-                                        }
-                                        else {
-                                          expenseMonthNov= expenseMonthNov + value[i].amount;
-                                        }
-                                      }
+                                            monthDataForGraph['feb']['total'] =
+                                                totalFeb.toString();
+                                            monthDataForGraph['feb']['income'] =
+                                                incomeMonthFeb.toString();
+                                            monthDataForGraph['feb']
+                                                    ['expense'] =
+                                                expenseMonthFeb.toString();
+                                          } else if (month == 'March') {
+                                            for (int i = 0;
+                                                i < value.length;
+                                                i++) {
+                                              totalMarch =
+                                                  totalMarch + value[i].amount;
+                                              if (value[i].categoryType ==
+                                                  CategoryType.income) {
+                                                incomeMonthMarch =
+                                                    incomeMonthMarch +
+                                                        value[i].amount;
+                                              } else {
+                                                expenseMonthMarch =
+                                                    expenseMonthMarch +
+                                                        value[i].amount;
+                                              }
+                                            }
 
-                                      monthDataForGraph['nov']['total'] =
-                                          totalNov.toString();
-                                      monthDataForGraph['nov']['income'] =
-                                          incomeMonthNov.toString();
-                                      monthDataForGraph['nov']['expense'] =
-                                          expenseMonthNov.toString();
-                                    } else if (month == 'December') {
+                                            monthDataForGraph['mar']['total'] =
+                                                totalMarch.toString();
+                                            monthDataForGraph['mar']['income'] =
+                                                incomeMonthMarch.toString();
+                                            monthDataForGraph['mar']
+                                                    ['expense'] =
+                                                expenseMonthMarch.toString();
+                                          } else if (month == 'April') {
+                                            for (int i = 0;
+                                                i < value.length;
+                                                i++) {
+                                              totalA = totalA + value[i].amount;
 
+                                              if (value[i].categoryType ==
+                                                  CategoryType.income) {
+                                                incomeMonth = incomeMonth +
+                                                    value[i].amount;
+                                              } else {
+                                                expenseMonth = expenseMonth +
+                                                    value[i].amount;
+                                              }
+                                            }
 
-                                      for (int i = 0; i < value.length; i++) {
-                                        totalDec= totalDec + value[i].amount;
-                                        if(value[i].categoryType == CategoryType.income){
+                                            monthDataForGraph['apr']['total'] =
+                                                totalA.toString();
 
-                                          incomeMonthDec= incomeMonthDec + value[i].amount;
-                                        }
-                                        else {
-                                          expenseMonthDec= expenseMonthDec + value[i].amount;
-                                        }
-                                      }
+                                            monthDataForGraph['apr']['income'] =
+                                                incomeMonth.toString();
+                                            monthDataForGraph['apr']
+                                                    ['expense'] =
+                                                expenseMonth.toString();
+                                          } else if (month == 'May') {
+                                            for (int i = 0;
+                                                i < value.length;
+                                                i++) {
+                                              totalMay =
+                                                  totalMay + value[i].amount;
+                                              if (value[i].categoryType ==
+                                                  CategoryType.income) {
+                                                incomeMonthMay =
+                                                    incomeMonthMay +
+                                                        value[i].amount;
+                                              } else {
+                                                expenseMonthMay =
+                                                    expenseMonthMay +
+                                                        value[i].amount;
+                                              }
+                                            }
 
-                                      monthDataForGraph['dec']['total'] =
-                                          totalDec.toString();
-                                      monthDataForGraph['dec']['income'] =
-                                          incomeMonthDec.toString();
-                                      monthDataForGraph['dec']['expense'] =
-                                          expenseMonthDec.toString();
-                                    } else {}
+                                            monthDataForGraph['may']['total'] =
+                                                totalMay.toString();
+                                            monthDataForGraph['may']['income'] =
+                                                incomeMonthMay.toString();
+                                            monthDataForGraph['may']
+                                                    ['expense'] =
+                                                expenseMonthMay.toString();
+                                          } else if (month == 'June') {
+                                            for (int i = 0;
+                                                i < value.length;
+                                                i++) {
+                                              totalJun =
+                                                  totalJun + value[i].amount;
+                                              if (value[i].categoryType ==
+                                                  CategoryType.income) {
+                                                incomeMonthJun =
+                                                    incomeMonthJun +
+                                                        value[i].amount;
+                                              } else {
+                                                expenseMonthJun =
+                                                    expenseMonthJun +
+                                                        value[i].amount;
+                                              }
+                                            }
 
+                                            monthDataForGraph['jun']['total'] =
+                                                totalJun.toString();
+                                            monthDataForGraph['jun']['income'] =
+                                                incomeMonthJun.toString();
+                                            monthDataForGraph['jun']
+                                                    ['expense'] =
+                                                expenseMonthJun.toString();
+                                          } else if (month == 'July') {
+                                            for (int i = 0;
+                                                i < value.length;
+                                                i++) {
+                                              totalJul =
+                                                  totalJul + value[i].amount;
+                                              if (value[i].categoryType ==
+                                                  CategoryType.income) {
+                                                incomeMonthJul =
+                                                    incomeMonthJul +
+                                                        value[i].amount;
+                                              } else {
+                                                expenseMonthJul =
+                                                    expenseMonthJul +
+                                                        value[i].amount;
+                                              }
+                                            }
 
-                                  });
+                                            monthDataForGraph['july']['total'] =
+                                                totalJul.toString();
+                                            monthDataForGraph['july']
+                                                    ['income'] =
+                                                incomeMonthJul.toString();
+                                            monthDataForGraph['july']
+                                                    ['expense'] =
+                                                expenseMonthJul.toString();
+                                          } else if (month == 'August') {
+                                            for (int i = 0;
+                                                i < value.length;
+                                                i++) {
+                                              totalAug =
+                                                  totalAug + value[i].amount;
+                                              if (value[i].categoryType ==
+                                                  CategoryType.income) {
+                                                incomeMonthAug =
+                                                    incomeMonthAug +
+                                                        value[i].amount;
+                                              } else {
+                                                expenseMonthAug =
+                                                    expenseMonthAug +
+                                                        value[i].amount;
+                                              }
+                                            }
 
-                                  monthChartDataGraph= monthDataForGraph;
+                                            monthDataForGraph['aug']['total'] =
+                                                totalAug.toString();
 
+                                            monthDataForGraph['aug']['income'] =
+                                                incomeMonthAug.toString();
+                                            monthDataForGraph['aug']
+                                                    ['expense'] =
+                                                expenseMonthAug.toString();
+                                          } else if (month == 'September') {
+                                            for (int i = 0;
+                                                i < value.length;
+                                                i++) {
+                                              totalSep =
+                                                  totalSep + value[i].amount;
+                                              if (value[i].categoryType ==
+                                                  CategoryType.income) {
+                                                incomeMonthSep =
+                                                    incomeMonthSep +
+                                                        value[i].amount;
+                                              } else {
+                                                expenseMonthSep =
+                                                    expenseMonthSep +
+                                                        value[i].amount;
+                                              }
+                                            }
 
-setState(() {
+                                            monthDataForGraph['sep']['total'] =
+                                                totalSep.toString();
+                                            monthDataForGraph['sep']['income'] =
+                                                incomeMonthSep.toString();
+                                            monthDataForGraph['sep']
+                                                    ['expense'] =
+                                                expenseMonthSep.toString();
+                                          } else if (month == 'October') {
+                                            for (int i = 0;
+                                                i < value.length;
+                                                i++) {
+                                              totalOct =
+                                                  totalOct + value[i].amount;
+                                              if (value[i].categoryType ==
+                                                  CategoryType.income) {
+                                                incomeMonthOct =
+                                                    incomeMonthOct +
+                                                        value[i].amount;
+                                              } else {
+                                                expenseMonthOct =
+                                                    expenseMonthOct +
+                                                        value[i].amount;
+                                              }
+                                            }
 
-});
+                                            monthDataForGraph['oct']['total'] =
+                                                totalOct.toString();
+                                            monthDataForGraph['oct']['income'] =
+                                                incomeMonthOct.toString();
+                                            monthDataForGraph['oct']
+                                                    ['expense'] =
+                                                expenseMonthOct.toString();
+                                          } else if (month == 'November') {
+                                            for (int i = 0;
+                                                i < value.length;
+                                                i++) {
+                                              totalNov =
+                                                  totalNov + value[i].amount;
+                                              if (value[i].categoryType ==
+                                                  CategoryType.income) {
+                                                incomeMonthNov =
+                                                    incomeMonthNov +
+                                                        value[i].amount;
+                                              } else {
+                                                expenseMonthNov =
+                                                    expenseMonthNov +
+                                                        value[i].amount;
+                                              }
+                                            }
 
+                                            monthDataForGraph['nov']['total'] =
+                                                totalNov.toString();
+                                            monthDataForGraph['nov']['income'] =
+                                                incomeMonthNov.toString();
+                                            monthDataForGraph['nov']
+                                                    ['expense'] =
+                                                expenseMonthNov.toString();
+                                          } else if (month == 'December') {
+                                            for (int i = 0;
+                                                i < value.length;
+                                                i++) {
+                                              totalDec =
+                                                  totalDec + value[i].amount;
+                                              if (value[i].categoryType ==
+                                                  CategoryType.income) {
+                                                incomeMonthDec =
+                                                    incomeMonthDec +
+                                                        value[i].amount;
+                                              } else {
+                                                expenseMonthDec =
+                                                    expenseMonthDec +
+                                                        value[i].amount;
+                                              }
+                                            }
 
+                                            monthDataForGraph['dec']['total'] =
+                                                totalDec.toString();
+                                            monthDataForGraph['dec']['income'] =
+                                                incomeMonthDec.toString();
+                                            monthDataForGraph['dec']
+                                                    ['expense'] =
+                                                expenseMonthDec.toString();
+                                          } else {}
+                                        });
+
+                                        monthChartDataGraph = monthDataForGraph;
+
+                                        initialize();
+
+                                        setState(() {});
+                                      },
+                                      style: TextButton.styleFrom(
+                                          shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(12))),
+                                      child: const Text(
+                                        'Income',
+                                        style: TextStyle(
+                                            fontSize: 22, color: Colors.white),
+                                      ));
                                 },
-                                style: TextButton.styleFrom(
-
-                                    shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(12))),
-                                child: const Text(
-                                  'Income',
-                                  style:
-                                  TextStyle(fontSize: 22, color: Colors.white),
-                                ));
-                          },
-                        ),
-
+                              ),
                       ),
                       Container(
                         height: MediaQuery.of(context).size.height * 0.09,
@@ -923,33 +958,31 @@ setState(() {
                                 onPressed: () async {
                                   setState(() {});
 
-
-                                    if (_FormKey.currentState!.validate()) {
-                                      if( _amountController.text!=''&&_categoryID!=null){
-                                        //금액을임력안하면 빈 스트링이 돌아오기에 이렇게 내맘대로 썼음
-                                        print('_amountController.text==${_amountController.text.runtimeType}==');
-                                        Navigator.pop(context);
-                                      }
-                                      await addExpenseTransaction();
+                                  if (_FormKey.currentState!.validate()) {
+                                    if (_amountController.text != '' &&
+                                        _categoryID != null) {
+                                      //금액을임력안하면 빈 스트링이 돌아오기에 이렇게 내맘대로 썼음
+                                      print(
+                                          '_amountController.text==${_amountController.text.runtimeType}==');
+                                      Navigator.pop(context);
                                     }
+                                    await addExpenseTransaction();
+                                  }
 
-                                    // expense.amount = int.parse(expenseController.text);
+                                  // expense.amount = int.parse(expenseController.text);
 
                                   // context.read<CreateExpenseBloc>().add(CreateExpense(expense));
                                   //임의로
-
-
                                 },
                                 style: TextButton.styleFrom(
-
                                     shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(12))),
+                                        borderRadius:
+                                            BorderRadius.circular(12))),
                                 child: const Text(
                                   'Expense',
-                                  style:
-                                      TextStyle(fontSize: 22, color: Colors.white),
+                                  style: TextStyle(
+                                      fontSize: 22, color: Colors.white),
                                 )),
-
                       )
                     ],
                   ),
@@ -961,6 +994,7 @@ setState(() {
       ),
     );
   }
+
   Future addExpenseTransaction() async {
     CategoryType selectedCategoryType = CategoryType.expense;
     final note = _noteController.text;
@@ -984,7 +1018,7 @@ setState(() {
         id: widget.modelFromTransation!.id,
         date: DateFormat('yyyy-MM-dd').format(selectedDate),
         amount: parsedAmount ?? 0.0,
-        account:  AccountType.cash,
+        account: AccountType.cash,
         categoryType: selectedCategoryType,
         category: selectedcategoryModel!,
         note: note.trim(),
@@ -995,6 +1029,7 @@ setState(() {
     }
     textFeildClear();
   }
+
   Future addIncomeTransaction() async {
     final note = _noteController.text;
     final amount = _amountController.text;
@@ -1013,26 +1048,27 @@ setState(() {
       );
       await TransactionDB.instance.addTransaction(model);
 
+      var data = TransactionDB.instance.transactionListNotifier;
+      print(data.value);
     } else {
       print('in side else case');
       final model = TransactionModel(
         id: widget.modelFromTransation!.id,
         date: DateFormat('yyyy-MM-dd').format(selectedDate),
         amount: parsedAmount ?? 0.0,
-        account:  AccountType.cash,
+        account: AccountType.cash,
         categoryType: selectedCategoryType,
         category: selectedcategoryModel!,
         note: note.trim(),
         image: 'assets/images/catpic3.png',
       );
       await TransactionDB.instance.editTransactionDb(model.id!, model);
-
     }
 
     textFeildClear();
   }
-  void textFeildClear() {
 
+  void textFeildClear() {
     setState(() {
       selectedDate = DateTime.now();
       _amountController.clear();
@@ -1041,5 +1077,4 @@ setState(() {
       // image = null;
     });
   }
-
 }

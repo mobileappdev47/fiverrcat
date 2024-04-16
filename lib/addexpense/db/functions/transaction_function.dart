@@ -37,6 +37,7 @@ class TransactionDB implements TransactionDBFunctions {
         await Hive.openBox<TransactionModel>(TRANSACTION_DB_NAME);
     await transactionDB.put(value.id, value);
     await updateAccountGroup(value);
+    refresh();
 
 
   }
