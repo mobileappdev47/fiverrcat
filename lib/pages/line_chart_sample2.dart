@@ -63,6 +63,8 @@ class _LineChartSample2State extends State<LineChartSample2> {
 
       fontWeight: FontWeight.bold,
       fontSize: 16,
+
+
     );
     Widget text;
     switch (value.toInt()) {
@@ -175,7 +177,7 @@ class _LineChartSample2State extends State<LineChartSample2> {
             FlSpot(9.5, 3),
             FlSpot(11, 4),
           ],
-          isCurved: true,
+          // isCurved: true,
           gradient: LinearGradient(
             colors: gradientColors,
           ),

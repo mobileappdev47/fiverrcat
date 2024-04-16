@@ -95,6 +95,7 @@ dev_dependencies:
   outline_material_icons: ^1.0.0
   flutter_boxicons: ^3.0.0
   font_awesome_flutter: ^10.7.0
+  syncfusion_flutter_charts: ^25.1.39+1
 
 
 flutter:

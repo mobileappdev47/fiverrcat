@@ -406,7 +406,8 @@ print('selectedDate==${selectedDateRange}');
                               previousValue += transaction.amount;
                             }
                             return previousValue;
-                          });
+                          }
+                          );
                       return Padding(
                         padding: EdgeInsets.symmetric(
                           horizontal:

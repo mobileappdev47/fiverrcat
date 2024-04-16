@@ -38,6 +38,7 @@ class TransactionDB implements TransactionDBFunctions {
     await transactionDB.put(value.id, value);
     await updateAccountGroup(value);
 
+
   }
 
   Future<void> refresh() async {
