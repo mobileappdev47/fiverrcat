@@ -28,13 +28,16 @@ class CalendarScreen extends StatefulWidget {
 }
 
 class _CalendarScreenState extends State<CalendarScreen> {
+  bool manage = false;
+
+  //late final GlobalKey _calendarKey;
   double incomeData = 0;
   double expenseData = 0;
 
-  List<Meeting> _getDataSource() {
+  List<Meeting> _getDataSource(DateTime selectedDate) {
     final List<Meeting> meetings = <Meeting>[];
-    final DateTime today = DateTime.now();
-    final DateTime startTime = DateTime(today.year, today.month, today.day, 9);
+    //final DateTime today = DateTime.now();
+    final DateTime startTime = DateTime(selectedDate.year, selectedDate.month, selectedDate.day, 9);
     final DateTime endTime = startTime.add(const Duration(hours: 2));
     meetings.add(Meeting(
         '${currencySymboleUpdate.value} ${formatter.format(incomeData - expenseData)}',
@@ -42,22 +45,24 @@ class _CalendarScreenState extends State<CalendarScreen> {
         endTime,
         Colors.transparent,
         false));
-    setState(() {});
+
     return meetings;
   }
 
   int myNumber = 0;
+  final CalendarController _calendarController = CalendarController();
 
   //-----------calendar ----------------
   late final ValueNotifier<List<Event>> _selectedEvents;
   final CalendarFormat _calendarFormat = CalendarFormat.month;
-  RangeSelectionMode _rangeSelectionMode = RangeSelectionMode
-      .toggledOff;
+  RangeSelectionMode _rangeSelectionMode = RangeSelectionMode.toggledOff;
   DateTime _focusedDay = DateTime.now();
   DateTime select = DateTime.now();
   DateTime? _selectedDay;
   DateTime? _rangeStart;
   DateTime? _rangeEnd;
+
+  bool click= false;
 
   //-----------------------------------
 
@@ -72,6 +77,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
     _selectedDay = _focusedDay;
     _selectedEvents = ValueNotifier(_getEventsForDay(_selectedDay!));
     TransactionDB.instance.refresh();
+
     super.initState();
   }
 
@@ -153,13 +159,13 @@ class _CalendarScreenState extends State<CalendarScreen> {
   }
 
   void _onRangeSelected(DateTime? start, DateTime? end, DateTime focusedDay) {
-    setState(() {
-      _selectedDay = null;
-      _focusedDay = focusedDay;
-      _rangeStart = start;
-      _rangeEnd = end;
-      _rangeSelectionMode = RangeSelectionMode.toggledOn;
-    });
+    // setState(() {
+    _selectedDay = null;
+    _focusedDay = focusedDay;
+    _rangeStart = start;
+    _rangeEnd = end;
+    _rangeSelectionMode = RangeSelectionMode.toggledOn;
+    // });
 
     // `start` or `end` could be null
     if (start != null && end != null) {
@@ -174,7 +180,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
   ValueNotifier<double> incomeCustomDateNotifier = ValueNotifier(0);
   ValueNotifier<double> expenseCustomDateNotifier = ValueNotifier(0);
   ValueNotifier<double> totalCustomDateNotifier = ValueNotifier(0);
-  final CalendarController _calendarController = CalendarController();
 
   @override
   Widget build(BuildContext context) {
@@ -192,30 +197,47 @@ class _CalendarScreenState extends State<CalendarScreen> {
       backgroundColor: AppTheme.pcPrimaryColor,
       body: SingleChildScrollView(
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
             SizedBox(
               height: 750,
               child: SfCalendar(
+                cellBorderColor: Colors.purple,
+                // key: _calendarKey,
                 controller: _calendarController,
                 appointmentTextStyle: const TextStyle(color: Colors.green),
                 todayTextStyle: const TextStyle(color: Colors.black),
                 monthViewSettings: const MonthViewSettings(
-                  appointmentDisplayMode: MonthAppointmentDisplayMode.appointment,
+                  appointmentDisplayMode:
+                      MonthAppointmentDisplayMode.appointment,
                   monthCellStyle: MonthCellStyle(
                     textStyle: TextStyle(color: Colors.white),
                   ),
                 ),
+
+                onViewChanged: (viewChangedDetails) {
+                if(click) {
+                  final DateTime firstVisibleDate = viewChangedDetails
+                      .visibleDates.first;
+                  _calendarController.selectedDate = DateTime(
+                      firstVisibleDate.year, firstVisibleDate.month, 1);
+                }else{
+                  click=true;
+                }
+                },
+
                 onSelectionChanged: (selectionDetails) {
-                  final DateTime selectedDay = selectionDetails.date ?? DateTime.now();
-                  final DateTime focusedDay = selectionDetails.date ?? DateTime.now();
+                  final DateTime selectedDay =
+                      selectionDetails.date ?? DateTime.now();
+                  final DateTime focusedDay =
+                      selectionDetails.date ?? DateTime.now();
                   onDaySelected(selectedDay, focusedDay);
-                  },
-                todayHighlightColor: Colors.blue,
-
+                },
+                 todayHighlightColor: Colors.blue,
                 view: CalendarView.month,
-                dataSource: MeetingDataSource(_getDataSource(),),
-
-
+                dataSource: MeetingDataSource(
+                  _getDataSource(_selectedDay!),
+                ),
               ),
             ),
             //---------------------------------------------------calendar-------------------------------------------------------------
@@ -278,11 +300,11 @@ class _CalendarScreenState extends State<CalendarScreen> {
             //   },
             // ),
             //---------------------------------------------------divider-------------------------------------------------------------
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Container(
+            const Padding(
+              padding: EdgeInsets.all(8.0),
+              child: SizedBox(
                 width: 350.0,
-                child: const Divider(
+                child: Divider(
                   thickness: 1.0,
                   height: 1.0,
                   color: AppTheme.dark_grey,
@@ -346,19 +368,15 @@ class _CalendarScreenState extends State<CalendarScreen> {
                       ],
                     ),
                     // -------------------------------- Balance Start ----------------------------------------------
-                    Column(
+                    Row(
                       children: [
-                        Row(
-                          children: [
-                            Text(
-                              '=  ${currencySymboleUpdate.value} ${formatter.format(incomeData - expenseData)}',
-                              style: const TextStyle(
-                                color: AppTheme.pcTextTertiaryColor,
-                                fontSize: 13,
-                              ),
-                            )
-                          ],
-                        ),
+                        Text(
+                          '=  ${currencySymboleUpdate.value} ${formatter.format(incomeData - expenseData)}',
+                          style: const TextStyle(
+                            color: AppTheme.pcTextTertiaryColor,
+                            fontSize: 13,
+                          ),
+                        )
                       ],
                     ),
 
@@ -508,7 +526,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                                 IconButton(
                                                   onPressed: () {
                                                     resetTransactionsOnly(
-                                                        context);
+                                                        context,
+                                                        mapList[keys[index]]?[index].id);
+                                                    setState(() {});
                                                   },
                                                   icon: const Icon(
                                                       Icons.delete_forever,
@@ -596,7 +616,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
     );
   }
 
-  resetTransactionsOnly(value) {
+  resetTransactionsOnly(value, id) {
     showDialog(
       context: value,
       builder: (context) {
@@ -621,11 +641,11 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   myNumber = myNumber + 1;
                 });
                 print(myNumber);
-                final transactionDB = await Hive.openBox<TransactionModel>(TRANSACTION_DB_NAME);
-                final keys = transactionDB.keys.toList();
-                for (var key in keys) {
-                  transactionDB.delete(key);
-                }
+                final transactionDB =
+                    await Hive.openBox<TransactionModel>(TRANSACTION_DB_NAME);
+
+               // final keys = transactionDB.values.toList();
+                transactionDB.delete(id);
                 setState(() {});
                 Navigator.of(context).pop();
               },
