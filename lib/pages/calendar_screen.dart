@@ -28,24 +28,61 @@ class CalendarScreen extends StatefulWidget {
 }
 
 class _CalendarScreenState extends State<CalendarScreen> {
-  bool manage = false;
+  double selectData = 0;
+  double selectExpenseData = 0;
+  List<String> transactionList = [];
+  String dateToCompare = DateFormat('yyyy-MM-dd').toString();
 
-  //late final GlobalKey _calendarKey;
-  double incomeData = 0;
-  double expenseData = 0;
+  String formatDate(DateTime date) {
+    // Define the date format you want
+    final DateFormat formatter = DateFormat('yyyy-MM-dd');
 
-  List<Meeting> _getDataSource() {
+    // Format the date
+    final String formattedDate = formatter.format(date);
+
+    return formattedDate;
+  }
+
+  List<Meeting> _getDataSource(selectDate) {
     final List<Meeting> meetings = <Meeting>[];
-    final DateTime today = DateTime.now();
-    final DateTime startTime = DateTime(today.year, today.month, today.day, 9);
+    final DateTime startTime =
+        DateTime(selectDate.year, selectDate.month, selectDate.day, 9);
     final DateTime endTime = startTime.add(const Duration(hours: 2));
-    meetings.add(Meeting(
-        '${currencySymboleUpdate.value} ${formatter.format(incomeData - expenseData)}',
-        startTime,
-        endTime,
-        Colors.transparent,
-        false));
+    bool existsInList = transactionList.contains(formatDate(selectDate));
+    setState(() {
+      // if (existsInList) {
+      //   meetings.add(Meeting(
+      //       '${currencySymboleUpdate.value} ${formatter.format(selectData - selectExpenseData)}',
+      //       startTime,
+      //       endTime,
+      //       Colors.transparent,
+      //       false));
+      //   print('$dateToCompare exists in the list.');
+      // } else {
+      //   print('$dateToCompare does not exist in the list.');
+      // }
 
+    });
+    for (int i = 0; i < transactionList.length; i++) {
+     setState(() {
+       DateTime dateTime = DateTime.parse(transactionList[i]);
+
+       final DateTime startTime =
+       DateTime(dateTime.year, dateTime.month, dateTime.day, 9);
+       final DateTime endTime = startTime.add(const Duration(hours: 2));
+       meetings.add(
+         Meeting(
+             '${currencySymboleUpdate.value} ${formatter.format(selectData - selectExpenseData)}',
+             startTime,
+             endTime,
+             Colors.transparent,
+             false),
+       );
+     });
+    }
+    setState(() {
+
+    });
     return meetings;
   }
 
@@ -62,7 +99,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
   DateTime? _rangeStart;
   DateTime? _rangeEnd;
 
-  bool click= false;
+  bool click = false;
 
   //-----------------------------------
 
@@ -86,8 +123,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
     _selectedEvents.dispose();
     super.dispose();
   }
-
-
 
   Map<DateTime, List<Event>> events = {
     DateTime.utc(2024, 3, 14): [const Event('title3')],
@@ -116,13 +151,11 @@ class _CalendarScreenState extends State<CalendarScreen> {
   // }
 
   List<Event> _getEventsForDay(DateTime day) {
-
     String dayString = DateFormat('yyyy-MM-dd').format(day).toString();
 
     // return events[day] ?? [];
     return [];
   }
-
 
   // List<Event> _getEventsForDay(DateTime day) {
   //   String myChosenDateString = DateFormat('yyyy-MM-dd').format(myChosenDate).toString();
@@ -189,6 +222,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
   Widget build(BuildContext context) {
     double incomeData = 0;
     double expenseData = 0;
+
     final double screenWidth = MediaQuery.of(context).size.width;
     double fontSize = 13;
     if (screenWidth > 350) {
@@ -208,7 +242,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
             SizedBox(
               height: 750,
               child: SfCalendar(
-                cellBorderColor: Colors.purple,
+                headerStyle: const CalendarHeaderStyle(
+                    textStyle: TextStyle(color: Colors.black)),
+                //cellBorderColor: Colors.purple,
                 // key: _calendarKey,
                 controller: _calendarController,
                 appointmentTextStyle: const TextStyle(color: Colors.green),
@@ -220,16 +256,15 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     textStyle: TextStyle(color: Colors.white),
                   ),
                 ),
-
                 onViewChanged: (viewChangedDetails) {
-                if(click) {
-                  final DateTime firstVisibleDate = viewChangedDetails
-                      .visibleDates.first;
-                  _calendarController.selectedDate = DateTime(
-                      firstVisibleDate.year, firstVisibleDate.month, 1);
-                }else{
-                  click=true;
-                }
+                  if (click) {
+                    final DateTime firstVisibleDate =
+                        viewChangedDetails.visibleDates.first;
+                    _calendarController.selectedDate = DateTime(
+                        firstVisibleDate.year, firstVisibleDate.month, 1);
+                  } else {
+                    click = true;
+                  }
                 },
 
                 onSelectionChanged: (selectionDetails) {
@@ -239,10 +274,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
                       selectionDetails.date ?? DateTime.now();
                   onDaySelected(selectedDay, focusedDay);
                 },
-                 todayHighlightColor: Colors.blue,
+                todayHighlightColor: Colors.blue,
                 view: CalendarView.month,
                 dataSource: MeetingDataSource(
-                  _getDataSource(),
+                  _getDataSource(myChosenDate),
                 ),
               ),
             ),
@@ -432,6 +467,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     SelectDate().sortByDate(newList);
                 //keys는 2024-03-24, 2024-03-21, 2024-03-12, 2024-03-01 같은 날짜의 나열.
                 List<String> keys = mapList.keys.toList();
+                transactionList = mapList.keys.toList();
+                print('============$transactionList');
                 keys = ['${myChosenDateString}'];
 
                 // 예 고민의 흔적 일단놔둠
@@ -458,6 +495,14 @@ class _CalendarScreenState extends State<CalendarScreen> {
                               }
                               return previousValue;
                             });
+                            selectData =calculationList.fold(0,
+                                    (previousValue, transaction) {
+                                  if (transaction.categoryType ==
+                                      CategoryType.income) {
+                                    return previousValue + transaction.amount;
+                                  }
+                                  return previousValue;
+                                });
                             double expenseData = calculationList.fold(0,
                                 (previousValue, transaction) {
                               if (transaction.categoryType ==
@@ -533,7 +578,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                                   onPressed: () {
                                                     resetTransactionsOnly(
                                                         context,
-                                                        mapList[keys[index]]?[index].id);
+                                                        mapList[keys[index]]
+                                                                ?[index]
+                                                            .id);
                                                     setState(() {});
                                                   },
                                                   icon: const Icon(
@@ -650,7 +697,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 final transactionDB =
                     await Hive.openBox<TransactionModel>(TRANSACTION_DB_NAME);
 
-               // final keys = transactionDB.values.toList();
+                // final keys = transactionDB.values.toList();
                 transactionDB.delete(id);
                 setState(() {});
                 Navigator.of(context).pop();

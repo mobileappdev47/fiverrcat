@@ -23,6 +23,12 @@ class TransactionScreen extends StatefulWidget {
 }
 
 class _TransactionScreenState extends State<TransactionScreen> {
+  String selectedMonth = '';
+  void filterTransactionsByMonth(String month) {
+    setState(() {
+      selectedMonth = month;
+    });
+  }
   NumberFormat formatter = NumberFormat('#,##0');
   DateTimeRange selectedDate = SelectDate().currentDateForCalenderSelection();
 
@@ -179,10 +185,15 @@ class _TransactionScreenState extends State<TransactionScreen> {
                           padding: const EdgeInsets.all(8.0),
                           child: Row(
                             children: [
-                              Text(
-                                //"${DateFormat(month).format(selectedDate.start)} - ${DateFormat(month).format(selectedDate.end)}",
-                                 month,
-                                style: TextStyle(color: Colors.white),
+                              InkWell(
+                                onTap: () {
+                                  filterTransactionsByMonth(selectedMonth);
+                                },
+                                child: Text(
+                                  //"${DateFormat(month).format(selectedDate.start)} - ${DateFormat(month).format(selectedDate.end)}",
+                                   month,
+                                  style: TextStyle(color: Colors.white),
+                                ),
                               ),
                             ],
                           ),
@@ -214,6 +225,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
             builder: (context, value, child) {
               Map<String, List<TransactionModel>> mapList =
                   SelectDate().sortByDate(value);
+
               incomeData = mapList.values.fold(0, (previousValue, element) {
                 for (var transaction in element) {
                   if (transaction.categoryType == CategoryType.income) {
@@ -293,6 +305,10 @@ class _TransactionScreenState extends State<TransactionScreen> {
               Map<String, List<TransactionModel>> mapList =
                   SelectDate().sortByDate(newList);
               List<String> keys = mapList.keys.toList();
+              print('Keys before filtering: $mapList');
+              if (selectedMonth.isNotEmpty) {
+                mapList.removeWhere((key, value) => !key.startsWith(selectedMonth));
+              }
               return keys.isNotEmpty
                   ? Expanded(
                       child: Padding(
