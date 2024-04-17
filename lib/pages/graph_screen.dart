@@ -12,6 +12,7 @@ import 'package:pokercat/addexpense/db/models/account_group/account_group_model_
 import 'package:pokercat/addexpense/db/models/category/category_model_db.dart';
 import 'package:pokercat/addexpense/db/models/transactions/transaction_model_db.dart';
 import 'package:pokercat/addexpense/widget/transaction_helper.dart';
+import 'package:pokercat/imports.dart';
 import 'package:pokercat/packages/expense_repository/lib/expense_repository.dart';
 import 'package:pokercat/packages/expense_repository/lib/src/models/expense.dart';
 import 'package:pokercat/pages/line_chart_sample2.dart';
@@ -69,12 +70,10 @@ class _GraphScreenState extends State<GraphScreen> {
     '1 Week',
     '1 Month',
     '1 Year',
-
   ];
 
-
   String selectedDate = DateFormat('dd-MM-yyyy').format(DateTime.now());
-  List<TransactionModel>  filterList = [];
+  List<TransactionModel> filterList = [];
 
   @override
   void initState() {
@@ -84,7 +83,8 @@ class _GraphScreenState extends State<GraphScreen> {
 
   @override
   Widget build(BuildContext context) {
-    print(TransactionDB.instance.transactionMonthListNotifier.value);
+   print(chartData.length);
+    // print(TransactionDB.instance.transactionMonthListNotifier.value);
 
     final LinearGradient gradientColors =
         LinearGradient(colors: color, stops: stops);
@@ -98,23 +98,52 @@ class _GraphScreenState extends State<GraphScreen> {
               // SfChartScreen(
               //   monthChartData: monthChartDataGraph!,
               // ),
+              chartData.length > 20
+                  ? SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Container(
+                        height: 300,
+                        width: 1000,
+                        child: SfCartesianChart(
+                          // enableAxisAnimation: true,
+                          primaryYAxis: NumericAxis(),
+                          primaryXAxis: CategoryAxis(
+                            maximumLabels: chartData.length,
+                            labelRotation: 270,
+                          ),
+                          series: <CartesianSeries>[
+                            AreaSeries<ChartData, String>(
+                                borderColor: AppTheme.contentColorCyan,
+                                borderWidth: 4,
+                                dataSource: chartData,
+                                xValueMapper: (ChartData data, _) => data.x,
+                                yValueMapper: (ChartData data, _) => data.y,
+                                gradient: gradientColors),
+                          ],
+                        ),
+                      ),
+                    )
+                  :
               Container(
-                height: 300,
-                // width: 200,
-                child: SfCartesianChart(
-                  primaryYAxis: NumericAxis(),
-                  primaryXAxis: CategoryAxis(),
-                  series: <CartesianSeries>[
-                    AreaSeries<ChartData, String>(
-                        borderColor: AppTheme.contentColorCyan,
-                        borderWidth: 4,
-                        dataSource: chartData,
-                        xValueMapper: (ChartData data, _) => data.x,
-                        yValueMapper: (ChartData data, _) => data.y,
-                        gradient: gradientColors),
-                  ],
-                ),
-              ),
+                      height: 300,
+                      child: SfCartesianChart(
+                        // enableAxisAnimation: true,
+                        primaryYAxis: NumericAxis(),
+                        primaryXAxis: CategoryAxis(
+                          maximumLabels: chartData.length,
+                          labelRotation: 270,
+                        ),
+                        series: <CartesianSeries>[
+                          AreaSeries<ChartData, String>(
+                              borderColor: AppTheme.contentColorCyan,
+                              borderWidth: 4,
+                              dataSource: chartData,
+                              xValueMapper: (ChartData data, _) => data.x,
+                              yValueMapper: (ChartData data, _) => data.y,
+                              gradient: gradientColors),
+                        ],
+                      ),
+                    ),
 
               SizedBox(
                 height: 10,
@@ -394,234 +423,424 @@ class _GraphScreenState extends State<GraphScreen> {
 
                               print(data);
 
-                              return
-                                StatefulBuilder(builder: (context, update) {
-                                  return Container(
-                                    height: 420.0,
-                                    width: MediaQuery.of(context).size.width,
-                                    child: Container(
-                                      padding: EdgeInsets.all(20.0),
-                                      decoration: BoxDecoration(
-                                        color: AppTheme.pcPopUpColor,
-                                        borderRadius: BorderRadius.only(
-                                          topLeft: Radius.circular(20.0),
-                                          topRight: Radius.circular(20.0),
-                                        ),
+                              return StatefulBuilder(
+                                  builder: (context, update) {
+                                return Container(
+                                  height: 420.0,
+                                  width: MediaQuery.of(context).size.width,
+                                  child: Container(
+                                    padding: EdgeInsets.all(20.0),
+                                    decoration: BoxDecoration(
+                                      color: AppTheme.pcPopUpColor,
+                                      borderRadius: BorderRadius.only(
+                                        topLeft: Radius.circular(20.0),
+                                        topRight: Radius.circular(20.0),
                                       ),
-                                      child: Column(
-                                        children: [
-                                          Row(
-                                            mainAxisAlignment:
-                                            MainAxisAlignment.center,
+                                    ),
+                                    child: Column(
+                                      children: [
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            Text(
+                                              'Select Period',
+                                              style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontWeight: FontWeight.w600,
+                                                  fontSize: 20),
+                                            ),
+                                          ],
+                                        ),
+                                        Container(
+                                          height: 1,
+                                          color: Colors.white,
+                                        ),
+                                        SizedBox(
+                                          height: 10,
+                                        ),
+                                        Container(
+                                          decoration: BoxDecoration(
+                                            color:
+                                                Colors.white.withOpacity(0.2),
+                                            border: Border.all(
+                                                color: Colors.white,
+                                                width: 0.5),
+                                            borderRadius: BorderRadius.circular(
+                                              7,
+                                            ),
+                                          ),
+                                          alignment: Alignment.center,
+                                          height: 50,
+                                          child: Row(
                                             children: [
+                                              SizedBox(
+                                                width: 10,
+                                              ),
+                                              Icon(
+                                                Icons.grid_view,
+                                                color: Colors.white,
+                                              ),
+                                              SizedBox(
+                                                width: 10,
+                                              ),
                                               Text(
-                                                'Select Period',
+                                                'All Time',
                                                 style: TextStyle(
                                                     color: Colors.white,
-                                                    fontWeight: FontWeight.w600,
-                                                    fontSize: 20),
+                                                    fontWeight: FontWeight.w500,
+                                                    fontSize: 16),
                                               ),
                                             ],
                                           ),
-                                          Container(
-                                            height: 1,
-                                            color: Colors.white,
+                                        ),
+                                        SizedBox(
+                                          height: 10,
+                                        ),
+                                        Container(
+                                          padding: EdgeInsets.all(10),
+                                          decoration: BoxDecoration(
+                                            border: Border.all(
+                                                color: Colors.white,
+                                                width: 0.5),
+                                            borderRadius: BorderRadius.circular(
+                                              7,
+                                            ),
                                           ),
-                                          SizedBox(
-                                            height: 10,
-                                          ),
-                                          Container(
+                                          alignment: Alignment.center,
+                                          height: 200,
+                                          child: Column(
+                                            children: [
+                                              Row(
+                                                children: [
+                                                  Icon(
+                                                    Icons.autorenew_rounded,
+                                                    color: Colors.white,
+                                                  ),
+                                                  SizedBox(
+                                                    width: 10,
+                                                  ),
+                                                  Text(
+                                                    'Cycle',
+                                                    style: TextStyle(
+                                                        color: Colors.white,
+                                                        fontWeight:
+                                                            FontWeight.w600,
+                                                        fontSize: 18),
+                                                  ),
+                                                ],
+                                              ),
+                                              SizedBox(
+                                                height: 10,
+                                              ),
+                                              Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.center,
+                                                children: [
+                                                  Text(
+                                                    'Every',
+                                                    style: TextStyle(
+                                                        color: Colors.white,
+                                                        fontWeight:
+                                                            FontWeight.w500,
+                                                        fontSize: 16),
+                                                  ),
+                                                  const SizedBox(
+                                                    width: 10,
+                                                  ),
+                                                  DropdownButton(
+                                                    // Initial Value
+                                                    value: dropdownvalue,
+                                                    dropdownColor: Colors.black,
+                                                    style: TextStyle(
+                                                        color: Colors.white,
+                                                        fontWeight:
+                                                            FontWeight.w600,
+                                                        fontSize: 18),
+                                                    // Down Arrow Icon
+                                                    icon: const Icon(Icons
+                                                        .keyboard_arrow_down),
 
+                                                    // Array list of items
+                                                    items: items
+                                                        .map((String items) {
+                                                      return DropdownMenuItem(
+                                                        value: items,
+                                                        child: Text(items),
+                                                      );
+                                                    }).toList(),
+                                                    // After selecting the desired option,it will
+                                                    // change button value to selected value
+                                                    onChanged:
+                                                        (String? newValue) {
+                                                      setState(() {
+                                                        dropdownvalue =
+                                                            newValue!;
+                                                      });
+                                                      update.call(
+                                                        () {},
+                                                      );
+                                                    },
+                                                  ),
+                                                ],
+                                              ),
+                                              SizedBox(
+                                                height: 10,
+                                              ),
+                                              Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.center,
+                                                children: [
+                                                  Text(
+                                                    'beginning',
+                                                    style: TextStyle(
+                                                        color: Colors.white,
+                                                        fontWeight:
+                                                            FontWeight.w500,
+                                                        fontSize: 16),
+                                                  ),
+                                                  SizedBox(
+                                                    width: 10,
+                                                  ),
+                                                  GestureDetector(
+                                                    onTap: () async {
+                                                      final DateTime? date =
+                                                          await showDatePicker(
+                                                        context: context,
+                                                        builder:
+                                                            (context, child) {
+                                                          return Theme(
+                                                            data: ThemeData.dark().copyWith(
+                                                                colorScheme: const ColorScheme
+                                                                    .dark(
+                                                                    onPrimary:
+                                                                        AppTheme
+                                                                            .pcAppBarColor,
+                                                                    onSurface:
+                                                                        AppTheme
+                                                                            .pcTextSecondayColor,
+                                                                    primary:
+                                                                        AppTheme
+                                                                            .pcTextTertiaryColor),
+                                                                dialogBackgroundColor:
+                                                                    AppTheme
+                                                                        .pcAppBarColor),
+                                                            child: child!,
+                                                          );
+                                                        },
+                                                        initialDate:
+                                                            DateTime.now(),
+                                                        firstDate: DateTime(1950),
+                                                        lastDate:
+                                                            DateTime.now(),
+                                                      );
+                                                      if (date != null) {
+                                                        selectedDate =
+                                                            DateFormat(
+                                                                    'dd-MM-yyyy')
+                                                                .format(date);
+                                                        setState(() {});
+                                                        update.call(
+                                                          () {},
+                                                        );
+                                                      }
+                                                    },
+                                                    child: Column(
+                                                      children: [
+                                                        Text(
+                                                          selectedDate,
+                                                          style: TextStyle(
+                                                              color:
+                                                                  Colors.white,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w600,
+                                                              fontSize: 18),
+                                                        ),
+                                                        Container(
+                                                          height: 1,
+                                                          color: Colors.white,
+                                                          width: 100,
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          height: 10,
+                                        ),
+                                        GestureDetector(
+                                          onTap: () {
+
+                                           // var data = TransactionDB.instance.transactionMonthListNotifier.value;
+
+                                           print(data);
+
+                                            if (dropdownvalue == '1 Week') {
+                                              List weeklyDates = [];
+                                              DateTime selectedOne =
+                                                  DateFormat('dd-MM-yyyy')
+                                                      .parse(selectedDate);
+                                              DateTime todayDate =
+                                                  DateTime.now();
+
+                                              while (selectedOne
+                                                  .isBefore(todayDate)) {
+                                                weeklyDates.add(
+                                                    DateFormat('dd-MM-yyyy')
+                                                        .format(selectedOne));
+                                                selectedOne = selectedOne
+                                                    .add(Duration(days: 7));
+                                              }
+                                              // print(weeklyDates);
+                                              List<ChartData> weekChart = [];
+                                              for (int i = 0;
+                                                  i < weeklyDates.length;
+                                                  i++) {
+
+                                                weekChart.add(ChartData(
+                                                    weeklyDates[i], 300));
+                                              }
+                                              chartData = weekChart;
+
+                                              setState(() {});
+
+                                            } else if (dropdownvalue ==
+                                                '1 Month') {
+                                              List monthlyDates = [];
+                                              DateTime selectedOne =
+                                                  DateFormat('dd-MM-yyyy')
+                                                      .parse(selectedDate);
+                                              DateTime todayDate =
+                                                  DateTime.now();
+
+                                              while (selectedOne
+                                                      .isBefore(todayDate) ||
+                                                  selectedOne.month ==
+                                                      todayDate.month) {
+                                                monthlyDates.add(  DateFormat('dd-MM-yyyy')
+                                                    .format(selectedOne));
+                                                selectedOne = DateTime(
+                                                    selectedOne.year,
+                                                    selectedOne.month + 1,
+                                                    selectedOne.day);
+                                              }
+
+                                              // print(monthlyDates);
+
+                                              List<ChartData> monthlyChart = [];
+                                              for (int i = 0;
+                                                  i < monthlyDates.length;
+                                                  i++) {
+                                                monthlyChart.add(ChartData(
+                                                    monthlyDates[i], 300));
+                                              }
+                                              chartData = monthlyChart;
+
+                                              setState(() {});
+                                            }
+                                            else if(dropdownvalue=='1 Year'){
+                                              List yearlyDates = [];
+                                              DateTime selectedOne =
+                                              DateFormat('dd-MM-yyyy')
+                                                  .parse(selectedDate);
+                                              DateTime today = DateTime.now();
+                                              DateTime currentDate = DateTime(selectedOne.year, selectedOne.month, selectedOne.day);
+
+                                              while (currentDate.isBefore(today) || (currentDate.year == today.year && currentDate.month == today.month && currentDate.day == today.day)) {
+                                                yearlyDates.add(  DateFormat('dd-MM-yyyy')
+                                                    .format(currentDate));
+                                                currentDate = DateTime(currentDate.year + 1, selectedOne.month, selectedOne.day);
+                                              }
+                                              // print(yearlyDates);
+                                              List<ChartData> yearlyChart = [];
+                                              for (int i = 0;
+                                              i < yearlyDates.length;
+                                              i++) {
+                                                yearlyChart.add(ChartData(
+                                                    yearlyDates[i], 300));
+                                              }
+                                              chartData = yearlyChart;
+
+                                              setState(() {});
+
+
+                                            }
+                                            else if(dropdownvalue=='1 Day'){
+                                              List dailyDates = [];
+                                              DateTime selectedOne =
+                                              DateFormat('dd-MM-yyyy')
+                                                  .parse(selectedDate);
+                                              DateTime today = DateTime.now();
+                                              DateTime currentDate = DateTime(selectedOne.year, selectedOne.month, selectedOne.day);
+
+                                              while (currentDate.isBefore(today) || (currentDate.year == today.year && currentDate.month == today.month && currentDate.day == today.day)) {
+                                                dailyDates.add(DateFormat('dd-MM-yyyy')
+                                                    .format(currentDate));
+                                                currentDate = currentDate.add(Duration(days: 1));
+                                              }
+
+                                              List<ChartData> dailyChart = [];
+                                              for (int i = 0;
+                                              i < dailyDates.length;
+                                              i++) {
+                                                dailyChart.add(ChartData(
+                                                    dailyDates[i], 0.0));
+                                              }
+
+
+                                              for (int i = 0; i < dailyDates.length; i++) {
+                                                String date2 = dailyDates[i];
+                                                for (int j = 0; j < data.length; j++) {
+                                                  DateTime localDate = DateTime.parse( data[j].date);
+                                                  String localDate1 = DateFormat('dd-MM-yyyy').format(localDate);
+
+                                                  if (localDate1 == date2) {
+
+                                                    double dateTotal = 0;
+
+                                                    for(int i =0; i < data.length;i++){
+
+                                                      if(localDate1 ==  DateFormat('dd-MM-yyyy').format( DateTime.parse( data[i].date))  ){
+
+                                                        dateTotal = dateTotal + data[i].amount ;
+                                                      }
+
+                                                    }
+
+                                                    dailyChart[i] =ChartData(
+                                                        dailyDates[i],dateTotal ) ;
+                                                    break;
+                                                  }
+                                                  else {
+                                                    print('no');
+                                                  }
+                                                }
+                                              }
+
+
+                                              chartData = dailyChart;
+                                              setState(() {});
+
+                                            }
+
+                                            Navigator.pop(context);
+
+                                          },
+                                          child: Container(
+                                            width: 100,
                                             decoration: BoxDecoration(
                                               color:
-                                              Colors.white.withOpacity(0.2),
+                                                  Colors.white.withOpacity(0.2),
                                               border: Border.all(
                                                   color: Colors.white,
                                                   width: 0.5),
                                               borderRadius:
-                                              BorderRadius.circular(
-                                                7,
-                                              ),
-                                            ),
-                                            alignment: Alignment.center,
-                                            height: 50,
-                                            child: Row(
-                                              children: [
-                                                SizedBox(width: 10,),
-                                                Icon(Icons.grid_view,color: Colors.white,),
-
-                                                SizedBox(width: 10,),
-
-                                                Text(
-                                                  'All Time',
-                                                  style: TextStyle(
-                                                      color: Colors.white,
-                                                      fontWeight: FontWeight.w500,
-                                                      fontSize: 16),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                          SizedBox(
-                                            height: 10,
-                                          ),
-                                          Container(
-                                            padding: EdgeInsets.all(10),
-                                            decoration: BoxDecoration(
-
-
-                                              border: Border.all(
-                                                  color: Colors.white,
-                                                  width: 0.5),
-                                              borderRadius:
-                                              BorderRadius.circular(
-                                                7,
-                                              ),
-                                            ),
-                                            alignment: Alignment.center,
-                                            height: 200,
-                                            child: Column(
-                                              children: [
-                                                Row(
-                                                  children: [
-                                                    Icon(Icons.autorenew_rounded,color:Colors.white ,),
-                                                    SizedBox(width: 10,),
-
-                                                    Text(
-                                                      'Cycle',
-                                                      style: TextStyle(
-                                                          color: Colors.white,
-                                                          fontWeight: FontWeight.w600,
-                                                          fontSize: 18),
-                                                    ),
-
-
-                                                  ],
-                                                ),
-                                                SizedBox(height: 10,),
-                                                Row(
-                                                  mainAxisAlignment: MainAxisAlignment.center,
-                                                  children: [
-                                                    Text(
-                                                      'Every',
-                                                      style: TextStyle(
-                                                          color: Colors.white,
-                                                          fontWeight: FontWeight.w500,
-                                                          fontSize: 16),
-                                                    ),
-                                                    SizedBox(width: 10,),
-                                                    DropdownButton(
-                                                      // Initial Value
-                                                      value: dropdownvalue,
-                                                      dropdownColor: Colors.black,
-                                                      style:  TextStyle(
-                                                          color: Colors.white,
-                                                          fontWeight: FontWeight.w600,
-                                                          fontSize: 18),
-                                                      // Down Arrow Icon
-                                                      icon: const Icon(Icons.keyboard_arrow_down),
-
-                                                      // Array list of items
-                                                      items: items.map((String items) {
-                                                        return DropdownMenuItem(
-                                                          value: items,
-                                                          child: Text(items),
-                                                        );
-                                                      }).toList(),
-                                                      // After selecting the desired option,it will
-                                                      // change button value to selected value
-                                                      onChanged: (String? newValue) {
-                                                        setState(() {
-                                                          dropdownvalue = newValue!;
-                                                        });
-                                                        update.call(() {
-
-                                                        },);
-                                                      },
-                                                    ),
-                                                  ],
-                                                ),
-                                                SizedBox(height: 10,),
-                                                Row(
-                                                  mainAxisAlignment: MainAxisAlignment.center,
-                                                  children: [
-                                                    Text(
-                                                      'beginning',
-                                                      style: TextStyle(
-                                                          color: Colors.white,
-                                                          fontWeight: FontWeight.w500,
-                                                          fontSize: 16),
-                                                    ),
-                                                    SizedBox(width: 10,),
-                                                    GestureDetector(
-                                                      onTap: () async {
-
-                                                        final DateTime? date = await showDatePicker(
-                                                          context: context,
-                                                          builder: (context, child) {
-                                                            return Theme(
-                                                              data: ThemeData.dark().copyWith(
-                                                                  colorScheme: const ColorScheme.dark(
-                                                                      onPrimary:
-                                                                      AppTheme.pcAppBarColor,
-                                                                      onSurface: AppTheme
-                                                                          .pcTextSecondayColor,
-                                                                      primary: AppTheme
-                                                                          .pcTextTertiaryColor),
-                                                                  dialogBackgroundColor:
-                                                                  AppTheme.pcAppBarColor),
-                                                              child: child!,
-                                                            );
-                                                          },
-                                                          initialDate: DateTime.now(),
-                                                          firstDate: DateTime.now()
-                                                              .subtract(const Duration(days: 90)),
-                                                          lastDate: DateTime.now(),
-                                                        );
-                                                        if(date!= null){
-                                                          selectedDate= DateFormat('dd-MM-yyyy').format(date);
-                                                          setState(() {
-
-                                                          });
-                                                          update.call(() {
-
-                                                          },);
-                                                        }
-
-                                                      },
-                                                      child: Column(
-                                                        children: [
-                                                          Text(
-                                                            selectedDate,
-                                                            style: TextStyle(
-                                                                color: Colors.white,
-                                                                fontWeight: FontWeight.w600,
-                                                                fontSize: 18),
-                                                          ),
-                                                          Container(height: 1,color: Colors.white,width: 100,),
-
-                                                        ],
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-
-                                              ],
-                                            ),
-                                          ),
-                                          SizedBox(
-                                            height: 10,
-                                          ),
-                                          Container(
-width: 100,
-                                            decoration: BoxDecoration(
-                                              color:
-                                              Colors.white.withOpacity(0.2),
-                                              border: Border.all(
-                                                  color: Colors.white,
-                                                  width: 0.5),
-                                              borderRadius:
-                                              BorderRadius.circular(
+                                                  BorderRadius.circular(
                                                 7,
                                               ),
                                             ),
@@ -635,13 +854,12 @@ width: 100,
                                                   fontSize: 16),
                                             ),
                                           ),
-                                        ],
-                                      ),
+                                        ),
+                                      ],
                                     ),
-                                  );
-                                });
-
-
+                                  ),
+                                );
+                              });
                             },
                           );
                         },
@@ -726,7 +944,8 @@ width: 100,
                                       children: [
                                         GestureDetector(
                                           onTap: () {
-                                            List<TransactionModel>  cashTransaction = [];
+                                            List<TransactionModel>
+                                                cashTransaction = [];
                                             for (int i = 0;
                                                 i < data.length;
                                                 i++) {
@@ -768,7 +987,8 @@ width: 100,
                                         ),
                                         GestureDetector(
                                           onTap: () {
-                                            List<TransactionModel>  onlineTransaction = [];
+                                            List<TransactionModel>
+                                                onlineTransaction = [];
                                             for (int i = 0;
                                                 i < data.length;
                                                 i++) {
@@ -816,7 +1036,8 @@ width: 100,
                                       children: [
                                         GestureDetector(
                                           onTap: () {
-                                            List<TransactionModel>  otherTransaction = [];
+                                            List<TransactionModel>
+                                                otherTransaction = [];
                                             for (int i = 0;
                                                 i < data.length;
                                                 i++) {
@@ -858,7 +1079,8 @@ width: 100,
                                         ),
                                         GestureDetector(
                                           onTap: () {
-                                            List<TransactionModel>  tournamentTransaction = [];
+                                            List<TransactionModel>
+                                                tournamentTransaction = [];
                                             for (int i = 0;
                                                 i < data.length;
                                                 i++) {
@@ -902,7 +1124,6 @@ width: 100,
                                 ),
                               ),
                             );
-
                           },
                         );
                       },
@@ -945,42 +1166,73 @@ width: 100,
                         children: [
                           Row(
                             children: [
-
-                              Text('Amount : ',style: TextStyle(color: Colors.white),),
-                              Text('${currencySymboleUpdate.value}${filterList[index].amount}',style: TextStyle(color:
-
-                              filterList[index].categoryType==CategoryType.income?
-                              Colors.green: Colors.red),),
-
+                              Text(
+                                'Amount : ',
+                                style: TextStyle(color: Colors.white),
+                              ),
+                              Text(
+                                '${currencySymboleUpdate.value}${filterList[index].amount}',
+                                style: TextStyle(
+                                    color: filterList[index].categoryType ==
+                                            CategoryType.income
+                                        ? Colors.green
+                                        : Colors.red),
+                              ),
                             ],
                           ),
-                          SizedBox(height: 5,),
+                          SizedBox(
+                            height: 5,
+                          ),
                           Row(
                             children: [
-                              Text('Transaction Type : ',style: TextStyle(color: Colors.white),),
-                              Text('${filterList[index].category.name}',style: TextStyle(color: Colors.white),),
-
+                              Text(
+                                'Transaction Type : ',
+                                style: TextStyle(color: Colors.white),
+                              ),
+                              Text(
+                                '${filterList[index].category.name}',
+                                style: TextStyle(color: Colors.white),
+                              ),
                             ],
                           ),
-                          SizedBox(height: 5,),
+                          SizedBox(
+                            height: 5,
+                          ),
                           Row(
                             children: [
-                              Text('Date : ',style: TextStyle(color: Colors.white),),
-                              Text('${filterList[index].date}',style: TextStyle(color: Colors.white),),
-
+                              Text(
+                                'Date : ',
+                                style: TextStyle(color: Colors.white),
+                              ),
+                              Text(
+                                '${filterList[index].date}',
+                                style: TextStyle(color: Colors.white),
+                              ),
                             ],
                           ),
-                          SizedBox(height: 5,),
+                          SizedBox(
+                            height: 5,
+                          ),
                           Row(
                             children: [
-                              Text('Category : ',style: TextStyle(color: Colors.white),),
-                              filterList[index].categoryType==CategoryType.income? Text('Income',style: TextStyle(color: Colors.white),):
-                              Text('Expense',style: TextStyle(color: Colors.white),),
+                              Text(
+                                'Category : ',
+                                style: TextStyle(color: Colors.white),
+                              ),
+                              filterList[index].categoryType ==
+                                      CategoryType.income
+                                  ? Text(
+                                      'Income',
+                                      style: TextStyle(color: Colors.white),
+                                    )
+                                  : Text(
+                                      'Expense',
+                                      style: TextStyle(color: Colors.white),
+                                    ),
                             ],
                           ),
                         ],
                       ),
-
                     );
                   }),
             ],
