@@ -467,7 +467,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     SelectDate().sortByDate(newList);
                 //keys는 2024-03-24, 2024-03-21, 2024-03-12, 2024-03-01 같은 날짜의 나열.
                 List<String> keys = mapList.keys.toList();
-                transactionList = mapList.keys.toList();
+                if(transactionList.isEmpty){
+                   transactionList = mapList.keys.toList();
+                }
+
                 print('============$transactionList');
                 keys = ['${myChosenDateString}'];
 
