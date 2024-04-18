@@ -24,11 +24,13 @@ class TransactionScreen extends StatefulWidget {
 
 class _TransactionScreenState extends State<TransactionScreen> {
   String selectedMonth = '';
+
   void filterTransactionsByMonth(String month) {
     setState(() {
       selectedMonth = month;
     });
   }
+
   NumberFormat formatter = NumberFormat('#,##0');
   DateTimeRange selectedDate = SelectDate().currentDateForCalenderSelection();
 
@@ -177,29 +179,41 @@ class _TransactionScreenState extends State<TransactionScreen> {
                   },
                 ),
                 Expanded(
-                  child: ListView(
+                  child: ListView.builder(
                     scrollDirection: Axis.horizontal,
-                    children: months.map((month) {
-                      return Center(
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Row(
-                            children: [
-                              InkWell(
-                                onTap: () {
-                                  filterTransactionsByMonth(selectedMonth);
-                                },
-                                child: Text(
-                                  //"${DateFormat(month).format(selectedDate.start)} - ${DateFormat(month).format(selectedDate.end)}",
-                                   month,
-                                  style: TextStyle(color: Colors.white),
-                                ),
+                    itemBuilder: (BuildContext context, int index) {
+                      return Row(
+                        children: months.map((month) {
+                          return Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: InkWell(
+                              onTap: () {
+
+                                setState(() {
+                                  selectedMonth = month;
+                                });
+                              },
+                              child: Column(
+                                children: [
+                                  Text(
+                                    month,
+                                    style:
+                                        const TextStyle(color: Colors.white),
+                                  ),
+                                 SizedBox(height: 5,),
+                                // selectedMonth.isNotEmpty? Container(
+                                //    height: 1,
+                                //    width: 50,
+                                //    color: Colors.white,
+                                //  ):SizedBox()
+
+                                ],
                               ),
-                            ],
-                          ),
-                        ),
+                            ),
+                          );
+                        }).toList(),
                       );
-                    }).toList(),
+                    },
                   ),
                 ),
                 IconButton(
@@ -307,7 +321,8 @@ class _TransactionScreenState extends State<TransactionScreen> {
               List<String> keys = mapList.keys.toList();
               print('Keys before filtering: $mapList');
               if (selectedMonth.isNotEmpty) {
-                mapList.removeWhere((key, value) => !key.startsWith(selectedMonth));
+                mapList.removeWhere(
+                    (key, value) => !key.startsWith(selectedMonth));
               }
               return keys.isNotEmpty
                   ? Expanded(
@@ -318,8 +333,11 @@ class _TransactionScreenState extends State<TransactionScreen> {
                           physics: const BouncingScrollPhysics(),
                           itemCount: keys.length,
                           itemBuilder: (context, index) {
+                            selectedMonth =
+                                DateFormat('MMMM').format(DateTime.parse(keys[index]));
+
                             List<TransactionModel> calculationList =
-                                mapList[keys[index]]!;
+                                mapList[keys[index]]??[];
                             double incomeDataForDay = calculationList.fold(0,
                                 (previousValue, transaction) {
                               if (transaction.categoryType ==
@@ -336,114 +354,125 @@ class _TransactionScreenState extends State<TransactionScreen> {
                               }
                               return previousValue;
                             });
-                            return Padding(
-                              padding: EdgeInsets.symmetric(
-                                horizontal:
-                                    MediaQuery.of(context).size.width * 0.04,
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.only(bottom: 8.8),
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(10),
-                                    color: AppTheme.pcTransactionColor,
-                                    boxShadow: const [
-                                      BoxShadow(
-                                        color: AppTheme.pcShadowColor,
-                                        spreadRadius: 0,
-                                        blurRadius: 5,
-                                        offset: Offset(0, 3),
-                                      ),
-                                    ],
-                                  ),
-                                  child: Column(
-                                    children: [
-                                      Padding(
-                                        padding: const EdgeInsets.only(
-                                            left: 10, right: 10, top: 10),
+                            return (selectedMonth.isNotEmpty)
+                                ? Padding(
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal:
+                                          MediaQuery.of(context).size.width *
+                                              0.04,
+                                    ),
+                                    child: Padding(
+                                      padding:
+                                          const EdgeInsets.only(bottom: 8.8),
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(10),
+                                          color: AppTheme.pcTransactionColor,
+                                          boxShadow: const [
+                                            BoxShadow(
+                                              color: AppTheme.pcShadowColor,
+                                              spreadRadius: 0,
+                                              blurRadius: 5,
+                                              offset: Offset(0, 3),
+                                            ),
+                                          ],
+                                        ),
                                         child: Column(
                                           children: [
-                                            Row(
-                                              children: [
-                                                Container(
-                                                  width: 105,
-                                                  //width: 65,
-                                                  decoration:
-                                                      const BoxDecoration(
+                                            Padding(
+                                              padding: const EdgeInsets.only(
+                                                  left: 10, right: 10, top: 10),
+                                              child: Column(
+                                                children: [
+                                                  Row(
+                                                    children: [
+                                                      Container(
+                                                        width: 105,
+                                                        //width: 65,
+                                                        decoration:
+                                                            const BoxDecoration(
+                                                          color: AppTheme
+                                                              .pcTextLinkColor2,
+                                                          borderRadius:
+                                                              BorderRadius.all(
+                                                                  Radius
+                                                                      .circular(
+                                                                          5)),
+                                                        ),
+                                                        child: Padding(
+                                                          padding:
+                                                              const EdgeInsets
+                                                                  .all(8.0),
+                                                          child: Text(
+                                                            DateFormat('yyyy.MM.dd ')
+                                                                    .format(DateTime
+                                                                        .parse(keys[
+                                                                            index]))
+                                                                    .toString() +
+                                                                DateFormat(
+                                                                        'EEE')
+                                                                    .format(DateTime
+                                                                        .parse(keys[
+                                                                            index]))
+                                                                    .toString(),
+                                                            style: const TextStyle(
+                                                                color: AppTheme
+                                                                    .pcTextSecondayColor,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                      const Spacer(),
+                                                      Column(
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .end,
+                                                        children: [
+                                                          Text(
+                                                            '+ ${currencySymboleUpdate.value} ${formatter.format(incomeDataForDay)}',
+                                                            style: const TextStyle(
+                                                                color: AppTheme
+                                                                    .pcTextIncomeColor,
+                                                                fontSize: 13),
+                                                          ),
+                                                          const SizedBox(
+                                                            height: 5,
+                                                          ),
+                                                          Text(
+                                                            '- ${currencySymboleUpdate.value} ${formatter.format(expenseDataForDay)}',
+                                                            style: const TextStyle(
+                                                                color: AppTheme
+                                                                    .pcTextExpenseColor,
+                                                                fontSize: 13),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  const Divider(
                                                     color: AppTheme
-                                                        .pcTextLinkColor2,
-                                                    borderRadius:
-                                                        BorderRadius.all(
-                                                            Radius.circular(5)),
+                                                        .pcSecondaryDividerColor,
+                                                    thickness: 2,
                                                   ),
-                                                  child: Padding(
-                                                    padding:
-                                                        const EdgeInsets.all(
-                                                            8.0),
-                                                    child: Text(
-                                                      DateFormat('yyyy.MM.dd ')
-                                                              .format(DateTime
-                                                                  .parse(keys[
-                                                                      index]))
-                                                              .toString() +
-                                                          DateFormat('EEE')
-                                                              .format(DateTime
-                                                                  .parse(keys[
-                                                                      index]))
-                                                              .toString(),
-                                                      style: const TextStyle(
-                                                          color: AppTheme
-                                                              .pcTextSecondayColor,
-                                                          fontWeight:
-                                                              FontWeight.bold),
-                                                    ),
-                                                  ),
-                                                ),
-                                                const Spacer(),
-                                                Column(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.end,
-                                                  children: [
-                                                    Text(
-                                                      '+ ${currencySymboleUpdate.value} ${formatter.format(incomeDataForDay)}',
-                                                      style: const TextStyle(
-                                                          color: AppTheme
-                                                              .pcTextIncomeColor,
-                                                          fontSize: 13),
-                                                    ),
-                                                    const SizedBox(
-                                                      height: 5,
-                                                    ),
-                                                    Text(
-                                                      '- ${currencySymboleUpdate.value} ${formatter.format(expenseDataForDay)}',
-                                                      style: const TextStyle(
-                                                          color: AppTheme
-                                                              .pcTextExpenseColor,
-                                                          fontSize: 13),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ],
+                                                ],
+                                              ),
                                             ),
-                                            const Divider(
-                                              color: AppTheme
-                                                  .pcSecondaryDividerColor,
-                                              thickness: 2,
+                                            Padding(
+                                              padding: const EdgeInsets.only(
+                                                  left: 10, right: 10),
+                                              child: TransactionsCategory(
+                                                  newList:
+                                                      mapList[keys[index]]??[]),
                                             ),
                                           ],
                                         ),
                                       ),
-                                      Padding(
-                                        padding: const EdgeInsets.only(
-                                            left: 10, right: 10),
-                                        child: TransactionsCategory(
-                                            newList: mapList[keys[index]]!),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            );
+                                    ),
+                                  )
+                                : SizedBox();
                           },
                         ),
                       ),

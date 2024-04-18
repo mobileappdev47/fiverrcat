@@ -1,7 +1,6 @@
 import 'package:pokercat/calander.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:hive/hive.dart';
 import 'package:intl/intl.dart';
 import 'package:lottie/lottie.dart';
@@ -31,15 +30,12 @@ class _CalendarScreenState extends State<CalendarScreen> {
   double selectData = 0;
   double selectExpenseData = 0;
   List<String> transactionList = [];
-  String dateToCompare = DateFormat('yyyy-MM-dd').toString();
+  Map<String, List<TransactionModel>>  newListData = {};
 
   String formatDate(DateTime date) {
-    // Define the date format you want
+
     final DateFormat formatter = DateFormat('yyyy-MM-dd');
-
-    // Format the date
     final String formattedDate = formatter.format(date);
-
     return formattedDate;
   }
 
@@ -49,20 +45,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
         DateTime(selectDate.year, selectDate.month, selectDate.day, 9);
     final DateTime endTime = startTime.add(const Duration(hours: 2));
     bool existsInList = transactionList.contains(formatDate(selectDate));
-    setState(() {
-      // if (existsInList) {
-      //   meetings.add(Meeting(
-      //       '${currencySymboleUpdate.value} ${formatter.format(selectData - selectExpenseData)}',
-      //       startTime,
-      //       endTime,
-      //       Colors.transparent,
-      //       false));
-      //   print('$dateToCompare exists in the list.');
-      // } else {
-      //   print('$dateToCompare does not exist in the list.');
-      // }
 
-    });
+    setState(() {});
     for (int i = 0; i < transactionList.length; i++) {
      setState(() {
        DateTime dateTime = DateTime.parse(transactionList[i]);
@@ -70,15 +54,24 @@ class _CalendarScreenState extends State<CalendarScreen> {
        final DateTime startTime =
        DateTime(dateTime.year, dateTime.month, dateTime.day, 9);
        final DateTime endTime = startTime.add(const Duration(hours: 2));
+
+
+       print(newListData);
+       if (newListData.containsKey(formatDate(selectDate))) {
+         double totalAmount = 0;
+
+         for (var transaction in newListData[formatDate(selectDate)]!) {
+           totalAmount += transaction.amount;
+         }
        meetings.add(
          Meeting(
-             '${currencySymboleUpdate.value} ${formatter.format(selectData - selectExpenseData)}',
+             '${currencySymboleUpdate.value} ${formatter.format(totalAmount)}',
              startTime,
              endTime,
              Colors.transparent,
              false),
        );
-     });
+     }});
     }
     setState(() {
 
@@ -465,6 +458,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
                 Map<String, List<TransactionModel>> mapList =
                     SelectDate().sortByDate(newList);
+                newListData=  mapList;
                 //keys는 2024-03-24, 2024-03-21, 2024-03-12, 2024-03-01 같은 날짜의 나열.
                 List<String> keys = mapList.keys.toList();
                 if(transactionList.isEmpty){
@@ -498,7 +492,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                               }
                               return previousValue;
                             });
-                            selectData =calculationList.fold(0,
+                            selectData= calculationList.fold(0,
                                     (previousValue, transaction) {
                                   if (transaction.categoryType ==
                                       CategoryType.income) {
@@ -514,6 +508,14 @@ class _CalendarScreenState extends State<CalendarScreen> {
                               }
                               return previousValue;
                             });
+                            selectExpenseData=calculationList.fold(0,
+                                    (previousValue, transaction) {
+                                  if (transaction.categoryType ==
+                                      CategoryType.expense) {
+                                    previousValue += transaction.amount;
+                                  }
+                                  return previousValue;
+                                });
                             return Padding(
                               padding: EdgeInsets.symmetric(
                                 horizontal:
