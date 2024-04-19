@@ -1,13 +1,12 @@
 import 'package:pokercat/calander.dart';
+import 'package:pokercat/imports.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:hive/hive.dart';
 import 'package:intl/intl.dart';
 import 'package:lottie/lottie.dart';
 import 'package:pokercat/pages/app_settings_screen/calendar_utils.dart';
 import 'package:table_calendar/table_calendar.dart';
-import '../addexpense/db/functions/account_group_function.dart';
 import '../addexpense/db/functions/category_functions.dart';
 import '../addexpense/db/functions/currency_function.dart';
 import '../addexpense/db/functions/transaction_function.dart';
@@ -32,60 +31,120 @@ class _CalendarScreenState extends State<CalendarScreen> {
   double selectData = 0;
   double selectExpenseData = 0;
   List<String> transactionList = [];
-  String dateToCompare = DateFormat('yyyy-MM-dd').toString();
+  Map<String, List<TransactionModel>> newListData = {};
 
   String formatDate(DateTime date) {
-    // Define the date format you want
     final DateFormat formatter = DateFormat('yyyy-MM-dd');
-
-    // Format the date
     final String formattedDate = formatter.format(date);
-
     return formattedDate;
   }
 
-  List<Meeting> _getDataSource(selectDate) {
+  DateTime selectDate = DateTime.now();
+
+  void onDaySelectedDate(DateTime selectedDay, DateTime focusedDay) {
+    setState(() {
+      selectDate = selectedDay; // Update selectDate when a day is selected
+    });
+  }
+
+  List<Meeting> _getDataSource() {
     final List<Meeting> meetings = <Meeting>[];
-    final DateTime startTime =
-        DateTime(selectDate.year, selectDate.month, selectDate.day, 9);
-    final DateTime endTime = startTime.add(const Duration(hours: 2));
-    bool existsInList = transactionList.contains(formatDate(selectDate));
-    setState(() {
-      // if (existsInList) {
-      //   meetings.add(Meeting(
-      //       '${currencySymboleUpdate.value} ${formatter.format(selectData - selectExpenseData)}',
-      //       startTime,
-      //       endTime,
-      //       Colors.transparent,
-      //       false));
-      //   print('$dateToCompare exists in the list.');
-      // } else {
-      //   print('$dateToCompare does not exist in the list.');
-      // }
+    // Iterate through newListData to calculate total amount for each date
 
+    newListData.forEach((date, transactions) {
+      double totalAmount = 0;
+      for (var transaction in transactions) {
+        totalAmount += transaction.amount;
+      }
+      // Create Meeting object for each date
+      DateTime dateTime = DateTime.parse(date);
+      final DateTime startTime =
+          DateTime(dateTime.year, dateTime.month, dateTime.day, 9);
+      final DateTime endTime = startTime.add(const Duration(hours: 2));
+
+      meetings.add(
+        Meeting(
+          '${currencySymboleUpdate.value} ${formatter.format(totalAmount)}',
+          startTime,
+          endTime,
+          Colors.transparent,
+          false,
+        ),
+      );
     });
-    for (int i = 0; i < transactionList.length; i++) {
-     setState(() {
-       DateTime dateTime = DateTime.parse(transactionList[i]);
 
-       final DateTime startTime =
-       DateTime(dateTime.year, dateTime.month, dateTime.day, 9);
-       final DateTime endTime = startTime.add(const Duration(hours: 2));
-       meetings.add(
-         Meeting(
-             '${currencySymboleUpdate.value} ${formatter.format(selectData - selectExpenseData)}',
-             startTime,
-             endTime,
-             Colors.transparent,
-             false),
-       );
-     });
-    }
-    setState(() {
-
-    });
     return meetings;
   }
+
+  RxBool loader = false.obs;
+  List<Meeting> getDataSource() {
+    loader.value=true;
+    final List<Meeting> meetings = <Meeting>[];
+    // Iterate through newListData to calculate total amount for each date
+    var data = TransactionDB.instance.transactionListNotifier.value;
+
+    for (int i = 0; i < data.length; i++) {
+     double totalAmount = 0;
+
+     totalAmount += data[i].amount;
+     DateTime dateTime = DateTime.parse(data[i].date);
+     final DateTime startTime =
+     DateTime(dateTime.year, dateTime.month, dateTime.day, 9);
+     final DateTime endTime = startTime.add(const Duration(hours: 2));
+
+     meetings.add(
+       Meeting(
+         '${currencySymboleUpdate.value} ${formatter.format(totalAmount)}',
+         startTime,
+         endTime,
+         Colors.transparent,
+         false,
+       ),
+     );
+    }
+    setState(() {});
+    loader.value=false;
+    Get.forceAppUpdate();
+    return meetings;
+  }
+
+  // List<Meeting> _getDataSource() {
+  //   final List<Meeting> meetings = <Meeting>[];
+  //
+  //   setState(() {});
+  //   for (int i = 0; i < transactionList.length; i++) {
+  //     setState(() {
+  //       DateTime dateTime = DateTime.parse(transactionList[i]);
+  //
+  //       final DateTime startTime =
+  //           DateTime(dateTime.year, dateTime.month, dateTime.day, 9);
+  //       final DateTime endTime = startTime.add(const Duration(hours: 2));
+  //
+  //
+  //       print(newListData);
+  //       // if (newListData.containsKey(formatDate(selectDate))) {
+  //       //   double totalAmount = 0;
+  //       //
+  //       //   for (var transaction in newListData[formatDate(selectDate)]!) {
+  //       //     totalAmount += transaction.amount;
+  //       //   }
+  //       meetings.add(
+  //         Meeting(
+  //             '${currencySymboleUpdate.value} ${formatter.format(selectData - selectExpenseData)}',
+  //             startTime,
+  //             endTime,
+  //             Colors.transparent,
+  //             false),
+  //       );
+  //       // }
+  //       setState(() {
+  //
+  //       });
+  //     });
+  //   }
+  //   setState(() {});
+  //   return meetings;
+  // }
 
   int myNumber = 0;
   final CalendarController _calendarController = CalendarController();
@@ -115,8 +174,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
     _selectedDay = _focusedDay;
     _selectedEvents = ValueNotifier(_getEventsForDay(_selectedDay!));
     TransactionDB.instance.refresh();
-
+    //  _getDataSource();
     super.initState();
+
   }
 
   @override
@@ -188,10 +248,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
       });
       _selectedEvents.value = _getEventsForDay(selectedDay);
     }
-    TransactionDB.instance
-        .filterByDate(selectedDateRange.start, selectedDateRange.end);
-    // print('selectedDate.start=${selectedDate.start},,fjsxkdla ==${selectedDate.runtimeType},,,selectedDate.end=${selectedDate.end}');
-    // TransactionDB.instance.getTransactionsForCurrentMonth();
+    // TransactionDB.instance
+    //     .filterByDate(selectedDateRange.start, selectedDateRange.end);
+
     print('myChosenDate==${myChosenDate}');
     print('selectedDate==${selectedDateRange}');
   }
@@ -220,7 +279,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
   ValueNotifier<double> totalCustomDateNotifier = ValueNotifier(0);
 
   @override
-  Widget build(BuildContext context) {
+  build(BuildContext context)  {
     double incomeData = 0;
     double expenseData = 0;
 
@@ -267,7 +326,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     click = true;
                   }
                 },
-
                 onSelectionChanged: (selectionDetails) {
                   final DateTime selectedDay =
                       selectionDetails.date ?? DateTime.now();
@@ -278,7 +336,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 todayHighlightColor: Colors.blue,
                 view: CalendarView.month,
                 dataSource: MeetingDataSource(
-                  _getDataSource(myChosenDate),
+                  // _getDataSource(),
+                  getDataSource(),
                 ),
               ),
             ),
@@ -466,11 +525,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
                 Map<String, List<TransactionModel>> mapList =
                     SelectDate().sortByDate(newList);
+                newListData = mapList;
+
                 //keys는 2024-03-24, 2024-03-21, 2024-03-12, 2024-03-01 같은 날짜의 나열.
                 List<String> keys = mapList.keys.toList();
-                if(transactionList.isEmpty){
-                   transactionList = mapList.keys.toList();
-                }
 
                 print('============$transactionList');
                 keys = ['${myChosenDateString}'];
@@ -499,15 +557,23 @@ class _CalendarScreenState extends State<CalendarScreen> {
                               }
                               return previousValue;
                             });
-                            selectData =calculationList.fold(0,
-                                    (previousValue, transaction) {
-                                  if (transaction.categoryType ==
-                                      CategoryType.income) {
-                                    return previousValue + transaction.amount;
-                                  }
-                                  return previousValue;
-                                });
+                            selectData = calculationList.fold(0,
+                                (previousValue, transaction) {
+                              if (transaction.categoryType ==
+                                  CategoryType.income) {
+                                return previousValue + transaction.amount;
+                              }
+                              return previousValue;
+                            });
                             double expenseData = calculationList.fold(0,
+                                (previousValue, transaction) {
+                              if (transaction.categoryType ==
+                                  CategoryType.expense) {
+                                previousValue += transaction.amount;
+                              }
+                              return previousValue;
+                            });
+                            selectExpenseData = calculationList.fold(0,
                                 (previousValue, transaction) {
                               if (transaction.categoryType ==
                                   CategoryType.expense) {
@@ -678,65 +744,62 @@ class _CalendarScreenState extends State<CalendarScreen> {
       context: value,
       builder: (context) {
         return StatefulBuilder(
-           builder: (context, update) => AlertDialog(
-             shape: RoundedRectangleBorder(
-               borderRadius: BorderRadius.circular(15),
-             ),
-             backgroundColor: AppTheme.pcWaveColor,
-             content: const Text(
-                 'Reseting transaction will erase all your transaction data.'),
-             title: const Text(
-               'Do you want to delete all transactions?',
-               style: TextStyle(
-                 color: AppTheme.pcTextQuaternaryColor,
-                 fontWeight: FontWeight.bold,
-               ),
-             ),
-             actions: [
-               TextButton(
-                 onPressed: () async {
-                   setState(() {
-                     myNumber = myNumber + 1;
-                   });
-                   print(myNumber);
-                   final transactionDB =
-                   await Hive.openBox<TransactionModel>(TRANSACTION_DB_NAME);
+          builder: (context, update) => AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15),
+            ),
+            backgroundColor: AppTheme.pcWaveColor,
+            content: const Text(
+                'Reseting transaction will erase all your transaction data.'),
+            title: const Text(
+              'Do you want to delete all transactions?',
+              style: TextStyle(
+                color: AppTheme.pcTextQuaternaryColor,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () async {
+                  setState(() {
+                    myNumber = myNumber + 1;
+                  });
+                  print(myNumber);
+                  final transactionDB =
+                      await Hive.openBox<TransactionModel>(TRANSACTION_DB_NAME);
 
-                   // final keys = transactionDB.values.toList();
-                   transactionDB.delete(id);
+                  // final keys = transactionDB.values.toList();
+                  transactionDB.delete(id);
 
-                   setState(() {});
-                   update.call(() {
-
-                   },);
-                   TransactionDB.instance.refresh();
-                   Navigator.of(context).pop();
-                 },
-                 child: const Text(
-                   'Yes',
-                   style: TextStyle(
-                     color: AppTheme.pcTextQuaternaryColor,
-                     fontWeight: FontWeight.bold,
-                   ),
-                 ),
-               ),
-               TextButton(
-                 onPressed: () {
-
-                   Navigator.of(context).pop();
-
-                 },
-                 child: const Text(
-                   'No',
-                   style: TextStyle(
-                     color: AppTheme.pcTextQuaternaryColor,
-                     fontWeight: FontWeight.bold,
-                   ),
-                 ),
-               ),
-             ],
-           ),
-
+                  setState(() {});
+                  update.call(
+                    () {},
+                  );
+                  TransactionDB.instance.refresh();
+                  Navigator.of(context).pop();
+                },
+                child: const Text(
+                  'Yes',
+                  style: TextStyle(
+                    color: AppTheme.pcTextQuaternaryColor,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text(
+                  'No',
+                  style: TextStyle(
+                    color: AppTheme.pcTextQuaternaryColor,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
         );
       },
     );

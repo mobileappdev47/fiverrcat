@@ -12,13 +12,33 @@ import '../db/models/category/category_model_db.dart';
 import '../db/models/transactions/transaction_model_db.dart';
 
 class SelectDate {
-  selectePreviousMonth() {
-    DateTimeRange selectedDate = DateTimeRange(
-      start: DateTime(DateTime.now().year, DateTime.now().month - 1, 1),
-      end: DateTime(DateTime.now().year, DateTime.now().month, 0),
-    );
+   selectPreviousMonth() {
+    DateTime now = DateTime.now();
+    int previousMonth = now.month - 1;
+    int year = now.year;
+
+    if (previousMonth == 0) {
+      // If the current month is January, set the previous month to December of the previous year
+      previousMonth = 12; // December
+      year--; // Previous year
+    }
+
+    DateTime startDate = DateTime(year, previousMonth, 1);
+    DateTime endDate = DateTime(year, now.month, 0);
+
+    DateTimeRange selectedDate = DateTimeRange(start: startDate, end: endDate);
     return selectedDate;
   }
+
+   selectMonth(month,year) {
+
+
+     DateTime startDate = DateTime(year, month, 1);
+     DateTime endDate = DateTime(year, month, 31);
+
+     DateTimeRange selectedDate = DateTimeRange(start: startDate, end: endDate);
+     return selectedDate;
+   }
 
   selecteNextMonth() {
     DateTimeRange selectedDate = DateTimeRange(

@@ -67,6 +67,19 @@ class TransactionDB implements TransactionDBFunctions {
             .isBefore(endOfMonth.add(const Duration(days: 1))));
     return results.toList();
   }
+  Future<List<TransactionModel>> getTransactionsForMonth(month) async {
+    final now = DateTime.now();
+    final startOfMonth = DateTime(now.year, month, 1);
+    final endOfMonth = DateTime(now.year, month, 31);
+    final box = Hive.box<TransactionModel>(TRANSACTION_DB_NAME);
+    final results = box.values.where((trxn) =>
+    DateTime.parse(trxn.date)
+        .isAfter(startOfMonth.subtract(const Duration(days: 1))) &&
+        DateTime.parse(trxn.date)
+            .isBefore(endOfMonth.add(const Duration(days: 1))));
+    return results.toList();
+  }
+
 
   @override
   Future<List<TransactionModel>> getAllTransactions() async {
