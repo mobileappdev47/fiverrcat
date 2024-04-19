@@ -98,6 +98,7 @@ dev_dependencies:
   syncfusion_flutter_charts: ^25.1.39+1
   sliver_tools:
   syncfusion_flutter_calendar: ^25.1.39
+  device_info_plus: ^10.1.0
 
 
 flutter:

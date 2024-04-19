@@ -113,6 +113,70 @@ class _BankrollState extends State<Bankroll> {
       'total': '0.0',
     }
   };
+initMonthData (){
+ monthDataForGraph = {
+    'jan': {
+      'income': '0.0',
+      'expense': '0.0',
+      'total': '0.0',
+    },
+    'feb': {
+      'income': '0.0',
+      'expense': '0.0',
+      'total': '0.0',
+    },
+    'mar': {
+      'income': '0.0',
+      'expense': '0.0',
+      'total': '0.0',
+    },
+    'apr': {
+      'income': '0.0',
+      'expense': '0.0',
+      'total': '0.0',
+    },
+    'may': {
+      'income': '0.0',
+      'expense': '0.0',
+      'total': '0.0',
+    },
+    'jun': {
+      'income': '0.0',
+      'expense': '0.0',
+      'total': '0.0',
+    },
+    'july': {
+      'income': '0.0',
+      'expense': '0.0',
+      'total': '0.0',
+    },
+    'aug': {
+      'income': '0.0',
+      'expense': '0.0',
+      'total': '0.0',
+    },
+    'sep': {
+      'income': '0.0',
+      'expense': '0.0',
+      'total': '0.0',
+    },
+    'oct': {
+      'income': '0.0',
+      'expense': '0.0',
+      'total': '0.0',
+    },
+    'nov': {
+      'income': '0.0',
+      'expense': '0.0',
+      'total': '0.0',
+    },
+    'dec': {
+      'income': '0.0',
+      'expense': '0.0',
+      'total': '0.0',
+    }
+  };
+}
 
   @override
   void initState() {
@@ -194,8 +258,10 @@ class _BankrollState extends State<Bankroll> {
                         animationDuration: const Duration(milliseconds: 200),
                         onChanged: (bool state) {
                           setState(() {
-                            screenIsGraph = state;
 
+
+                            screenIsGraph = state;
+                            initMonthData();
                             //january
 
                             double totalJan = 0.0;
@@ -269,7 +335,7 @@ class _BankrollState extends State<Bankroll> {
 
                             print(mapList);
 
-                            print(keys);
+                             print(keys);
 
                             mapList.forEach((key, value) {
                               print('$key: $value');

@@ -64,6 +64,8 @@ class GraphScreen extends StatefulWidget {
 
 class _GraphScreenState extends State<GraphScreen> {
   String selected = 'All';
+
+  String selectedCategory ='All Time';
   String dropdownvalue = '1 Day';
   var items = [
     '1 Day',
@@ -73,7 +75,7 @@ class _GraphScreenState extends State<GraphScreen> {
   ];
 
   String selectedDate = DateFormat('dd-MM-yyyy').format(DateTime.now());
-  List<TransactionModel> filterList = [];
+  List<TransactionModel> filterList = TransactionDB.instance.transactionListNotifier.value;
 
   @override
   void initState() {
@@ -484,7 +486,7 @@ class _GraphScreenState extends State<GraphScreen> {
                                                 width: 10,
                                               ),
                                               Text(
-                                                'All Time',
+                                                selectedCategory,
                                                 style: TextStyle(
                                                     color: Colors.white,
                                                     fontWeight: FontWeight.w500,
@@ -676,6 +678,7 @@ class _GraphScreenState extends State<GraphScreen> {
                                         GestureDetector(
                                           onTap: () {
                                             // var data = TransactionDB.instance.transactionMonthListNotifier.value;
+                                            data = filterList;
 
                                             print(data);
 
@@ -695,7 +698,9 @@ class _GraphScreenState extends State<GraphScreen> {
                                                 selectedOne = selectedOne
                                                     .add(Duration(days: 7));
                                               }
+
                                               // print(weeklyDates);
+
                                               List<ChartData> weekChart = [];
                                               for (int i = 0;
                                                   i < weeklyDates.length;
@@ -703,9 +708,6 @@ class _GraphScreenState extends State<GraphScreen> {
                                                 weekChart.add(ChartData(
                                                     weeklyDates[i], 300));
                                               }
-
-
-
 
                                               List<ChartData> weeklyChart = [];
                                               for (int i = 0;
@@ -802,7 +804,7 @@ class _GraphScreenState extends State<GraphScreen> {
                                                     finalList[i]['totalamt']);
                                               }
 
-                                              chartData = weekChart;
+                                              chartData = weeklyChart;
                                               setState(() {});
                                             } else if (dropdownvalue ==
                                                 '1 Month') {
@@ -955,13 +957,111 @@ class _GraphScreenState extends State<GraphScreen> {
                                                     selectedOne.day);
                                               }
                                               // print(yearlyDates);
-                                              List<ChartData> yearlyChart = [];
+                                              List<ChartData> yearChart = [];
                                               for (int i = 0;
                                                   i < yearlyDates.length;
                                                   i++) {
-                                                yearlyChart.add(ChartData(
+                                                yearChart.add(ChartData(
                                                     yearlyDates[i], 300));
                                               }
+
+
+
+                                              List<ChartData> yearlyChart = [];
+                                              for (int i = 0;
+                                              i < yearlyDates.length;
+                                              i++) {
+                                                yearlyChart.add(ChartData(
+                                                    yearlyDates[i], 0));
+                                              }
+
+                                              // data.sort((a, b) => a.date.compareTo(b.date),);
+
+                                              List myYearList = [];
+
+                                              for (int i = 0;
+                                              i < data.length;
+                                              i++) {
+                                                bool found = false;
+                                                for (int j = 0;
+                                                j < yearlyDates.length - 1;
+                                                j++) {
+                                                  DateTime startDate =
+                                                  DateFormat('dd-MM-yyyy')
+                                                      .parse(
+                                                      yearlyDates[j]);
+                                                  DateTime endDate = DateFormat(
+                                                      'dd-MM-yyyy')
+                                                      .parse(
+                                                      yearlyDates[j + 1]);
+                                                  DateTime date2 =
+                                                  DateTime.parse(
+                                                      data[i].date);
+
+                                                  if (date2
+                                                      .isAfter(startDate) &&
+                                                      date2.isBefore(endDate)) {
+                                                    print(myYearList);
+                                                    print('Yes');
+
+                                                    myYearList.add({
+                                                      'index': j + 1,
+                                                      'amt': data[i].amount
+                                                    });
+
+                                                    // monthlyChart[j] = ChartData(
+                                                    //     monthlyDates[j + 1],
+                                                    //     data[i].amount);
+
+                                                    found = true;
+                                                    break;
+                                                  } else {
+                                                    print('no');
+                                                  }
+                                                }
+                                                if (!found) {
+                                                  print(
+                                                      'Item from list2 at index $i is not within any date range of list1.');
+                                                }
+                                              }
+
+                                              print(myYearList);
+
+
+
+                                              Map<int, double> indexAmtMap = {};
+                                              for (var data in myYearList) {
+                                                int index = data['index'];
+                                                double amt = data['amt'];
+                                                indexAmtMap[index] =
+                                                    (indexAmtMap[index] ?? 0) +
+                                                        amt;
+                                              }
+
+                                              List<Map<String, dynamic>>
+                                              finalList = [];
+                                              indexAmtMap
+                                                  .forEach((index, totalAmt) {
+                                                finalList.add({
+                                                  'index': index,
+                                                  'totalamt': totalAmt
+                                                });
+                                              });
+
+                                              print(finalList);
+
+                                              for (int i = 0;
+                                              i < finalList.length;
+                                              i++) {
+                                                yearlyChart[
+                                                finalList[i]
+                                                ['index']] = ChartData(
+                                                    yearlyDates[finalList[i]
+                                                    ['index']],
+                                                    finalList[i]['totalamt']);
+                                              }
+
+
                                               chartData = yearlyChart;
 
                                               setState(() {});
@@ -1121,7 +1221,7 @@ class _GraphScreenState extends State<GraphScreen> {
                             print(data);
 
                             return Container(
-                              height: 180.0,
+                              height: 220.0,
                               width: MediaQuery.of(context).size.width,
                               child: Container(
                                 padding: EdgeInsets.all(20.0),
@@ -1156,6 +1256,48 @@ class _GraphScreenState extends State<GraphScreen> {
                                     ),
                                     Row(
                                       mainAxisAlignment:
+                                      MainAxisAlignment.center,
+                                      children: [
+                                        GestureDetector(
+                                          onTap: () {
+                                            selectedCategory= 'All Time';
+                                            filterList = TransactionDB.instance.transactionListNotifier.value;
+                                            setState(() {
+                                            });
+                                            Navigator.pop(context);
+                                          },
+                                          child: Container(
+                                            width: 120,
+                                            decoration: BoxDecoration(
+                                              color:
+                                              Colors.white.withOpacity(0.2),
+                                              border: Border.all(
+                                                  color: Colors.white,
+                                                  width: 0.5),
+                                              borderRadius:
+                                              BorderRadius.circular(
+                                                7,
+                                              ),
+                                            ),
+                                            alignment: Alignment.center,
+                                            height: 40,
+                                            child: Text(
+                                              'All Time',
+                                              style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontWeight: FontWeight.w500,
+                                                  fontSize: 16),
+                                            ),
+                                          ),
+                                        ),
+
+                                      ],
+                                    ),
+                                    SizedBox(
+                                      height: 10,
+                                    ),
+                                    Row(
+                                      mainAxisAlignment:
                                           MainAxisAlignment.center,
                                       children: [
                                         GestureDetector(
@@ -1171,6 +1313,7 @@ class _GraphScreenState extends State<GraphScreen> {
                                               } else {}
                                             }
                                             filterList = cashTransaction;
+                                            selectedCategory= 'Cash';
                                             setState(() {});
                                             Navigator.pop(context);
                                           },
@@ -1214,6 +1357,8 @@ class _GraphScreenState extends State<GraphScreen> {
                                               } else {}
                                             }
                                             filterList = onlineTransaction;
+                                            selectedCategory= 'Online';
+
                                             setState(() {});
                                             Navigator.pop(context);
                                           },
@@ -1263,6 +1408,7 @@ class _GraphScreenState extends State<GraphScreen> {
                                               } else {}
                                             }
                                             filterList = otherTransaction;
+                                            selectedCategory= 'Other';
                                             setState(() {});
                                             Navigator.pop(context);
                                           },
@@ -1307,6 +1453,7 @@ class _GraphScreenState extends State<GraphScreen> {
                                               } else {}
                                             }
                                             filterList = tournamentTransaction;
+                                            selectedCategory='Tournament';
                                             setState(() {});
                                             Navigator.pop(context);
                                           },
