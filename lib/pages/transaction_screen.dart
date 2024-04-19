@@ -23,13 +23,9 @@ class TransactionScreen extends StatefulWidget {
 }
 
 class _TransactionScreenState extends State<TransactionScreen> {
-  String selectedMonth = '';
 
-  void filterTransactionsByMonth(String month) {
-    setState(() {
-      selectedMonth = month;
-    });
-  }
+
+
 
   NumberFormat formatter = NumberFormat('#,##0');
   DateTimeRange selectedDate = SelectDate().currentDateForCalenderSelection();
@@ -45,7 +41,8 @@ class _TransactionScreenState extends State<TransactionScreen> {
   ValueNotifier<double> incomeCustomDateNotifier = ValueNotifier(0);
   ValueNotifier<double> expenseCustomDateNotifier = ValueNotifier(0);
   ValueNotifier<double> totalCustomDateNotifier = ValueNotifier(0);
-
+PageController scrollController = PageController();
+int indexAll =DateTime.now().month -1;
   @override
   Widget build(BuildContext context) {
     List<String> months = List.generate(12, (index) {
@@ -163,72 +160,93 @@ class _TransactionScreenState extends State<TransactionScreen> {
             height: 50,
             child: Row(
               children: [
-                IconButton(
-                  alignment: Alignment.centerRight,
-                  icon: const Icon(Icons.arrow_back_ios,
-                      color: AppTheme.pcTextSecondayColor, size: 16),
-                  onPressed: () {
-                    setState(
-                      () {
-                        selectedDate = SelectDate().selectePreviousMonth();
-                      },
-                    );
-                    TransactionDB.instance
-                        .filterForHome(selectedDate.start, selectedDate.end);
-                    TransactionDB.instance.getTransactionsForCurrentMonth();
-                  },
-                ),
+                // IconButton(
+                //   alignment: Alignment.centerRight,
+                //   icon: const Icon(Icons.arrow_back_ios,
+                //       color: AppTheme.pcTextSecondayColor, size: 16),
+                //   onPressed: () {
+                //     setState(
+                //       () {
+                //         if(scrollController.page!.round() >0) {
+                //
+                //           selectedDate = SelectDate().selectMonth(scrollController.page!.round() - 1,
+                //               DateTime
+                //                   .now()
+                //                   .year);
+                //         }
+                //
+                //       },
+                //     );
+                //     TransactionDB.instance
+                //         .filterForHome(selectedDate.start, selectedDate.end);
+                //     TransactionDB.instance.getTransactionsForCurrentMonth();
+                //   },
+                // ),
                 Expanded(
                   child: ListView.builder(
+                    controller: scrollController,
+                    itemCount: months.length,
                     scrollDirection: Axis.horizontal,
                     itemBuilder: (BuildContext context, int index) {
+
+
                       return Row(
-                        children: months.map((month) {
-                          return Padding(
+                        children:[
+                          Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: InkWell(
                               onTap: () {
 
                                 setState(() {
-                                  selectedMonth = month;
+                                  indexAll = index;
+                                  selectedDate = SelectDate().selectMonth(index+1,
+                                      DateTime.now().year);
+                                  TransactionDB.instance
+                                      .filterForHome(selectedDate.start, selectedDate.end);
+                                  TransactionDB.instance.getTransactionsForCurrentMonth();
                                 });
                               },
                               child: Column(
                                 children: [
                                   Text(
-                                    month,
+                                    months[index],
                                     style:
-                                        const TextStyle(color: Colors.white),
+                                     TextStyle(color: Colors.white),
                                   ),
-                                 SizedBox(height: 5,),
-                                // selectedMonth.isNotEmpty? Container(
-                                //    height: 1,
-                                //    width: 50,
-                                //    color: Colors.white,
-                                //  ):SizedBox()
+                                  SizedBox(height: 5,),
+                                  indexAll ==index ?   Container(
+                                     height: 1,
+                                     width: 50,
+                                     color: Colors.white,
+                                   ):SizedBox()
 
                                 ],
                               ),
                             ),
-                          );
-                        }).toList(),
+                          ),
+                        ],
                       );
                     },
                   ),
                 ),
-                IconButton(
-                  alignment: Alignment.centerLeft,
-                  icon: const Icon(Icons.arrow_forward_ios,
-                      color: AppTheme.pcTextSecondayColor, size: 16),
-                  onPressed: () {
-                    setState(
-                      () {
-                        selectedDate = SelectDate().selecteNextMonth();
-                      },
-                    );
-                    TransactionDB.instance.refresh();
-                  },
-                ),
+                // IconButton(
+                //   alignment: Alignment.centerLeft,
+                //   icon: const Icon(Icons.arrow_forward_ios,
+                //       color: AppTheme.pcTextSecondayColor, size: 16),
+                //   onPressed: () {
+                //     setState(
+                //       () {
+                //         if(scrollController.page!.round() <12) {
+                //           selectedDate = SelectDate().selectMonth(scrollController.page!.round() + 1,
+                //               DateTime
+                //                   .now()
+                //                   .year);
+                //         }
+                //       },
+                //     );
+                //     TransactionDB.instance.refresh();
+                //   },
+                // ),
               ],
             ),
           ),
@@ -320,10 +338,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
                   SelectDate().sortByDate(newList);
               List<String> keys = mapList.keys.toList();
               print('Keys before filtering: $mapList');
-              if (selectedMonth.isNotEmpty) {
-                mapList.removeWhere(
-                    (key, value) => !key.startsWith(selectedMonth));
-              }
+
               return keys.isNotEmpty
                   ? Expanded(
                       child: Padding(
@@ -333,8 +348,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
                           physics: const BouncingScrollPhysics(),
                           itemCount: keys.length,
                           itemBuilder: (context, index) {
-                            selectedMonth =
-                                DateFormat('MMMM').format(DateTime.parse(keys[index]));
+
 
                             List<TransactionModel> calculationList =
                                 mapList[keys[index]]??[];
@@ -354,8 +368,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
                               }
                               return previousValue;
                             });
-                            return (selectedMonth.isNotEmpty)
-                                ? Padding(
+                            return  Padding(
                                     padding: EdgeInsets.symmetric(
                                       horizontal:
                                           MediaQuery.of(context).size.width *
@@ -471,8 +484,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
                                         ),
                                       ),
                                     ),
-                                  )
-                                : SizedBox();
+                                  );
                           },
                         ),
                       ),
