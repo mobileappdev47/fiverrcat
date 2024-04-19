@@ -606,7 +606,8 @@ initMonthData (){
               context: context,
               builder: (context) => AddTaskScreen()).then((value) {
             setState(() {
-              initialize();
+              // initialize();
+              initialize1DayData();
             });
           });
 
