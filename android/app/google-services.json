@@ -1,89 +1,34 @@
 {
   "project_info": {
-    "project_number": "1073515429674",
-    "project_id": "pokercat2-b55de",
-    "storage_bucket": "pokercat2-b55de.appspot.com"
+    "project_number": "419533019754",
+    "project_id": "pokercat-77864",
+    "storage_bucket": "pokercat-77864.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:1073515429674:android:63ec952268f96673d82853",
+        "mobilesdk_app_id": "1:419533019754:android:9c90feee177db83c5c8813",
         "android_client_info": {
           "package_name": "com.havea.pokercat"
         }
       },
       "oauth_client": [
         {
-          "client_id": "1073515429674-2pib91qkfko4o9tqcer67271eaubb6p2.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.havea.pokercat",
-            "certificate_hash": "d0a09a1fe0b2a41bf3bdbc17ec6dc31e675133a2"
-          }
-        },
-        {
-          "client_id": "1073515429674-dgls9vea5pmvtarkrqdoe89qchnrnnrl.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.havea.pokercat",
-            "certificate_hash": "deaf62a5999168fe5f667f96445e5d5190135a65"
-          }
-        },
-        {
-          "client_id": "1073515429674-fmdh0rcs4q7hokmb73a7p99bkmvpid00.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.havea.pokercat",
-            "certificate_hash": "41e220092eca3e8b5bc09483e9ee0bf57241f1fa"
-          }
-        },
-        {
-          "client_id": "1073515429674-lr5l01opurta23mgubn5gkpv6lodnen3.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.havea.pokercat",
-            "certificate_hash": "37cc47255a9085c0c6ad8638211d59e3b7041c99"
-          }
-        },
-        {
-          "client_id": "1073515429674-t4k1bdtdh7c3n43iasaavfe0pjboh9nm.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.havea.pokercat",
-            "certificate_hash": "1611ea9d1c952a8ac1fa05c0553477e72f144744"
-          }
-        },
-        {
-          "client_id": "1073515429674-v7ou3l41mo78il2ja6155c0kd8h3guot.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.havea.pokercat",
-            "certificate_hash": "ae5f0ba116cb129a74e06b143993acedc8ad3cca"
-          }
-        },
-        {
-          "client_id": "1073515429674-0aotgrmkj4msn1fgst17nb2od7q6li01.apps.googleusercontent.com",
+          "client_id": "419533019754-bnp8tm23ukhgvjfu9r29o2lq0ndmdmkv.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyCx2sAMhUQpX_Q9Csf9Zim5lsU9oxYvUZ0"
+          "current_key": "AIzaSyC3kRFtnws7FCGiXS7dpKjwm1XIpz5FZPA"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "1073515429674-0aotgrmkj4msn1fgst17nb2od7q6li01.apps.googleusercontent.com",
+              "client_id": "419533019754-bnp8tm23ukhgvjfu9r29o2lq0ndmdmkv.apps.googleusercontent.com",
               "client_type": 3
-            },
-            {
-              "client_id": "1073515429674-7trerhlt80566abgs44uc4rkim5jh3it.apps.googleusercontent.com",
-              "client_type": 2,
-              "ios_info": {
-                "bundle_id": "com.havea.pokercat"
-              }
             }
           ]
         }

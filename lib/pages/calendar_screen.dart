@@ -77,36 +77,74 @@ class _CalendarScreenState extends State<CalendarScreen> {
   }
 
   RxBool loader = false.obs;
-  List<Meeting> getDataSource() {
-    loader.value=true;
+
+  List<Meeting> getDataSource1() {
+    loader.value = true;
     final List<Meeting> meetings = <Meeting>[];
     // Iterate through newListData to calculate total amount for each date
     var data = TransactionDB.instance.transactionListNotifier.value;
 
     for (int i = 0; i < data.length; i++) {
-     double totalAmount = 0;
+      double totalAmount = 0;
 
-     totalAmount += data[i].amount;
-     DateTime dateTime = DateTime.parse(data[i].date);
-     final DateTime startTime =
-     DateTime(dateTime.year, dateTime.month, dateTime.day, 9);
-     final DateTime endTime = startTime.add(const Duration(hours: 2));
+      totalAmount += data[i].amount;
+      DateTime dateTime = DateTime.parse(data[i].date);
+      final DateTime startTime =
+          DateTime(dateTime.year, dateTime.month, dateTime.day, 9);
+      final DateTime endTime = startTime.add(const Duration(hours: 2));
 
-     meetings.add(
-       Meeting(
-         '${currencySymboleUpdate.value} ${formatter.format(totalAmount)}',
-         startTime,
-         endTime,
-         Colors.transparent,
-         false,
-       ),
-     );
+      meetings.add(
+        Meeting(
+          '${currencySymboleUpdate.value} ${formatter.format(totalAmount)}',
+          startTime,
+          endTime,
+          Colors.transparent,
+          false,
+        ),
+      );
     }
     setState(() {});
-    loader.value=false;
+    loader.value = false;
     Get.forceAppUpdate();
     return meetings;
   }
+  List<Meeting> getDataSource() {
+    loader.value = true;
+    final List<Meeting> meetings = <Meeting>[];
+    final Map<DateTime, double> totalAmountMap = {}; // Map to store total amount for each date
+
+    var data = TransactionDB.instance.transactionListNotifier.value;
+
+    // Calculate total amount for each date
+    for (int i = 0; i < data.length; i++) {
+      DateTime dateTime = DateTime.parse(data[i].date);
+      double totalAmount = totalAmountMap[dateTime] ?? 0; // Initialize to 0 if not exists
+      totalAmount += data[i].amount;
+      totalAmountMap[dateTime] = totalAmount; // Update total amount for this date
+    }
+
+    // Create Meeting objects with total amount for each date
+    totalAmountMap.forEach((date, totalAmount) {
+      final DateTime startTime = DateTime(date.year, date.month, date.day, 9);
+      final DateTime endTime = startTime.add(const Duration(hours: 2));
+
+      meetings.add(
+        Meeting(
+          '${currencySymboleUpdate.value} ${formatter.format(totalAmount)}',
+          startTime,
+          endTime,
+          Colors.transparent,
+          false,
+        ),
+      );
+    });
+
+    setState(() {});
+    loader.value = false;
+    Get.forceAppUpdate();
+    return meetings;
+  }
+
 
   // List<Meeting> _getDataSource() {
   //   final List<Meeting> meetings = <Meeting>[];
@@ -176,7 +214,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
     TransactionDB.instance.refresh();
     //  _getDataSource();
     super.initState();
-
   }
 
   @override
@@ -279,7 +316,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
   ValueNotifier<double> totalCustomDateNotifier = ValueNotifier(0);
 
   @override
-  build(BuildContext context)  {
+  build(BuildContext context) {
     double incomeData = 0;
     double expenseData = 0;
 
@@ -300,14 +337,17 @@ class _CalendarScreenState extends State<CalendarScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             SizedBox(
-              height: 750,
+              height: 450,
               child: SfCalendar(
                 headerStyle: const CalendarHeaderStyle(
                     textStyle: TextStyle(color: Colors.black)),
                 //cellBorderColor: Colors.purple,
                 // key: _calendarKey,
                 controller: _calendarController,
-                appointmentTextStyle: const TextStyle(color: Colors.green),
+                appointmentTextStyle: const TextStyle(
+                  color: Colors.green,
+                  fontSize: 50,
+                ),
                 todayTextStyle: const TextStyle(color: Colors.black),
                 monthViewSettings: const MonthViewSettings(
                   appointmentDisplayMode:
@@ -646,12 +686,11 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                                 ),
                                                 IconButton(
                                                   onPressed: () {
-                                                    resetTransactionsOnly(
-                                                        context,
-                                                        mapList[keys[index]]
-                                                                ?[index]
-                                                            .id);
-                                                    setState(() {});
+                                                    resetTransactionsOnly(context, mapList[keys[index]]!);
+                                                    setState(() {
+                                                      mapList.remove(keys[index].length);
+                                                      keys.removeAt(index).length;
+                                                    });
                                                   },
                                                   icon: const Icon(
                                                       Icons.delete_forever,
@@ -739,9 +778,74 @@ class _CalendarScreenState extends State<CalendarScreen> {
     );
   }
 
-  resetTransactionsOnly(value, id) {
+  // resetTransactionsOnly(value, id) {
+  //   showDialog(
+  //     context: value,
+  //     builder: (context) {
+  //       return StatefulBuilder(
+  //         builder: (context, update) => AlertDialog(
+  //           shape: RoundedRectangleBorder(
+  //             borderRadius: BorderRadius.circular(15),
+  //           ),
+  //           backgroundColor: AppTheme.pcWaveColor,
+  //           content: const Text(
+  //               'Reseting transaction will erase all your transaction data.'),
+  //           title: const Text(
+  //             'Do you want to delete all transactions?',
+  //             style: TextStyle(
+  //               color: AppTheme.pcTextQuaternaryColor,
+  //               fontWeight: FontWeight.bold,
+  //             ),
+  //           ),
+  //           actions: [
+  //             TextButton(
+  //               onPressed: () async {
+  //                 setState(() {
+  //                   myNumber = myNumber + 1;
+  //                 });
+  //                 print(myNumber);
+  //                 final transactionDB =
+  //                     await Hive.openBox<TransactionModel>(TRANSACTION_DB_NAME);
+  //
+  //                 // final keys = transactionDB.values.toList();
+  //                 transactionDB.delete(id);
+  //
+  //                 setState(() {});
+  //                 update.call(
+  //                   () {},
+  //                 );
+  //                 TransactionDB.instance.refresh();
+  //                 Navigator.of(context).pop();
+  //               },
+  //               child: const Text(
+  //                 'Yes',
+  //                 style: TextStyle(
+  //                   color: AppTheme.pcTextQuaternaryColor,
+  //                   fontWeight: FontWeight.bold,
+  //                 ),
+  //               ),
+  //             ),
+  //             TextButton(
+  //               onPressed: () {
+  //                 Navigator.of(context).pop();
+  //               },
+  //               child: const Text(
+  //                 'No',
+  //                 style: TextStyle(
+  //                   color: AppTheme.pcTextQuaternaryColor,
+  //                   fontWeight: FontWeight.bold,
+  //                 ),
+  //               ),
+  //             ),
+  //           ],
+  //         ),
+  //       );
+  //     },
+  //   );
+  // }
+  resetTransactionsOnly(BuildContext context, List<TransactionModel> transactions) {
     showDialog(
-      context: value,
+      context: context,
       builder: (context) {
         return StatefulBuilder(
           builder: (context, update) => AlertDialog(
@@ -750,9 +854,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
             ),
             backgroundColor: AppTheme.pcWaveColor,
             content: const Text(
-                'Reseting transaction will erase all your transaction data.'),
+                'Resetting transactions will erase all your transaction data for this date.'),
             title: const Text(
-              'Do you want to delete all transactions?',
+              'Do you want to delete all transactions for this date?',
               style: TextStyle(
                 color: AppTheme.pcTextQuaternaryColor,
                 fontWeight: FontWeight.bold,
@@ -760,23 +864,16 @@ class _CalendarScreenState extends State<CalendarScreen> {
             ),
             actions: [
               TextButton(
-                onPressed: () async {
-                  setState(() {
-                    myNumber = myNumber + 1;
-                  });
-                  print(myNumber);
-                  final transactionDB =
-                      await Hive.openBox<TransactionModel>(TRANSACTION_DB_NAME);
-
-                  // final keys = transactionDB.values.toList();
-                  transactionDB.delete(id);
-
-                  setState(() {});
-                  update.call(
-                    () {},
-                  );
-                  TransactionDB.instance.refresh();
-                  Navigator.of(context).pop();
+                onPressed: ()  {
+                  setState(() async {
+                    final transactionDB = await Hive.openBox<TransactionModel>(TRANSACTION_DB_NAME);
+                    for (var transaction in transactions) {
+                      transactionDB.delete(transaction.id);
+                    }
+                    update.call(() {},);
+                    TransactionDB.instance.refresh(); // Refresh the transaction list
+                    Navigator.of(context).pop();
+                  });// Close the dialog
                 },
                 child: const Text(
                   'Yes',
@@ -788,7 +885,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
               ),
               TextButton(
                 onPressed: () {
-                  Navigator.of(context).pop();
+                  Navigator.of(context).pop(); // Close the dialog
                 },
                 child: const Text(
                   'No',
@@ -804,4 +901,5 @@ class _CalendarScreenState extends State<CalendarScreen> {
       },
     );
   }
+
 }

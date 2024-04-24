@@ -1,8 +1,5 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
-import 'package:ionicons/ionicons.dart';
 import 'package:lottie/lottie.dart';
 import 'package:pokercat/addexpense/db/functions/category_functions.dart';
 import 'package:pokercat/addexpense/db/functions/currency_function.dart';
@@ -11,7 +8,6 @@ import 'package:pokercat/addexpense/db/models/category/category_model_db.dart';
 import 'package:pokercat/addexpense/db/models/transactions/transaction_model_db.dart';
 import 'package:pokercat/addexpense/widget/transaction_helper.dart';
 import 'package:pokercat/constant.dart';
-import 'package:table_calendar/table_calendar.dart';
 import '../global/component/appbar.dart';
 
 // ignore: must_be_immutable
@@ -23,10 +19,6 @@ class TransactionScreen extends StatefulWidget {
 }
 
 class _TransactionScreenState extends State<TransactionScreen> {
-
-
-
-
   NumberFormat formatter = NumberFormat('#,##0');
   DateTimeRange selectedDate = SelectDate().currentDateForCalenderSelection();
 
@@ -41,13 +33,14 @@ class _TransactionScreenState extends State<TransactionScreen> {
   ValueNotifier<double> incomeCustomDateNotifier = ValueNotifier(0);
   ValueNotifier<double> expenseCustomDateNotifier = ValueNotifier(0);
   ValueNotifier<double> totalCustomDateNotifier = ValueNotifier(0);
-PageController scrollController = PageController();
-int indexAll =DateTime.now().month -1;
+  PageController scrollController = PageController();
+  int indexAll = DateTime.now().month - 1;
+
   @override
   Widget build(BuildContext context) {
-    List<String> months = List.generate(12, (index) {
-      return DateFormat('MMMM').format(DateTime(2024, index + 1, 1));
-    });
+    // List<String> months = List.generate(12, (index) {
+    //   return DateFormat('MMMM').format(DateTime(2024, index + 1, 1));
+    // });
     final double screenWidth = MediaQuery.of(context).size.width;
     double fontSize = 13;
     if (screenWidth > 350) {
@@ -60,7 +53,22 @@ int indexAll =DateTime.now().month -1;
 
     double incomeData = 0;
     double expenseData = 0;
+    List<String> months = [
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December'
+    ];
 
+    List<int> years = [2023, 2024, 2025];
     return Scaffold(
       resizeToAvoidBottomInset: false,
       backgroundColor: AppTheme.pcPrimaryColor,
@@ -157,7 +165,7 @@ int indexAll =DateTime.now().month -1;
           //   ),
           // ),
           Container(
-            height: 50,
+            height: 80,
             child: Row(
               children: [
                 // IconButton(
@@ -185,41 +193,52 @@ int indexAll =DateTime.now().month -1;
                 Expanded(
                   child: ListView.builder(
                     controller: scrollController,
-                    itemCount: months.length,
+                    itemCount: months.length * years.length,
                     scrollDirection: Axis.horizontal,
                     itemBuilder: (BuildContext context, int index) {
-
-
+                      int monthIndex = index % months.length;
+                      int yearIndex = index ~/ months.length;
+                      int year = years[yearIndex];
+                      String month = months[monthIndex];
                       return Row(
-                        children:[
+                        children: [
                           Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: InkWell(
                               onTap: () {
-
                                 setState(() {
                                   indexAll = index;
-                                  selectedDate = SelectDate().selectMonth(index+1,
-                                      DateTime.now().year);
+                                  // selectedDate = SelectDate().selectMonth(
+                                  //     index + 1, DateTime.now().year);
+                                  selectedDate =
+                                      SelectDate().selectMonth(monthIndex+1, year);
                                   TransactionDB.instance
-                                      .filterForHome(selectedDate.start, selectedDate.end);
-                                  TransactionDB.instance.getTransactionsForCurrentMonth();
+                                      .filterForHome(selectedDate.start,selectedDate.end);
+                                  TransactionDB.instance
+                                      .getTransactionsForCurrentMonth();
                                 });
                               },
                               child: Column(
                                 children: [
                                   Text(
-                                    months[index],
-                                    style:
-                                     TextStyle(color: Colors.white),
+                                    month,
+                                    // months[index],
+                                    style: const TextStyle(color: Colors.white),
                                   ),
-                                  SizedBox(height: 5,),
-                                  indexAll ==index ?   Container(
-                                     height: 1,
-                                     width: 50,
-                                     color: Colors.white,
-                                   ):SizedBox()
-
+                                  Text(
+                                    '${year == 2024 ? '' : year}',
+                                    style: const TextStyle(color: Colors.white),
+                                  ),
+                                  const SizedBox(
+                                    height: 5,
+                                  ),
+                                  indexAll == index
+                                      ? Container(
+                                          height: 1,
+                                          width: 50,
+                                          color: Colors.white,
+                                        )
+                                      : const SizedBox()
                                 ],
                               ),
                             ),
@@ -348,10 +367,8 @@ int indexAll =DateTime.now().month -1;
                           physics: const BouncingScrollPhysics(),
                           itemCount: keys.length,
                           itemBuilder: (context, index) {
-
-
                             List<TransactionModel> calculationList =
-                                mapList[keys[index]]??[];
+                                mapList[keys[index]] ?? [];
                             double incomeDataForDay = calculationList.fold(0,
                                 (previousValue, transaction) {
                               if (transaction.categoryType ==
@@ -368,123 +385,115 @@ int indexAll =DateTime.now().month -1;
                               }
                               return previousValue;
                             });
-                            return  Padding(
-                                    padding: EdgeInsets.symmetric(
-                                      horizontal:
-                                          MediaQuery.of(context).size.width *
-                                              0.04,
-                                    ),
-                                    child: Padding(
-                                      padding:
-                                          const EdgeInsets.only(bottom: 8.8),
-                                      child: Container(
-                                        decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(10),
-                                          color: AppTheme.pcTransactionColor,
-                                          boxShadow: const [
-                                            BoxShadow(
-                                              color: AppTheme.pcShadowColor,
-                                              spreadRadius: 0,
-                                              blurRadius: 5,
-                                              offset: Offset(0, 3),
-                                            ),
-                                          ],
-                                        ),
+                            return Padding(
+                              padding: EdgeInsets.symmetric(
+                                horizontal:
+                                    MediaQuery.of(context).size.width * 0.04,
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.only(bottom: 8.8),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(10),
+                                    color: AppTheme.pcTransactionColor,
+                                    boxShadow: const [
+                                      BoxShadow(
+                                        color: AppTheme.pcShadowColor,
+                                        spreadRadius: 0,
+                                        blurRadius: 5,
+                                        offset: Offset(0, 3),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Column(
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.only(
+                                            left: 10, right: 10, top: 10),
                                         child: Column(
                                           children: [
-                                            Padding(
-                                              padding: const EdgeInsets.only(
-                                                  left: 10, right: 10, top: 10),
-                                              child: Column(
-                                                children: [
-                                                  Row(
-                                                    children: [
-                                                      Container(
-                                                        width: 105,
-                                                        //width: 65,
-                                                        decoration:
-                                                            const BoxDecoration(
-                                                          color: AppTheme
-                                                              .pcTextLinkColor2,
-                                                          borderRadius:
-                                                              BorderRadius.all(
-                                                                  Radius
-                                                                      .circular(
-                                                                          5)),
-                                                        ),
-                                                        child: Padding(
-                                                          padding:
-                                                              const EdgeInsets
-                                                                  .all(8.0),
-                                                          child: Text(
-                                                            DateFormat('yyyy.MM.dd ')
-                                                                    .format(DateTime
-                                                                        .parse(keys[
-                                                                            index]))
-                                                                    .toString() +
-                                                                DateFormat(
-                                                                        'EEE')
-                                                                    .format(DateTime
-                                                                        .parse(keys[
-                                                                            index]))
-                                                                    .toString(),
-                                                            style: const TextStyle(
-                                                                color: AppTheme
-                                                                    .pcTextSecondayColor,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .bold),
-                                                          ),
-                                                        ),
-                                                      ),
-                                                      const Spacer(),
-                                                      Column(
-                                                        crossAxisAlignment:
-                                                            CrossAxisAlignment
-                                                                .end,
-                                                        children: [
-                                                          Text(
-                                                            '+ ${currencySymboleUpdate.value} ${formatter.format(incomeDataForDay)}',
-                                                            style: const TextStyle(
-                                                                color: AppTheme
-                                                                    .pcTextIncomeColor,
-                                                                fontSize: 13),
-                                                          ),
-                                                          const SizedBox(
-                                                            height: 5,
-                                                          ),
-                                                          Text(
-                                                            '- ${currencySymboleUpdate.value} ${formatter.format(expenseDataForDay)}',
-                                                            style: const TextStyle(
-                                                                color: AppTheme
-                                                                    .pcTextExpenseColor,
-                                                                fontSize: 13),
-                                                          ),
-                                                        ],
-                                                      ),
-                                                    ],
-                                                  ),
-                                                  const Divider(
+                                            Row(
+                                              children: [
+                                                Container(
+                                                  width: 105,
+                                                  //width: 65,
+                                                  decoration:
+                                                      const BoxDecoration(
                                                     color: AppTheme
-                                                        .pcSecondaryDividerColor,
-                                                    thickness: 2,
+                                                        .pcTextLinkColor2,
+                                                    borderRadius:
+                                                        BorderRadius.all(
+                                                            Radius.circular(5)),
                                                   ),
-                                                ],
-                                              ),
+                                                  child: Padding(
+                                                    padding:
+                                                        const EdgeInsets.all(
+                                                            8.0),
+                                                    child: Text(
+                                                      DateFormat('yyyy.MM.dd ')
+                                                              .format(DateTime
+                                                                  .parse(keys[
+                                                                      index]))
+                                                              .toString() +
+                                                          DateFormat('EEE')
+                                                              .format(DateTime
+                                                                  .parse(keys[
+                                                                      index]))
+                                                              .toString(),
+                                                      style: const TextStyle(
+                                                          color: AppTheme
+                                                              .pcTextSecondayColor,
+                                                          fontWeight:
+                                                              FontWeight.bold),
+                                                    ),
+                                                  ),
+                                                ),
+                                                const Spacer(),
+                                                Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.end,
+                                                  children: [
+                                                    Text(
+                                                      '+ ${currencySymboleUpdate.value} ${formatter.format(incomeDataForDay)}',
+                                                      style: const TextStyle(
+                                                          color: AppTheme
+                                                              .pcTextIncomeColor,
+                                                          fontSize: 13),
+                                                    ),
+                                                    const SizedBox(
+                                                      height: 5,
+                                                    ),
+                                                    Text(
+                                                      '- ${currencySymboleUpdate.value} ${formatter.format(expenseDataForDay)}',
+                                                      style: const TextStyle(
+                                                          color: AppTheme
+                                                              .pcTextExpenseColor,
+                                                          fontSize: 13),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ],
                                             ),
-                                            Padding(
-                                              padding: const EdgeInsets.only(
-                                                  left: 10, right: 10),
-                                              child: TransactionsCategory(
-                                                  newList:
-                                                      mapList[keys[index]]??[]),
+                                            const Divider(
+                                              color: AppTheme
+                                                  .pcSecondaryDividerColor,
+                                              thickness: 2,
                                             ),
                                           ],
                                         ),
                                       ),
-                                    ),
-                                  );
+                                      Padding(
+                                        padding: const EdgeInsets.only(
+                                            left: 10, right: 10),
+                                        child: TransactionsCategory(
+                                            newList:
+                                                mapList[keys[index]] ?? []),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            );
                           },
                         ),
                       ),
