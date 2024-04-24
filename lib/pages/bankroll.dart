@@ -607,6 +607,7 @@ initMonthData (){
               builder: (context) => AddTaskScreen()).then((value) {
             setState(() {
               // initialize();
+              selected='All';
               initialize1DayData();
             });
           });
