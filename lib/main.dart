@@ -4,16 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:pokercat/addexpense/db/functions/category_functions.dart';
 import 'package:pokercat/addexpense/db/models/account_group/account_group_model_db.dart';
 import 'package:pokercat/addexpense/db/models/transactions/transaction_model_db.dart';
 import 'package:pokercat/pages/app_settings_screen/income_category_settings/app_default.dart';
 import 'package:pokercat/pages/app_settings_screen/income_category_settings/income_category_provider.dart';
-import 'package:pokercat/pages/bankroll.dart';
 import 'package:pokercat/pages/btmnavigation.dart';
-import 'package:pokercat/pages/splash_screen.dart';
 import 'addexpense/db/models/category/category_model_db.dart';
 import 'addexpense/db/models/currency/curency_model.db.dart';
 import 'global/component/preferences.dart';
@@ -22,7 +19,14 @@ import 'imports.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
+  await Firebase.initializeApp(
+    // options: const FirebaseOptions(
+    //     apiKey: "AIzaSyC3kRFtnws7FCGiXS7dpKjwm1XIpz5FZPA",
+    //     appId: "1:419533019754:android:9c90feee177db83c5c8813",
+    //     messagingSenderId: "419533019754",
+    //     projectId: "pokercat-77864",
+    //     storageBucket: "pokercat-77864.appspot.com"),
+  );
   await Hive.initFlutter();
 
   if (!Hive.isAdapterRegistered(CategoryTypeAdapter().typeId)) {
@@ -44,12 +48,10 @@ Future<void> main() async {
     Hive.registerAdapter(TransactionModelAdapter());
   }
 
-
-
   //LocaleSettings.useDeviceLocale();
   // Initalize Fire
   // base Core for app, necessary for firebase to work
-  await Firebase.initializeApp();
+
 
   //init을 통해 get.put injection 수행
   await AppPreferences.init();
@@ -69,7 +71,6 @@ class App extends StatefulWidget {
 }
 
 class _AppState extends State<App> {
-
   // bool isLogIn = false;
   // getLoggedInState() async{
   //   await LocalDataSaver.getLogData().then((value){
@@ -88,20 +89,19 @@ class _AppState extends State<App> {
   @override
   void initState() {
     IncomeCategoryProvider().addDefaultCategory(
-        AppDefaultIncomeCategory()
-            .appDefaultIncomeCategory);
+        AppDefaultIncomeCategory().appDefaultIncomeCategory);
     CategoryDB().getAllCategory();
     // TODO: implement initState
     super.initState();
     // getLoggedInState();
   }
+
   // This widget is the root of your application.
 
   @override
   Widget build(BuildContext context) {
-
     return ScreenUtilInit(
-      designSize:  const Size(360, 640),
+      designSize: const Size(360, 640),
       builder: (BuildContext context, Widget? child) {
         return GetMaterialApp(
           title: '포커캣',
@@ -110,8 +110,10 @@ class _AppState extends State<App> {
           // builder: (_, w) => BotToastInit()(_, w),
           builder: (context, w) {
             return MediaQuery(
-                data: MediaQuery.of(context).copyWith(textScaler: const TextScaler.linear(1.0)),
-                child: BotToastInit()(context, w)); },
+                data: MediaQuery.of(context)
+                    .copyWith(textScaler: const TextScaler.linear(1.0)),
+                child: BotToastInit()(context, w));
+          },
           debugShowCheckedModeBanner: false,
           theme: ThemeData(
             primarySwatch: Colors.grey,
@@ -140,7 +142,6 @@ class _AppState extends State<App> {
           getPages: AppRoutes.pages,
         );
       },
-
     );
   }
 }

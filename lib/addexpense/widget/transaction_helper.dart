@@ -12,6 +12,14 @@ import '../db/models/category/category_model_db.dart';
 import '../db/models/transactions/transaction_model_db.dart';
 
 class SelectDate {
+  DateTimeRange selectMonth(int month, int year) {
+    DateTime startDate = DateTime(year, month, 1);
+    int daysInMonth = DateTime(year, month, 30).day;
+    DateTime endDate = DateTime(year, month, daysInMonth);
+
+    DateTimeRange selectedDate = DateTimeRange(start: startDate, end: endDate);
+    return selectedDate;
+  }
    selectPreviousMonth() {
     DateTime now = DateTime.now();
     int previousMonth = now.month - 1;
@@ -30,15 +38,15 @@ class SelectDate {
     return selectedDate;
   }
 
-   selectMonth(month,year) {
-
-
-     DateTime startDate = DateTime(year, month, 1);
-     DateTime endDate = DateTime(year, month, 31);
-
-     DateTimeRange selectedDate = DateTimeRange(start: startDate, end: endDate);
-     return selectedDate;
-   }
+   // selectMonth(month,year) {
+   //
+   //
+   //   DateTime startDate = DateTime(year, month, 1);
+   //   DateTime endDate = DateTime(year, month, 31);
+   //
+   //   DateTimeRange selectedDate = DateTimeRange(start: startDate, end: endDate);
+   //   return selectedDate;
+   // }
 
   selecteNextMonth() {
     DateTimeRange selectedDate = DateTimeRange(
@@ -50,7 +58,7 @@ class SelectDate {
 
   currentDateForCalenderSelection() {
     var daterange = DateTimeRange(
-      start: DateTime(DateTime.now().year, DateTime.now().month),
+      start: DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day,),
       end: DateTime(
         DateTime.now().year,
         DateTime.now().month,

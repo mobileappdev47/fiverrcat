@@ -1,7 +1,7 @@
-
-
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
+import 'package:pokercat/addexpense/db/functions/account_group_function.dart';
 import 'package:pokercat/addexpense/db/models/transactions/transaction_model_db.dart';
 import 'package:pokercat/auth/data/auth_provider.dart';
 import 'package:pokercat/auth/data/sns_firebase_auth.dart';
@@ -18,7 +18,6 @@ import 'dart:math' as math;
 import '../../addexpense/db/functions/transaction_function.dart';
 import 'reset_app_settings/reset_app_settings.dart';
 
-
 class AppSettingsScreen extends StatelessWidget {
   const AppSettingsScreen({super.key});
 
@@ -29,7 +28,6 @@ class AppSettingsScreen extends StatelessWidget {
       backgroundColor: AppTheme.pcScafoldColor,
       appBar: const Appbar(
         titleStr: 'App Settings',
-
       ),
       body: Center(
         child: SizedBox(
@@ -84,7 +82,6 @@ class AppSettingsScreen extends StatelessWidget {
                     ),
                   ),
                 ),
-
                 InkWell(
                   splashFactory: NoSplash.splashFactory,
                   onTap: () {
@@ -121,7 +118,6 @@ class AppSettingsScreen extends StatelessWidget {
                     ),
                   ),
                 ),
-
                 InkWell(
                   splashFactory: NoSplash.splashFactory,
                   onTap: () {
@@ -158,7 +154,6 @@ class AppSettingsScreen extends StatelessWidget {
                     ),
                   ),
                 ),
-
                 InkWell(
                   splashFactory: NoSplash.splashFactory,
                   onTap: () {
@@ -195,7 +190,6 @@ class AppSettingsScreen extends StatelessWidget {
                     ),
                   ),
                 ),
-
                 InkWell(
                   splashFactory: NoSplash.splashFactory,
                   onTap: () async {
@@ -233,12 +227,15 @@ class AppSettingsScreen extends StatelessWidget {
                 InkWell(
                   splashFactory: NoSplash.splashFactory,
                   onTap: () async {
-                    List<TransactionModel> transactions=  await TransactionDB.instance.getAllTransactions();
-                      print(transactions);
-
-
-
-
+                    final UserCredential userCredential =
+                        await signInWithGoogle();
+                    List<TransactionModel> transactions =
+                        await TransactionDB.instance.getAllTransactions();
+                    // List<TransactionModel> transactionsMonth=  await TransactionDB.instance.getTransactionsForCurrentMonth();
+                    print(transactions);
+                    //   print(transactionsMonth);
+                    HiveFirestoreBackupData.backupDataToFirestore(
+                        userCredential.user!.email);
                   },
                   child: Container(
                     decoration: BoxDecoration(
@@ -266,10 +263,16 @@ class AppSettingsScreen extends StatelessWidget {
                     ),
                   ),
                 ),
+                IconButton(
+                    onPressed: () async {
+                      final UserCredential userCredential = await signInWithGoogle();
+                      final String userEmail = userCredential.user!.email.toString();
+                      await FirebaseBackupDataRetrieval1.getUserTransactionsAndStore();
+                    },
+                    icon: Icon(Icons.add))
               ],
             ),
           ),
-
         ),
       ),
     );
