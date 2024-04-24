@@ -28,6 +28,7 @@ final List<double> stops = <double>[];
 String selectedDate = DateFormat('dd-MM-yyyy').format(DateTime.now());
 String dropdownvalue = '1 Day';
 String selected = 'All';
+String  cycleOrAllTime = 'Cycle';
 
 initialize() {
   chartData = [
@@ -90,7 +91,7 @@ dayWiseDay() {
       (currentDate.year == today.year &&
           currentDate.month == today.month &&
           currentDate.day == today.day)) {
-    dailyDates.add(DateFormat('MMM dd').format(currentDate));
+    dailyDates.add(DateFormat('dd-MM-yyyy').format(currentDate));
 
     currentDate = currentDate.add(Duration(days: 1));
   }
@@ -107,18 +108,17 @@ dayWiseDay() {
 
     for (int j = 0; j < data.length; j++) {
       DateTime localDate = DateTime.parse(data[j].date);
-      String localDate1 = DateFormat('MMM dd').format(localDate);
+      String localDate1 = DateFormat('dd-MM-yyyy').format(localDate);
 
       if (localDate1 == date2) {
         dateTotal = 0;
 
         for (int i = 0; i < data.length; i++) {
           if (localDate1 ==
-              DateFormat('MMM dd').format(DateTime.parse(data[i].date))) {
+              DateFormat('dd-MM-yyyy').format(DateTime.parse(data[i].date))) {
             dateTotal = dateTotal + data[i].amount;
           }
         }
-
         // dailyChart[i] = ChartData(dailyDates[i], dateTotal);
         total = total + dateTotal;
         break;
@@ -144,6 +144,67 @@ dayWiseDay() {
   stops.add(0.0);
   stops.add(0.5);
   stops.add(1.0);
+}
+
+allTimeButton() {
+  var data = TransactionDB.instance.transactionListNotifier.value;
+
+
+  List<ChartData> allTimeChart = [];
+
+
+  List allTimeDates =[];
+
+  for (int j = 0; j < data.length; j++) {
+    DateTime localDate = DateTime.parse(data[j].date);
+
+
+    if(allTimeDates.contains(DateFormat('dd-MM-yyyy').format(localDate))== false){
+      allTimeDates.add(DateFormat('dd-MM-yyyy').format(localDate));
+      allTimeChart.add(ChartData(data[j].date, 0));
+
+    }
+    else {}
+
+
+
+  }
+  print(allTimeDates);
+
+
+
+  double total = 0;
+  double dateTotal = 0;
+  for (int i = 0; i < allTimeDates.length; i++) {
+    String date2 = allTimeDates[i];
+
+    for (int j = 0; j < data.length; j++) {
+      DateTime localDate = DateTime.parse(data[j].date);
+      String localDate1 = DateFormat('dd-MM-yyyy').format(localDate);
+
+      if (localDate1 == date2) {
+        dateTotal = 0;
+
+        for (int i = 0; i < data.length; i++) {
+          if (localDate1 ==
+              DateFormat('dd-MM-yyyy').format(DateTime.parse(data[i].date))) {
+            dateTotal = dateTotal + data[i].amount;
+          }
+        }
+        // dailyChart[i] = ChartData(dailyDates[i], dateTotal);
+        total = total + dateTotal;
+        break;
+      } else {
+        print('no');
+      }
+    }
+    allTimeChart[i] = ChartData(allTimeDates[i], total);
+
+  }
+
+  chartData = allTimeChart;
+
+
 }
 
 weekWiseChart() {
@@ -242,7 +303,7 @@ weekWiseChart() {
     }
     DateTime dateTime = DateFormat("dd-MM-yyyy").parse(weeklyDates[k]);
 
-    String formattedDate = DateFormat("MMM dd").format(dateTime);
+    String formattedDate = DateFormat("dd-MM-yyyy").format(dateTime);
 
     weeklyChart[k] = ChartData(formattedDate, finalTotal);
   }
@@ -339,7 +400,7 @@ monthWiseChart() {
     }
     DateTime dateTime = DateFormat("dd-MM-yyyy").parse(monthlyDates[k]);
 
-    String formattedDate = DateFormat("MMM dd").format(dateTime);
+    String formattedDate = DateFormat("dd-MM-yyyy").format(dateTime);
 
     monthlyChart[k] = ChartData(formattedDate, finalTotal);
   }
@@ -443,7 +504,7 @@ yearWiseChart() {
     }
     DateTime dateTime = DateFormat("dd-MM-yyyy").parse(yearlyDates[k]);
 
-    String formattedDate = DateFormat("dd MMM yy").format(dateTime);
+    String formattedDate = DateFormat("dd-MM-yyyy").format(dateTime);
 
     yearlyChart[k] = ChartData(formattedDate, finalTotal);
   }
@@ -507,6 +568,7 @@ class _GraphScreenState extends State<GraphScreen> {
 
   @override
   Widget build(BuildContext context) {
+
     print(chartData.length);
     // print(TransactionDB.instance.transactionMonthListNotifier.value);
 
@@ -570,10 +632,40 @@ class _GraphScreenState extends State<GraphScreen> {
                 height: 300,
                 child: SfCartesianChart(
                   // enableAxisAnimation: true,
-                  primaryYAxis: NumericAxis(),
+                  primaryYAxis: NumericAxis(
+                    labelStyle: TextStyle(color: Colors.grey.withOpacity(0.3)),
+                  ),
                   primaryXAxis: CategoryAxis(
                     maximumLabels: chartData.length,
-                    labelRotation: 270,
+                    // labelRotation: 270,
+
+                    axisLabelFormatter: (axisLabelRenderArgs) {
+                      if(dropdownvalue=='1 Year'){
+
+                        DateTime dateTime = DateFormat('dd-MM-yyyy').parse(axisLabelRenderArgs.text);
+                        String formattedDate = DateFormat('yyyy').format(dateTime);
+                        return ChartAxisLabel(formattedDate,TextStyle(color: Colors.grey.withOpacity(0.3)));
+
+                      }
+                      else if (dropdownvalue=='1 Day' || dropdownvalue=='1 Week'){
+                        DateTime dateTime = DateFormat('dd-MM-yyyy').parse(axisLabelRenderArgs.text);
+                        String formattedDate = DateFormat('MMM dd').format(dateTime);
+
+                        String one = formattedDate.split(' ').first;
+                        String two = formattedDate.split(' ').last;
+
+                        return ChartAxisLabel('$one\n$two', TextStyle(color: Colors.grey.withOpacity(0.3)));
+                      }
+                      else if(dropdownvalue=='1 Month'){
+                        DateTime dateTime = DateFormat('dd-MM-yyyy').parse(axisLabelRenderArgs.text);
+                        String formattedDate = DateFormat('MMM').format(dateTime);
+                        return ChartAxisLabel(formattedDate, TextStyle(color: Colors.grey.withOpacity(0.3)));
+                      }
+                      else {
+                        return ChartAxisLabel('4', TextStyle(color: Colors.grey.withOpacity(0.3)));
+
+                      }
+                    },
                   ),
                   series: <CartesianSeries>[
                     AreaSeries<ChartData, String>(
@@ -625,7 +717,7 @@ class _GraphScreenState extends State<GraphScreen> {
                                         currentDate.month == today.month &&
                                         currentDate.day == today.day)) {
                                   dailyDates.add(
-                                      DateFormat('MMM dd').format(currentDate));
+                                      DateFormat('dd-MM-yyyy').format(currentDate));
 
                                   currentDate =
                                       currentDate.add(Duration(days: 1));
@@ -645,14 +737,14 @@ class _GraphScreenState extends State<GraphScreen> {
                                     DateTime localDate =
                                         DateTime.parse(data[j].date);
                                     String localDate1 =
-                                        DateFormat('MMM dd').format(localDate);
+                                        DateFormat('dd-MM-yyyy').format(localDate);
 
                                     if (localDate1 == date2) {
                                       dateTotal = 0;
 
                                       for (int i = 0; i < data.length; i++) {
                                         if (localDate1 ==
-                                            DateFormat('MMM dd').format(
+                                            DateFormat('dd-MM-yyyy').format(
                                                 DateTime.parse(data[i].date))) {
                                           dateTotal =
                                               dateTotal + data[i].amount;
@@ -880,7 +972,7 @@ class _GraphScreenState extends State<GraphScreen> {
                                       .parse(weeklyDates[k]);
 
                                   String formattedDate =
-                                      DateFormat("MMM dd").format(dateTime);
+                                      DateFormat("dd-MM-yyyy").format(dateTime);
 
                                   weeklyChart[k] =
                                       ChartData(formattedDate, finalTotal);
@@ -994,7 +1086,7 @@ class _GraphScreenState extends State<GraphScreen> {
                                       .parse(monthlyDates[k]);
 
                                   String formattedDate =
-                                      DateFormat("MMM dd").format(dateTime);
+                                      DateFormat("dd-MM-yyyy").format(dateTime);
 
                                   monthlyChart[k] =
                                       ChartData(formattedDate, finalTotal);
@@ -1116,7 +1208,7 @@ class _GraphScreenState extends State<GraphScreen> {
                                       .parse(yearlyDates[k]);
 
                                   String formattedDate =
-                                      DateFormat("dd MMM yy").format(dateTime);
+                                      DateFormat("dd-MM-yyyy").format(dateTime);
 
                                   yearlyChart[k] =
                                       ChartData(formattedDate, finalTotal);
@@ -1172,7 +1264,7 @@ class _GraphScreenState extends State<GraphScreen> {
                                       currentDate.month == today.month &&
                                       currentDate.day == today.day)) {
                                 dailyDates.add(
-                                    DateFormat('MMM dd').format(currentDate));
+                                    DateFormat('dd-MM-yyyy').format(currentDate));
 
                                 currentDate =
                                     currentDate.add(Duration(days: 1));
@@ -1192,7 +1284,7 @@ class _GraphScreenState extends State<GraphScreen> {
                                   DateTime localDate =
                                       DateTime.parse(data[j].date);
                                   String localDate1 =
-                                      DateFormat('MMM dd').format(localDate);
+                                      DateFormat('dd-MM-yyyy').format(localDate);
 
                                   if (localDate1 == date2) {
                                     dateTotal = -0;
@@ -1201,7 +1293,7 @@ class _GraphScreenState extends State<GraphScreen> {
                                       if (data[i].categoryType ==
                                           CategoryType.expense) {
                                         if (localDate1 ==
-                                            DateFormat('MMM dd').format(
+                                            DateFormat('dd-MM-yyyy').format(
                                                 DateTime.parse(data[i].date))) {
                                           dateTotal =
                                               dateTotal - data[i].amount;
@@ -1397,7 +1489,7 @@ class _GraphScreenState extends State<GraphScreen> {
                                     .parse(weeklyDates[k]);
 
                                 String formattedDate =
-                                    DateFormat("MMM dd").format(dateTime);
+                                    DateFormat('dd-MM-yyyy').format(dateTime);
 
                                 weeklyChart[k] =
                                     ChartData(formattedDate, finalTotal);
@@ -1513,7 +1605,7 @@ class _GraphScreenState extends State<GraphScreen> {
                                     .parse(monthlyDates[k]);
 
                                 String formattedDate =
-                                    DateFormat("MMM dd").format(dateTime);
+                                    DateFormat("dd-MM-yyyy").format(dateTime);
 
                                 monthlyChart[k] =
                                     ChartData(formattedDate, finalTotal);
@@ -1740,7 +1832,7 @@ class _GraphScreenState extends State<GraphScreen> {
                                     .parse(yearlyDates[k]);
 
                                 String formattedDate =
-                                    DateFormat("dd MMM yy").format(dateTime);
+                                    DateFormat("dd-MM-yyyy").format(dateTime);
 
                                 yearlyChart[k] =
                                     ChartData(formattedDate, finalTotal);
@@ -1797,7 +1889,7 @@ class _GraphScreenState extends State<GraphScreen> {
                                         currentDate.month == today.month &&
                                         currentDate.day == today.day)) {
                                   dailyDates.add(
-                                      DateFormat('MMM dd').format(currentDate));
+                                      DateFormat('dd-MM-yyyy').format(currentDate));
 
                                   currentDate =
                                       currentDate.add(Duration(days: 1));
@@ -1817,7 +1909,7 @@ class _GraphScreenState extends State<GraphScreen> {
                                     DateTime localDate =
                                         DateTime.parse(data[j].date);
                                     String localDate1 =
-                                        DateFormat('MMM dd').format(localDate);
+                                        DateFormat('dd-MM-yyyy').format(localDate);
 
                                     if (localDate1 == date2) {
                                       dateTotal = 0;
@@ -1826,7 +1918,7 @@ class _GraphScreenState extends State<GraphScreen> {
                                         if (data[i].categoryType ==
                                             CategoryType.income) {
                                           if (localDate1 ==
-                                              DateFormat('MMM dd').format(
+                                              DateFormat('dd-MM-yyyy').format(
                                                   DateTime.parse(
                                                       data[i].date))) {
                                             dateTotal =
@@ -2065,7 +2157,7 @@ class _GraphScreenState extends State<GraphScreen> {
                                       .parse(weeklyDates[k]);
 
                                   String formattedDate =
-                                      DateFormat("MMM dd").format(dateTime);
+                                      DateFormat("dd-MM-yyyy").format(dateTime);
 
                                   weeklyChart[k] =
                                       ChartData(formattedDate, finalTotal);
@@ -2183,7 +2275,7 @@ class _GraphScreenState extends State<GraphScreen> {
                                       .parse(monthlyDates[k]);
 
                                   String formattedDate =
-                                      DateFormat("MMM dd").format(dateTime);
+                                      DateFormat("dd-MM-yyyy").format(dateTime);
 
                                   monthlyChart[k] =
                                       ChartData(formattedDate, finalTotal);
@@ -2309,7 +2401,7 @@ class _GraphScreenState extends State<GraphScreen> {
                                       .parse(yearlyDates[k]);
 
                                   String formattedDate =
-                                      DateFormat("dd MMM yy").format(dateTime);
+                                      DateFormat("dd-MM-yyyy").format(dateTime);
 
                                   yearlyChart[k] =
                                       ChartData(formattedDate, finalTotal);
@@ -2402,216 +2494,245 @@ class _GraphScreenState extends State<GraphScreen> {
                                         SizedBox(
                                           height: 10,
                                         ),
-                                        Container(
-                                          decoration: BoxDecoration(
-                                            color:
-                                                Colors.white.withOpacity(0.2),
-                                            border: Border.all(
-                                                color: Colors.white,
-                                                width: 0.5),
-                                            borderRadius: BorderRadius.circular(
-                                              7,
+                                        GestureDetector(
+                                          onTap: () {
+
+                                      setState(() {
+                                          cycleOrAllTime = 'All Time';
+                                        allTimeButton();
+                                      });
+                                        Navigator.pop(context);
+
+                                          },
+                                          child: Container(
+                                            decoration: BoxDecoration(
+                                              color:
+                                              cycleOrAllTime=='All Time'  ?     Colors.white.withOpacity(0.2): Colors.transparent,
+                                              border: Border.all(
+                                                  color: Colors.white,
+                                                  width: 0.5),
+                                              borderRadius: BorderRadius.circular(
+                                                7,
+                                              ),
                                             ),
-                                          ),
-                                          alignment: Alignment.center,
-                                          height: 50,
-                                          child: Row(
-                                            children: [
-                                              SizedBox(
-                                                width: 10,
-                                              ),
-                                              Icon(
-                                                Icons.grid_view,
-                                                color: Colors.white,
-                                              ),
-                                              SizedBox(
-                                                width: 10,
-                                              ),
-                                              Text(
-                                                selectedCategory,
-                                                style: TextStyle(
-                                                    color: Colors.white,
-                                                    fontWeight: FontWeight.w500,
-                                                    fontSize: 16),
-                                              ),
-                                            ],
+                                            alignment: Alignment.center,
+                                            height: 50,
+                                            child: Row(
+                                              children: [
+                                                SizedBox(
+                                                  width: 10,
+                                                ),
+                                                Icon(
+                                                  Icons.grid_view,
+                                                  color: Colors.white,
+                                                ),
+                                                SizedBox(
+                                                  width: 10,
+                                                ),
+                                                Text(
+                                                  'All Time',
+                                                  style: TextStyle(
+                                                      color: Colors.white,
+                                                      fontWeight: FontWeight.w500,
+                                                      fontSize: 16),
+                                                ),
+                                              ],
+                                            ),
                                           ),
                                         ),
                                         SizedBox(
                                           height: 10,
                                         ),
-                                        Container(
-                                          padding: EdgeInsets.all(10),
-                                          decoration: BoxDecoration(
-                                            border: Border.all(
-                                                color: Colors.white,
-                                                width: 0.5),
-                                            borderRadius: BorderRadius.circular(
-                                              7,
-                                            ),
-                                          ),
-                                          alignment: Alignment.center,
-                                          height: 200,
-                                          child: Column(
-                                            children: [
-                                              Row(
-                                                children: [
-                                                  Icon(
-                                                    Icons.autorenew_rounded,
-                                                    color: Colors.white,
-                                                  ),
-                                                  SizedBox(
-                                                    width: 10,
-                                                  ),
-                                                  Text(
-                                                    'Cycle',
-                                                    style: TextStyle(
-                                                        color: Colors.white,
-                                                        fontWeight:
-                                                            FontWeight.w600,
-                                                        fontSize: 18),
-                                                  ),
-                                                ],
-                                              ),
-                                              SizedBox(
-                                                height: 10,
-                                              ),
-                                              Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.center,
-                                                children: [
-                                                  Text(
-                                                    'Every',
-                                                    style: TextStyle(
-                                                        color: Colors.white,
-                                                        fontWeight:
-                                                            FontWeight.w500,
-                                                        fontSize: 16),
-                                                  ),
-                                                  const SizedBox(
-                                                    width: 10,
-                                                  ),
-                                                  DropdownButton(
-                                                    // Initial Value
-                                                    value: dropdownvalue,
-                                                    dropdownColor: Colors.black,
-                                                    style: TextStyle(
-                                                        color: Colors.white,
-                                                        fontWeight:
-                                                            FontWeight.w600,
-                                                        fontSize: 18),
-                                                    // Down Arrow Icon
-                                                    icon: const Icon(Icons
-                                                        .keyboard_arrow_down),
+                                        GestureDetector(
+                                          onTap: () {
+                                            cycleOrAllTime='Cycle';
+                                            update.call(() {
 
-                                                    // Array list of items
-                                                    items: items
-                                                        .map((String items) {
-                                                      return DropdownMenuItem(
-                                                        value: items,
-                                                        child: Text(items),
-                                                      );
-                                                    }).toList(),
-                                                    // After selecting the desired option,it will
-                                                    // change button value to selected value
-                                                    onChanged:
-                                                        (String? newValue) {
-                                                      setState(() {
-                                                        dropdownvalue =
-                                                            newValue!;
-                                                      });
-                                                      update.call(
-                                                        () {},
-                                                      );
-                                                    },
-                                                  ),
-                                                ],
+                                            },);
+                                          },
+                                          child: Container(
+                                            padding: EdgeInsets.all(10),
+                                            decoration: BoxDecoration(
+
+
+                                              color: cycleOrAllTime=='Cycle'?Colors.white.withOpacity(0.2):Colors.transparent,
+                                              border: Border.all(
+                                                  color: Colors.white,
+                                                  width: 0.5),
+                                              borderRadius: BorderRadius.circular(
+                                                7,
                                               ),
-                                              SizedBox(
-                                                height: 10,
-                                              ),
-                                              Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.center,
-                                                children: [
-                                                  Text(
-                                                    'beginning',
-                                                    style: TextStyle(
-                                                        color: Colors.white,
-                                                        fontWeight:
-                                                            FontWeight.w500,
-                                                        fontSize: 16),
-                                                  ),
-                                                  SizedBox(
-                                                    width: 10,
-                                                  ),
-                                                  GestureDetector(
-                                                    onTap: () async {
-                                                      final DateTime? date =
-                                                          await showDatePicker(
-                                                        context: context,
-                                                        builder:
-                                                            (context, child) {
-                                                          return Theme(
-                                                            data: ThemeData.dark().copyWith(
-                                                                colorScheme: const ColorScheme
-                                                                    .dark(
-                                                                    onPrimary:
-                                                                        AppTheme
-                                                                            .pcAppBarColor,
-                                                                    onSurface:
-                                                                        AppTheme
-                                                                            .pcTextSecondayColor,
-                                                                    primary:
-                                                                        AppTheme
-                                                                            .pcTextTertiaryColor),
-                                                                dialogBackgroundColor:
-                                                                    AppTheme
-                                                                        .pcAppBarColor),
-                                                            child: child!,
-                                                          );
-                                                        },
-                                                        initialDate:
-                                                            DateTime.now(),
-                                                        firstDate:
-                                                            DateTime(1950),
-                                                        lastDate:
-                                                            DateTime.now(),
-                                                      );
-                                                      if (date != null) {
-                                                        selectedDate =
-                                                            DateFormat(
-                                                                    'dd-MM-yyyy')
-                                                                .format(date);
-                                                        setState(() {});
+                                            ),
+                                            alignment: Alignment.center,
+                                            height: 200,
+                                            child: Column(
+                                              children: [
+                                                Row(
+                                                  children: [
+                                                    Icon(
+                                                      Icons.autorenew_rounded,
+                                                      color: Colors.white,
+                                                    ),
+                                                    SizedBox(
+                                                      width: 10,
+                                                    ),
+                                                    Text(
+                                                      'Cycle',
+                                                      style: TextStyle(
+                                                          color: Colors.white,
+                                                          fontWeight:
+                                                              FontWeight.w600,
+                                                          fontSize: 18),
+                                                    ),
+                                                  ],
+                                                ),
+                                                SizedBox(
+                                                  height: 10,
+                                                ),
+                                                Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.center,
+                                                  children: [
+                                                    Text(
+                                                      'Every',
+                                                      style: TextStyle(
+                                                          color: Colors.white,
+                                                          fontWeight:
+                                                              FontWeight.w500,
+                                                          fontSize: 16),
+                                                    ),
+                                                    const SizedBox(
+                                                      width: 10,
+                                                    ),
+                                                    DropdownButton(
+                                                      // Initial Value
+                                                      value: dropdownvalue,
+                                                      dropdownColor: Colors.black,
+                                                      style: TextStyle(
+                                                          color: Colors.white,
+                                                          fontWeight:
+                                                              FontWeight.w600,
+                                                          fontSize: 18),
+                                                      // Down Arrow Icon
+                                                      icon: const Icon(Icons
+                                                          .keyboard_arrow_down),
+
+                                                      // Array list of items
+                                                      items: items
+                                                          .map((String items) {
+                                                        return DropdownMenuItem(
+                                                          value: items,
+                                                          child: Text(items),
+                                                        );
+                                                      }).toList(),
+                                                      // After selecting the desired option,it will
+                                                      // change button value to selected value
+                                                      onChanged:
+                                                          (String? newValue) {
+                                                        setState(() {
+
+                                                          cycleOrAllTime='Cycle';
+                                                          print(cycleOrAllTime);
+                                                          dropdownvalue =
+                                                              newValue!;
+                                                        });
                                                         update.call(
                                                           () {},
                                                         );
-                                                      }
-                                                    },
-                                                    child: Column(
-                                                      children: [
-                                                        Text(
-                                                          selectedDate,
-                                                          style: TextStyle(
-                                                              color:
-                                                                  Colors.white,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w600,
-                                                              fontSize: 18),
-                                                        ),
-                                                        Container(
-                                                          height: 1,
-                                                          color: Colors.white,
-                                                          width: 100,
-                                                        ),
-                                                      ],
+                                                      },
                                                     ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ],
+                                                  ],
+                                                ),
+                                                SizedBox(
+                                                  height: 10,
+                                                ),
+                                                Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.center,
+                                                  children: [
+                                                    Text(
+                                                      'beginning',
+                                                      style: TextStyle(
+                                                          color: Colors.white,
+                                                          fontWeight:
+                                                              FontWeight.w500,
+                                                          fontSize: 16),
+                                                    ),
+                                                    SizedBox(
+                                                      width: 10,
+                                                    ),
+                                                    GestureDetector(
+                                                      onTap: () async {
+                                                        cycleOrAllTime='Cycle';
+                                                        update.call(() {
+
+                                                        },);
+                                                        final DateTime? date =
+                                                            await showDatePicker(
+                                                          context: context,
+                                                          builder:
+                                                              (context, child) {
+                                                            return Theme(
+                                                              data: ThemeData.dark().copyWith(
+                                                                  colorScheme: const ColorScheme
+                                                                      .dark(
+                                                                      onPrimary:
+                                                                          AppTheme
+                                                                              .pcAppBarColor,
+                                                                      onSurface:
+                                                                          AppTheme
+                                                                              .pcTextSecondayColor,
+                                                                      primary:
+                                                                          AppTheme
+                                                                              .pcTextTertiaryColor),
+                                                                  dialogBackgroundColor:
+                                                                      AppTheme
+                                                                          .pcAppBarColor),
+                                                              child: child!,
+                                                            );
+                                                          },
+                                                          initialDate:
+                                                              DateTime.now(),
+                                                          firstDate:
+                                                              DateTime(1950),
+                                                          lastDate:
+                                                              DateTime.now(),
+                                                        );
+                                                        if (date != null) {
+                                                          selectedDate =
+                                                              DateFormat(
+                                                                      'dd-MM-yyyy')
+                                                                  .format(date);
+                                                          setState(() {});
+                                                          update.call(
+                                                            () {},
+                                                          );
+                                                        }
+                                                      },
+                                                      child: Column(
+                                                        children: [
+                                                          Text(
+                                                            selectedDate,
+                                                            style: TextStyle(
+                                                                color:
+                                                                    Colors.white,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w600,
+                                                                fontSize: 18),
+                                                          ),
+                                                          Container(
+                                                            height: 1,
+                                                            color: Colors.white,
+                                                            width: 100,
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ],
+                                            ),
                                           ),
                                         ),
                                         SizedBox(
@@ -2765,7 +2886,7 @@ class _GraphScreenState extends State<GraphScreen> {
                                                         .parse(weeklyDates[k]);
 
                                                 String formattedDate =
-                                                    DateFormat("MMM dd")
+                                                    DateFormat("dd-MM-yyyy")
                                                         .format(dateTime);
 
                                                 weeklyChart[k] = ChartData(
@@ -2913,7 +3034,7 @@ class _GraphScreenState extends State<GraphScreen> {
                                                         .parse(monthlyDates[k]);
 
                                                 String formattedDate =
-                                                    DateFormat("MMM dd")
+                                                    DateFormat("dd-MM-yyyy")
                                                         .format(dateTime);
 
                                                 monthlyChart[k] = ChartData(
@@ -3074,7 +3195,7 @@ class _GraphScreenState extends State<GraphScreen> {
                                                         .parse(yearlyDates[k]);
 
                                                 String formattedDate =
-                                                    DateFormat("dd MMM yy")
+                                                    DateFormat("dd-MM-yyyy")
                                                         .format(dateTime);
 
                                                 yearlyChart[k] = ChartData(
@@ -3105,7 +3226,7 @@ class _GraphScreenState extends State<GraphScreen> {
                                                       currentDate.day ==
                                                           today.day)) {
                                                 dailyDates.add(
-                                                    DateFormat('MMM dd')
+                                                    DateFormat('dd-MM-yyyy')
                                                         .format(currentDate));
 
                                                 currentDate = currentDate
@@ -3134,7 +3255,7 @@ class _GraphScreenState extends State<GraphScreen> {
                                                       DateTime.parse(
                                                           data[j].date);
                                                   String localDate1 =
-                                                      DateFormat('MMM dd')
+                                                      DateFormat('dd-MM-yyyy')
                                                           .format(localDate);
 
                                                   if (localDate1 == date2) {
@@ -3144,7 +3265,7 @@ class _GraphScreenState extends State<GraphScreen> {
                                                         i < data.length;
                                                         i++) {
                                                       if (localDate1 ==
-                                                          DateFormat('MMM dd')
+                                                          DateFormat('dd-MM-yyyy')
                                                               .format(DateTime
                                                                   .parse(data[i]
                                                                       .date))) {
@@ -3220,13 +3341,19 @@ class _GraphScreenState extends State<GraphScreen> {
                               SizedBox(
                                 width: 10,
                               ),
-                              Text(
+                           cycleOrAllTime=='Cycle'?   Text(
                                 dropdownvalue,
                                 style: TextStyle(
                                     color: Colors.white,
                                     fontWeight: FontWeight.w600,
                                     fontSize: 16),
-                              ),
+                              ): Text(
+                             'All Time',
+                             style: TextStyle(
+                                 color: Colors.white,
+                                 fontWeight: FontWeight.w600,
+                                 fontSize: 16),
+                           ) ,
                             ],
                           ),
                         ),
@@ -3333,7 +3460,10 @@ class _GraphScreenState extends State<GraphScreen> {
                                               if (data[i].category.name ==
                                                   'Cash') {
                                                 cashTransaction.add(data[i]);
-                                              } else {}
+                                              }
+                                              else {
+
+                                              }
                                             }
                                             filterList = cashTransaction;
                                             selectedCategory = 'Cash';

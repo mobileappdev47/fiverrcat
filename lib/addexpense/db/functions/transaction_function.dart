@@ -39,7 +39,6 @@ class TransactionDB implements TransactionDBFunctions {
     await updateAccountGroup(value);
     refresh();
 
-
   }
 
   Future<void> refresh() async {
