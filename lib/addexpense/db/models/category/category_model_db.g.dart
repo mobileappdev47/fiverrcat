@@ -74,6 +74,8 @@ class CategoryTypeAdapter extends TypeAdapter<CategoryType> {
       case CategoryType.expense:
         writer.writeByte(1);
         break;
+      case CategoryType.unknown:
+        // TODO: Handle this case.
     }
   }
 

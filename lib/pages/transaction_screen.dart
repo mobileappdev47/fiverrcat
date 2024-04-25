@@ -24,6 +24,27 @@ class _TransactionScreenState extends State<TransactionScreen> {
 
   @override
   void initState() {
+    years.forEach((element) {
+      if(element == DateTime.now().year)
+        {
+          if(years.indexOf(element) ==0)
+            {
+              indexAll = DateTime.now().month-1;
+            }
+          else if(years.indexOf(element) ==1)
+          {
+            indexAll =( DateTime.now().month-1) +12;
+          }
+          else
+            {
+              indexAll = (DateTime.now().month-1 )+24;
+            }
+        }
+    });
+    selectedDate = SelectDate()
+        .selectMonth(DateTime.now().month, DateTime.now().year);
+    TransactionDB.instance.filterForHome(
+        selectedDate.start, selectedDate.end);
     TransactionDB.instance.refresh();
     TransactionDB.instance.getTransactionsForCurrentMonth();
     CategoryDB.instance.getAllCategory();
@@ -34,10 +55,26 @@ class _TransactionScreenState extends State<TransactionScreen> {
   ValueNotifier<double> expenseCustomDateNotifier = ValueNotifier(0);
   ValueNotifier<double> totalCustomDateNotifier = ValueNotifier(0);
   PageController scrollController = PageController();
-  int indexAll = DateTime.now().month - 1;
+  int indexAll = DateTime.now().month;
+  List<String> months = [
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December'
+  ];
 
+  List<int> years = [2023, 2024, 2025];
   @override
   Widget build(BuildContext context) {
+
     // List<String> months = List.generate(12, (index) {
     //   return DateFormat('MMMM').format(DateTime(2024, index + 1, 1));
     // });
@@ -53,22 +90,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
 
     double incomeData = 0;
     double expenseData = 0;
-    List<String> months = [
-      'January',
-      'February',
-      'March',
-      'April',
-      'May',
-      'June',
-      'July',
-      'August',
-      'September',
-      'October',
-      'November',
-      'December'
-    ];
 
-    List<int> years = [2023, 2024, 2025];
     return Scaffold(
       resizeToAvoidBottomInset: false,
       backgroundColor: AppTheme.pcPrimaryColor,
@@ -210,10 +232,10 @@ class _TransactionScreenState extends State<TransactionScreen> {
                                   indexAll = index;
                                   // selectedDate = SelectDate().selectMonth(
                                   //     index + 1, DateTime.now().year);
-                                  selectedDate =
-                                      SelectDate().selectMonth(monthIndex+1, year);
-                                  TransactionDB.instance
-                                      .filterForHome(selectedDate.start,selectedDate.end);
+                                  selectedDate = SelectDate()
+                                      .selectMonth(monthIndex + 1, year);
+                                  TransactionDB.instance.filterForHome(
+                                      selectedDate.start, selectedDate.end);
                                   TransactionDB.instance
                                       .getTransactionsForCurrentMonth();
                                 });

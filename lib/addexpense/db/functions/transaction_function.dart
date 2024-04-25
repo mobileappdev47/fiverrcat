@@ -469,6 +469,7 @@ class HiveFirestoreBackupData {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       for (var transaction in transactionList) {
+        CategoryModel category = transaction.category;
         var firestoreData = {
           'email': email,
           'id': transaction.id,
@@ -476,7 +477,13 @@ class HiveFirestoreBackupData {
           'date': transaction.date,
           'account': transaction.account.name,
           'categoryType': transaction.categoryType.name,
-          'category': transaction.category.name,
+          'category': {
+            'id': category.id,
+            'name': category.name,
+            'isDeleted': category.isDeleted,
+            'categoryType': category.categoryType.name,
+          },
+          // 'category': transaction.category.name,
           'note': transaction.note,
         };
         Set<String> savedIds =
@@ -596,34 +603,53 @@ class FirebaseBackupDataRetrieval1 {
 
   static Future<void> getUserTransactionsAndStore() async {
     try {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
       User? user = auth.currentUser;
       if (user != null) {
         String authEmail = user.email!;
-        List<String>? savedIds = prefs.getStringList('saved_transaction_ids');
 
-        if (savedIds != null && savedIds.isNotEmpty) {
-          for (String transactionId in savedIds) {
-            DocumentSnapshot transactionSnapshot = await firestore
-                .collection('transactions')
-                .doc(authEmail)
-                .collection('user_transactions')
-                .doc(transactionId)
-                .get();
+        CollectionReference userTransactionsCollection = firestore
+            .collection('transactions')
+            .doc(authEmail)
+            .collection('user_transactions');
 
-            if (transactionSnapshot.exists) {
-              Map<String, dynamic>? data =
-                  transactionSnapshot.data() as Map<String, dynamic>?;
-              if (data != null) {
-                var categoryType;
+        QuerySnapshot transactionSnapshots = await userTransactionsCollection.get();
 
-                if(data['categoryType']=='income'){
-                  categoryType=CategoryType.income;
+
+        for (DocumentSnapshot transactionSnapshot in transactionSnapshots.docs) {
+          String transactionId = transactionSnapshot.id;
+
+
+          if (transactionSnapshot.exists) {
+            Map<String, dynamic>? data = transactionSnapshot.data()
+            as Map<String, dynamic>?;
+
+            if (data != null) {
+
+              CategoryType getCategoryTypeFromString(String categoryTypeString) {
+                switch (categoryTypeString.toLowerCase()) {
+                  case 'income':
+                    return CategoryType.income;
+                  case 'expense':
+                    return CategoryType.expense;
+                  default:
+                    return CategoryType.unknown; // or any other default value
                 }
-                else {
-                  categoryType= CategoryType.expense;
-                }
+              }
 
+              dynamic categoryTypeData = data['categoryType'];
+              if (categoryTypeData is String) {
+                CategoryType categoryType =
+                getCategoryTypeFromString(categoryTypeData);
+
+
+                Map<String, dynamic> categoryData = data['category'];
+                CategoryModel category = CategoryModel(
+                  id: categoryData['id'],
+                  name: categoryData['name'],
+                  isDeleted: categoryData['isDeleted'],
+                  categoryType:
+                  getCategoryTypeFromString(categoryData['categoryType']),
+                );
 
                 TransactionModel transaction = TransactionModel(
                   id: data['id'],
@@ -631,19 +657,17 @@ class FirebaseBackupDataRetrieval1 {
                   date: data['date'],
                   note: data['note'],
                   categoryType: categoryType,
-                  category: data['category'],
+                  category: category,
                   account: AccountType.cash,
                 );
                 final transactionDB = await Hive.openBox<TransactionModel>(
                     HiveFirestoreBackupData.TRANSACTION_DB_NAME);
                 await transactionDB.put(transaction.id, transaction);
+              } else {
+                print('Invalid categoryType data: $categoryTypeData');
               }
-            } else {
-              print("Document with ID $transactionId does not exist");
             }
           }
-        } else {
-          print("No saved transaction IDs found");
         }
       } else {
         print('User not authenticated');
@@ -652,4 +676,5 @@ class FirebaseBackupDataRetrieval1 {
       print('Error getting user transactions and storing: $e');
     }
   }
+
 }

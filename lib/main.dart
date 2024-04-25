@@ -16,17 +16,16 @@ import 'addexpense/db/models/currency/curency_model.db.dart';
 import 'global/component/preferences.dart';
 import 'imports.dart';
 
-
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
-    // options: const FirebaseOptions(
-    //     apiKey: "AIzaSyC3kRFtnws7FCGiXS7dpKjwm1XIpz5FZPA",
-    //     appId: "1:419533019754:android:9c90feee177db83c5c8813",
-    //     messagingSenderId: "419533019754",
-    //     projectId: "pokercat-77864",
-    //     storageBucket: "pokercat-77864.appspot.com"),
-  );
+      // options: const FirebaseOptions(
+      //     apiKey: "AIzaSyC3kRFtnws7FCGiXS7dpKjwm1XIpz5FZPA",
+      //     appId: "1:419533019754:android:9c90feee177db83c5c8813",
+      //     messagingSenderId: "419533019754",
+      //     projectId: "pokercat-77864",
+      //     storageBucket: "pokercat-77864.appspot.com"),
+      );
   await Hive.initFlutter();
 
   if (!Hive.isAdapterRegistered(CategoryTypeAdapter().typeId)) {
@@ -52,7 +51,6 @@ Future<void> main() async {
   // Initalize Fire
   // base Core for app, necessary for firebase to work
 
-
   //init을 통해 get.put injection 수행
   await AppPreferences.init();
 
@@ -61,6 +59,7 @@ Future<void> main() async {
   unawaited(MobileAds.instance.initialize());
 
   runApp(const App());
+
 }
 
 class App extends StatefulWidget {
@@ -81,6 +80,7 @@ class _AppState extends State<App> {
   //   });
   // }
 
+
   @override
   void dispose() {
     super.dispose();
@@ -93,8 +93,11 @@ class _AppState extends State<App> {
     CategoryDB().getAllCategory();
     // TODO: implement initState
     super.initState();
+
     // getLoggedInState();
   }
+
+
 
   // This widget is the root of your application.
 
