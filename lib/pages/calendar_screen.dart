@@ -111,25 +111,38 @@ class _CalendarScreenState extends State<CalendarScreen> {
   List<Meeting> getDataSource() {
     loader.value = true;
     final List<Meeting> meetings = <Meeting>[];
-    final Map<DateTime, double> totalAmountMap = {}; // Map to store total amount for each date
+    final Map<DateTime, double> totalAmountMap = {};
 
     var data = TransactionDB.instance.transactionListNotifier.value;
 
     // Calculate total amount for each date
     for (int i = 0; i < data.length; i++) {
       DateTime dateTime = DateTime.parse(data[i].date);
-      double totalAmount = totalAmountMap[dateTime] ?? 0; // Initialize to 0 if not exists
+      double totalAmount = totalAmountMap[dateTime] ?? 0;
       totalAmount += data[i].amount;
-      totalAmountMap[dateTime] = totalAmount; // Update total amount for this date
+      totalAmountMap[dateTime] = totalAmount;
     }
 
     // Create Meeting objects with total amount for each date
     totalAmountMap.forEach((date, totalAmount) {
       final DateTime startTime = DateTime(date.year, date.month, date.day, 9);
       final DateTime endTime = startTime.add(const Duration(hours: 2));
+
+      // Define color and whether it's income or expense
+      Color amountColor = totalAmount >= 0 ? Colors.green : Colors.red;
+      String formattedTotalAmount = formatter.format(totalAmount.abs());
+      String amountText = '${currencySymboleUpdate.value} $formattedTotalAmount';
+
+
+      if (totalAmount < 0) {
+        amountText = '- $amountText';
+      }else{
+        amountText = '+ $amountText';
+      }
+
       meetings.add(
         Meeting(
-          '${currencySymboleUpdate.value} ${formatter.format(totalAmount)}',
+          amountText,
           startTime,
           endTime,
           Colors.transparent,
@@ -137,6 +150,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
         ),
       );
     });
+
     setState(() {});
     loader.value = false;
     Get.forceAppUpdate();
@@ -354,6 +368,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     textStyle: TextStyle(color: Colors.white),
                   ),
                 ),
+
                 onViewChanged: (viewChangedDetails) {
                   if (click) {
                     final DateTime firstVisibleDate =
@@ -371,6 +386,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
                       selectionDetails.date ?? DateTime.now();
                   onDaySelected(selectedDay, focusedDay);
                 },
+                selectionDecoration: BoxDecoration(
+                  border: Border.all(color: Colors.purple, width: 2.0),
+                ),
                 todayHighlightColor: Colors.blue,
                 view: CalendarView.month,
                 dataSource: MeetingDataSource(
