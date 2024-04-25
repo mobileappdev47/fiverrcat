@@ -1,4 +1,6 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:pokercat/addexpense/db/functions/transaction_function.dart';
 import 'package:pokercat/pages/app_settings_screen/app_settings_screen.dart';
 
 
@@ -33,7 +35,47 @@ class _BtmNaviState extends State<BtmNavi> {
 
 
   ];
-
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    WidgetsBinding.instance?.addPostFrameCallback((_) {
+      showDialogOnInit(context);
+    });
+  }
+  void showDialogOnInit(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Back up'),
+          content: const Text('Would you like to create a backup of your data now?'),
+          actions: <Widget>[
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                TextButton(
+                  onPressed: () async {
+                    final UserCredential userCredential = await signInWithGoogle();
+                    final String userEmail = userCredential.user!.email.toString();
+                    await FirebaseBackupDataRetrieval1.getUserTransactionsAndStore();
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('Yes'),
+                ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('No'),
+                ),
+              ],
+            ),
+          ],
+        );
+      },
+    );
+  }
   void _onItemTap(int index) {
     setState(() {
       _currentIndex = index;

@@ -6,7 +6,7 @@ enum CategoryType {
   @HiveField(0)
   income,
   @HiveField(1)
-  expense,
+  expense, unknown,
 }
 
 @HiveType(typeId: 1)

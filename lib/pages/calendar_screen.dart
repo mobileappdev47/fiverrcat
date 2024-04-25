@@ -127,7 +127,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
     totalAmountMap.forEach((date, totalAmount) {
       final DateTime startTime = DateTime(date.year, date.month, date.day, 9);
       final DateTime endTime = startTime.add(const Duration(hours: 2));
-
       meetings.add(
         Meeting(
           '${currencySymboleUpdate.value} ${formatter.format(totalAmount)}',
@@ -138,7 +137,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
         ),
       );
     });
-
     setState(() {});
     loader.value = false;
     Get.forceAppUpdate();

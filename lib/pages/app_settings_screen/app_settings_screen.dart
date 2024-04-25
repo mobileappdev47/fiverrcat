@@ -263,13 +263,13 @@ class AppSettingsScreen extends StatelessWidget {
                     ),
                   ),
                 ),
-                IconButton(
-                    onPressed: () async {
-                      final UserCredential userCredential = await signInWithGoogle();
-                      final String userEmail = userCredential.user!.email.toString();
-                      await FirebaseBackupDataRetrieval1.getUserTransactionsAndStore();
-                    },
-                    icon: Icon(Icons.add))
+                // IconButton(
+                //     onPressed: () async {
+                //       final UserCredential userCredential = await signInWithGoogle();
+                //       final String userEmail = userCredential.user!.email.toString();
+                //       await FirebaseBackupDataRetrieval1.getUserTransactionsAndStore();
+                //     },
+                //     icon: Icon(Icons.add))
               ],
             ),
           ),
