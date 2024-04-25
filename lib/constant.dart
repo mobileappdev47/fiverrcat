@@ -4,6 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 class AppTheme {
   AppTheme._();
   static const Color contentColorBlue = Color(0xFF2196F3);
+  static const Color chartColor = Color(0xFFc2cdf4);
 
   static const Color contentColorCyan = Color(0xFF50E4FF);
   static const Color mainGridLineColor = Colors.white10;

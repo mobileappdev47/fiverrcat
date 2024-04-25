@@ -774,6 +774,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
         ),
       ),
     );
+
+
+
   }
 
   // resetTransactionsOnly(value, id) {
@@ -841,6 +844,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
   //     },
   //   );
   // }
+
   resetTransactionsOnly(BuildContext context, List<TransactionModel> transactions) {
     showDialog(
       context: context,
