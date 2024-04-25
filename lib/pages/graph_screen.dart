@@ -154,6 +154,8 @@ allTimeButton() {
 
 
   List allTimeDates =[];
+  List reverseAllTimeDates =[];
+
 
   for (int j = 0; j < data.length; j++) {
     DateTime localDate = DateTime.parse(data[j].date);
@@ -166,17 +168,15 @@ allTimeButton() {
     }
     else {}
 
-
-
   }
   print(allTimeDates);
 
-
+  reverseAllTimeDates= List.from(allTimeDates.reversed);
 
   double total = 0;
   double dateTotal = 0;
-  for (int i = 0; i < allTimeDates.length; i++) {
-    String date2 = allTimeDates[i];
+  for (int i = 0; i < reverseAllTimeDates.length; i++) {
+    String date2 = reverseAllTimeDates[i];
 
     for (int j = 0; j < data.length; j++) {
       DateTime localDate = DateTime.parse(data[j].date);
@@ -198,7 +198,145 @@ allTimeButton() {
         print('no');
       }
     }
-    allTimeChart[i] = ChartData(allTimeDates[i], total);
+    allTimeChart[i] = ChartData(reverseAllTimeDates[i], total);
+
+  }
+
+  chartData = allTimeChart;
+
+
+}
+
+allTimeExpenseButton() {
+  var data = TransactionDB.instance.transactionListNotifier.value;
+
+
+  List<ChartData> allTimeChart = [];
+
+
+  List allTimeDates =[];
+  List reverseAllTimeDates =[];
+
+
+  for (int j = 0; j < data.length; j++) {
+    DateTime localDate = DateTime.parse(data[j].date);
+
+
+    if(allTimeDates.contains(DateFormat('dd-MM-yyyy').format(localDate))== false){
+      allTimeDates.add(DateFormat('dd-MM-yyyy').format(localDate));
+      allTimeChart.add(ChartData(data[j].date, 0));
+
+    }
+    else {}
+
+  }
+  print(allTimeDates);
+
+  reverseAllTimeDates= List.from(allTimeDates.reversed);
+
+  double total = -0;
+  double dateTotal = -0;
+  for (int i = 0; i < reverseAllTimeDates.length; i++) {
+    String date2 = reverseAllTimeDates[i];
+
+    for (int j = 0; j < data.length; j++) {
+
+      if(data[j].categoryType ==CategoryType.expense){
+        DateTime localDate = DateTime.parse(data[j].date);
+        String localDate1 = DateFormat('dd-MM-yyyy').format(localDate);
+
+        if (localDate1 == date2) {
+          dateTotal = -0;
+
+          for (int i = 0; i < data.length; i++) {
+            if (localDate1 ==
+                DateFormat('dd-MM-yyyy').format(DateTime.parse(data[i].date))) {
+              dateTotal = dateTotal - data[i].amount;
+            }
+          }
+          // dailyChart[i] = ChartData(dailyDates[i], dateTotal);
+          total = total + dateTotal;
+          break;
+        } else {
+          print('no');
+        }
+      }
+      else {
+
+      }
+
+
+    }
+    allTimeChart[i] = ChartData(reverseAllTimeDates[i], total);
+
+  }
+
+  chartData = allTimeChart;
+
+
+}
+
+allTimeIncomeButton() {
+  var data = TransactionDB.instance.transactionListNotifier.value;
+
+
+  List<ChartData> allTimeChart = [];
+
+
+  List allTimeDates =[];
+  List reverseAllTimeDates =[];
+
+
+  for (int j = 0; j < data.length; j++) {
+    DateTime localDate = DateTime.parse(data[j].date);
+
+
+    if(allTimeDates.contains(DateFormat('dd-MM-yyyy').format(localDate))== false){
+      allTimeDates.add(DateFormat('dd-MM-yyyy').format(localDate));
+      allTimeChart.add(ChartData(data[j].date, 0));
+
+    }
+    else {}
+
+  }
+  print(allTimeDates);
+
+  reverseAllTimeDates= List.from(allTimeDates.reversed);
+
+  double total = 0;
+  double dateTotal = 0;
+  for (int i = 0; i < reverseAllTimeDates.length; i++) {
+    String date2 = reverseAllTimeDates[i];
+
+    for (int j = 0; j < data.length; j++) {
+
+      if(data[j].categoryType ==CategoryType.income){
+        DateTime localDate = DateTime.parse(data[j].date);
+        String localDate1 = DateFormat('dd-MM-yyyy').format(localDate);
+
+        if (localDate1 == date2) {
+          dateTotal = 0;
+
+          for (int i = 0; i < data.length; i++) {
+            if (localDate1 ==
+                DateFormat('dd-MM-yyyy').format(DateTime.parse(data[i].date))) {
+              dateTotal = dateTotal +data[i].amount;
+            }
+          }
+          // dailyChart[i] = ChartData(dailyDates[i], dateTotal);
+          total = total + dateTotal;
+          break;
+        } else {
+          print('no');
+        }
+      }
+      else {
+
+      }
+
+
+    }
+    allTimeChart[i] = ChartData(reverseAllTimeDates[i], total);
 
   }
 
@@ -702,71 +840,77 @@ class _GraphScreenState extends State<GraphScreen> {
                               var data = TransactionDB
                                   .instance.transactionListNotifier.value;
                               data = filterList;
-                              if (dropdownvalue == '1 Day') {
-                                List dailyDates = [];
-                                DateTime selectedOne = DateFormat('dd-MM-yyyy')
-                                    .parse(selectedDate);
-                                DateTime today = DateTime.now();
-                                DateTime currentDate = DateTime(
-                                    selectedOne.year,
-                                    selectedOne.month,
-                                    selectedOne.day);
 
-                                while (currentDate.isBefore(today) ||
-                                    (currentDate.year == today.year &&
-                                        currentDate.month == today.month &&
-                                        currentDate.day == today.day)) {
-                                  dailyDates.add(
-                                      DateFormat('dd-MM-yyyy').format(currentDate));
+                              if(cycleOrAllTime == 'All Time'){
+                             allTimeButton();
+                              }
+                              else {
+                                if (dropdownvalue == '1 Day') {
+                                  List dailyDates = [];
+                                  DateTime selectedOne = DateFormat('dd-MM-yyyy')
+                                      .parse(selectedDate);
+                                  DateTime today = DateTime.now();
+                                  DateTime currentDate = DateTime(
+                                      selectedOne.year,
+                                      selectedOne.month,
+                                      selectedOne.day);
 
-                                  currentDate =
-                                      currentDate.add(Duration(days: 1));
-                                }
+                                  while (currentDate.isBefore(today) ||
+                                      (currentDate.year == today.year &&
+                                          currentDate.month == today.month &&
+                                          currentDate.day == today.day)) {
+                                    dailyDates.add(
+                                        DateFormat('dd-MM-yyyy').format(currentDate));
 
-                                List<ChartData> dailyChart = [];
-
-                                for (int i = 0; i < dailyDates.length; i++) {
-                                  dailyChart.add(ChartData(dailyDates[i], 0.0));
-                                }
-                                double total = 0;
-                                double dateTotal = 0;
-                                for (int i = 0; i < dailyDates.length; i++) {
-                                  String date2 = dailyDates[i];
-
-                                  for (int j = 0; j < data.length; j++) {
-                                    DateTime localDate =
-                                        DateTime.parse(data[j].date);
-                                    String localDate1 =
-                                        DateFormat('dd-MM-yyyy').format(localDate);
-
-                                    if (localDate1 == date2) {
-                                      dateTotal = 0;
-
-                                      for (int i = 0; i < data.length; i++) {
-                                        if (localDate1 ==
-                                            DateFormat('dd-MM-yyyy').format(
-                                                DateTime.parse(data[i].date))) {
-                                          dateTotal =
-                                              dateTotal + data[i].amount;
-                                        }
-                                      }
-
-                                      // dailyChart[i] = ChartData(dailyDates[i], dateTotal);
-                                      total = total + dateTotal;
-                                      break;
-                                    } else {
-                                      print('no');
-                                    }
+                                    currentDate =
+                                        currentDate.add(Duration(days: 1));
                                   }
 
-                                  dailyChart[i] =
-                                      ChartData(dailyDates[i], total);
-                                }
+                                  List<ChartData> dailyChart = [];
 
-                                chartData = dailyChart;
-                                setState(() {});
-                              } else if (dropdownvalue == '1 Week') {
-                                /*       List weeklyDates = [];
+                                  for (int i = 0; i < dailyDates.length; i++) {
+                                    dailyChart.add(ChartData(dailyDates[i], 0.0));
+                                  }
+                                  double total = 0;
+                                  double dateTotal = 0;
+                                  for (int i = 0; i < dailyDates.length; i++) {
+                                    String date2 = dailyDates[i];
+
+                                    for (int j = 0; j < data.length; j++) {
+                                      DateTime localDate =
+                                      DateTime.parse(data[j].date);
+                                      String localDate1 =
+                                      DateFormat('dd-MM-yyyy').format(localDate);
+
+                                      if (localDate1 == date2) {
+                                        dateTotal = 0;
+
+                                        for (int i = 0; i < data.length; i++) {
+                                          if (localDate1 ==
+                                              DateFormat('dd-MM-yyyy').format(
+                                                  DateTime.parse(data[i].date))) {
+                                            dateTotal =
+                                                dateTotal + data[i].amount;
+                                          }
+                                        }
+
+                                        // dailyChart[i] = ChartData(dailyDates[i], dateTotal);
+                                        total = total + dateTotal;
+                                        break;
+                                      } else {
+                                        print('no');
+                                      }
+                                    }
+
+                                    dailyChart[i] =
+                                        ChartData(dailyDates[i], total);
+                                  }
+
+                                  chartData = dailyChart;
+                                  setState(() {});
+                                }
+                                else if (dropdownvalue == '1 Week') {
+                                  /*       List weeklyDates = [];
                                 DateTime selectedOne = DateFormat('dd-MM-yyyy')
                                     .parse(selectedDate);
                                 DateTime todayDate = DateTime.now();
@@ -861,363 +1005,369 @@ class _GraphScreenState extends State<GraphScreen> {
                                 chartData = weeklyChart;
                                 setState(() {});*/
 
-                                List weeklyDates = [];
-                                DateTime selectedOne = DateFormat('dd-MM-yyyy')
-                                    .parse(selectedDate);
-                                DateTime todayDate = DateTime.now();
+                                  List weeklyDates = [];
+                                  DateTime selectedOne = DateFormat('dd-MM-yyyy')
+                                      .parse(selectedDate);
+                                  DateTime todayDate = DateTime.now();
 
-                                while (selectedOne.isBefore(todayDate)) {
-                                  weeklyDates.add(DateFormat('dd-MM-yyyy')
-                                      .format(selectedOne));
-                                  selectedOne =
-                                      selectedOne.add(Duration(days: 7));
-                                }
+                                  while (selectedOne.isBefore(todayDate)) {
+                                    weeklyDates.add(DateFormat('dd-MM-yyyy')
+                                        .format(selectedOne));
+                                    selectedOne =
+                                        selectedOne.add(Duration(days: 7));
+                                  }
 
-                                // print(weeklyDates);
+                                  // print(weeklyDates);
 
-                                List<ChartData> weekChart = [];
-                                for (int i = 0; i < weeklyDates.length; i++) {
-                                  weekChart.add(ChartData(weeklyDates[i], 300));
-                                }
+                                  List<ChartData> weekChart = [];
+                                  for (int i = 0; i < weeklyDates.length; i++) {
+                                    weekChart.add(ChartData(weeklyDates[i], 300));
+                                  }
 
-                                List<ChartData> weeklyChart = [];
-                                for (int i = 0; i < weeklyDates.length; i++) {
-                                  weeklyChart.add(ChartData(weeklyDates[i], 0));
-                                }
+                                  List<ChartData> weeklyChart = [];
+                                  for (int i = 0; i < weeklyDates.length; i++) {
+                                    weeklyChart.add(ChartData(weeklyDates[i], 0));
+                                  }
 
-                                // data.sort((a, b) => a.date.compareTo(b.date),);
+                                  // data.sort((a, b) => a.date.compareTo(b.date),);
 
-                                List myweekList = [];
+                                  List myweekList = [];
 
-                                for (int i = 0; i < data.length; i++) {
-                                  bool found = false;
-                                  for (int j = 0;
-                                      j < weeklyDates.length - 1;
-                                      j++) {
-                                    DateTime startDate =
-                                        DateFormat('dd-MM-yyyy')
-                                            .parse(weeklyDates[j]);
-                                    DateTime endDate = DateFormat('dd-MM-yyyy')
-                                        .parse(weeklyDates[j + 1]);
-                                    DateTime date2 =
-                                        DateTime.parse(data[i].date);
+                                  for (int i = 0; i < data.length; i++) {
+                                    bool found = false;
+                                    for (int j = 0;
+                                    j < weeklyDates.length - 1;
+                                    j++) {
+                                      DateTime startDate =
+                                      DateFormat('dd-MM-yyyy')
+                                          .parse(weeklyDates[j]);
+                                      DateTime endDate = DateFormat('dd-MM-yyyy')
+                                          .parse(weeklyDates[j + 1]);
+                                      DateTime date2 =
+                                      DateTime.parse(data[i].date);
 
-                                    if (date2.isAfter(startDate) &&
-                                        date2.isBefore(endDate)) {
-                                      print(myweekList);
-                                      print('Yes');
+                                      if (date2.isAfter(startDate) &&
+                                          date2.isBefore(endDate)) {
+                                        print(myweekList);
+                                        print('Yes');
 
-                                      myweekList.add({
-                                        'index': j + 1,
-                                        'amt': data[i].amount
-                                      });
+                                        myweekList.add({
+                                          'index': j + 1,
+                                          'amt': data[i].amount
+                                        });
 
-                                      // monthlyChart[j] = ChartData(
-                                      //     monthlyDates[j + 1],
-                                      //     data[i].amount);
+                                        // monthlyChart[j] = ChartData(
+                                        //     monthlyDates[j + 1],
+                                        //     data[i].amount);
 
-                                      found = true;
-                                      break;
-                                    } else {
-                                      print('no');
+                                        found = true;
+                                        break;
+                                      } else {
+                                        print('no');
+                                      }
+                                    }
+                                    if (!found) {
+                                      print(
+                                          'Item from list2 at index $i is not within any date range of list1.');
                                     }
                                   }
-                                  if (!found) {
-                                    print(
-                                        'Item from list2 at index $i is not within any date range of list1.');
+
+                                  print(myweekList);
+
+                                  Map<int, double> indexAmtMap = {};
+                                  for (var data in myweekList) {
+                                    int index = data['index'];
+                                    double amt = data['amt'];
+                                    indexAmtMap[index] =
+                                        (indexAmtMap[index] ?? 0) + amt;
                                   }
+
+                                  List<Map<String, dynamic>> finalList = [];
+                                  indexAmtMap.forEach((index, totalAmt) {
+                                    finalList.add(
+                                        {'index': index, 'totalamt': totalAmt});
+                                  });
+
+                                  print(finalList);
+
+                                  // for (int i = 0;
+                                  //     i < finalList.length;
+                                  //     i++) {
+                                  //   weeklyChart[
+                                  //       finalList[i]
+                                  //           ['index']] = ChartData(
+                                  //       weeklyDates[finalList[i]
+                                  //           ['index']],
+                                  //       finalList[i]['totalamt']);
+                                  // }
+                                  double finalTotal = 0;
+                                  for (int k = 0; k < weeklyChart.length; k++) {
+                                    for (int i = 0; i < finalList.length; i++) {
+                                      if (finalList[i]['index'] == k) {
+                                        // weeklyChart[k] = ChartData(
+                                        //     weeklyDates[k],
+                                        //     finalList[i]
+                                        //         ['totalamt']);
+                                        finalTotal =
+                                            finalTotal + finalList[i]['totalamt'];
+                                      }
+                                    }
+                                    DateTime dateTime = DateFormat("dd-MM-yyyy")
+                                        .parse(weeklyDates[k]);
+
+                                    String formattedDate =
+                                    DateFormat("dd-MM-yyyy").format(dateTime);
+
+                                    weeklyChart[k] =
+                                        ChartData(formattedDate, finalTotal);
+                                  }
+
+                                  chartData = weeklyChart;
+                                  setState(() {});
                                 }
+                                else if (dropdownvalue == '1 Month') {
+                                  print(data);
+                                  List monthlyDates = [];
+                                  DateTime selectedOne = DateFormat('dd-MM-yyyy')
+                                      .parse(selectedDate);
+                                  DateTime todayDate = DateTime.now();
 
-                                print(myweekList);
+                                  while (selectedOne.isBefore(todayDate) ||
+                                      selectedOne.month == todayDate.month) {
+                                    monthlyDates.add(DateFormat('dd-MM-yyyy')
+                                        .format(selectedOne));
+                                    selectedOne = DateTime(selectedOne.year,
+                                        selectedOne.month + 1, selectedOne.day);
+                                  }
 
-                                Map<int, double> indexAmtMap = {};
-                                for (var data in myweekList) {
-                                  int index = data['index'];
-                                  double amt = data['amt'];
-                                  indexAmtMap[index] =
-                                      (indexAmtMap[index] ?? 0) + amt;
-                                }
+                                  // print(monthlyDates);
 
-                                List<Map<String, dynamic>> finalList = [];
-                                indexAmtMap.forEach((index, totalAmt) {
-                                  finalList.add(
-                                      {'index': index, 'totalamt': totalAmt});
-                                });
+                                  List<ChartData> monthlyChart = [];
+                                  for (int i = 0; i < monthlyDates.length; i++) {
+                                    monthlyChart
+                                        .add(ChartData(monthlyDates[i], 0));
+                                  }
 
-                                print(finalList);
+                                  // data.sort((a, b) => a.date.compareTo(b.date),);
 
-                                // for (int i = 0;
-                                //     i < finalList.length;
-                                //     i++) {
-                                //   weeklyChart[
-                                //       finalList[i]
-                                //           ['index']] = ChartData(
-                                //       weeklyDates[finalList[i]
-                                //           ['index']],
-                                //       finalList[i]['totalamt']);
-                                // }
-                                double finalTotal = 0;
-                                for (int k = 0; k < weeklyChart.length; k++) {
-                                  for (int i = 0; i < finalList.length; i++) {
-                                    if (finalList[i]['index'] == k) {
-                                      // weeklyChart[k] = ChartData(
-                                      //     weeklyDates[k],
-                                      //     finalList[i]
-                                      //         ['totalamt']);
-                                      finalTotal =
-                                          finalTotal + finalList[i]['totalamt'];
+                                  List myMonthList = [];
+
+                                  for (int i = 0; i < data.length; i++) {
+                                    bool found = false;
+                                    for (int j = 0;
+                                    j < monthlyDates.length - 1;
+                                    j++) {
+                                      DateTime startDate =
+                                      DateFormat('dd-MM-yyyy')
+                                          .parse(monthlyDates[j]);
+                                      DateTime endDate = DateFormat('dd-MM-yyyy')
+                                          .parse(monthlyDates[j + 1]);
+                                      DateTime date2 =
+                                      DateTime.parse(data[i].date);
+
+                                      if (date2.isAfter(startDate) &&
+                                          date2.isBefore(endDate)) {
+                                        print(myMonthList);
+                                        print('Yes');
+
+                                        myMonthList.add({
+                                          'index': j + 1,
+                                          'amt': data[i].amount
+                                        });
+
+                                        // monthlyChart[j] = ChartData(
+                                        //     monthlyDates[j + 1],
+                                        //     data[i].amount);
+
+                                        found = true;
+                                        break;
+                                      } else {
+                                        print('no');
+                                      }
+                                    }
+                                    if (!found) {
+                                      print(
+                                          'Item from list2 at index $i is not within any date range of list1.');
                                     }
                                   }
-                                  DateTime dateTime = DateFormat("dd-MM-yyyy")
-                                      .parse(weeklyDates[k]);
 
-                                  String formattedDate =
-                                      DateFormat("dd-MM-yyyy").format(dateTime);
+                                  print(myMonthList);
 
-                                  weeklyChart[k] =
-                                      ChartData(formattedDate, finalTotal);
+                                  Map<int, double> indexAmtMap = {};
+                                  for (var data in myMonthList) {
+                                    int index = data['index'];
+                                    double amt = data['amt'];
+                                    indexAmtMap[index] =
+                                        (indexAmtMap[index] ?? 0) + amt;
+                                  }
+
+                                  List<Map<String, dynamic>> finalList = [];
+                                  indexAmtMap.forEach((index, totalAmt) {
+                                    finalList.add(
+                                        {'index': index, 'totalamt': totalAmt});
+                                  });
+
+                                  print(finalList);
+
+                                  // for (int i = 0; i < finalList.length; i++) {
+                                  //   monthlyChart[finalList[i]['index']] =
+                                  //       ChartData(
+                                  //           monthlyDates[finalList[i]['index']],
+                                  //           finalList[i]['totalamt']);
+                                  // }
+                                  double finalTotal = 0;
+                                  for (int k = 0; k < monthlyChart.length; k++) {
+                                    for (int i = 0; i < finalList.length; i++) {
+                                      if (finalList[i]['index'] == k) {
+                                        // weeklyChart[k] = ChartData(
+                                        //     weeklyDates[k],
+                                        //     finalList[i]
+                                        //         ['totalamt']);
+                                        finalTotal =
+                                            finalTotal + finalList[i]['totalamt'];
+                                      }
+                                    }
+                                    DateTime dateTime = DateFormat("dd-MM-yyyy")
+                                        .parse(monthlyDates[k]);
+
+                                    String formattedDate =
+                                    DateFormat("dd-MM-yyyy").format(dateTime);
+
+                                    monthlyChart[k] =
+                                        ChartData(formattedDate, finalTotal);
+                                  }
+
+                                  chartData = monthlyChart;
+
+                                  setState(() {});
                                 }
+                                else if (dropdownvalue == '1 Year') {
+                                  List yearlyDates = [];
+                                  DateTime selectedOne = DateFormat('dd-MM-yyyy')
+                                      .parse(selectedDate);
+                                  DateTime today = DateTime.now();
+                                  DateTime currentDate = DateTime(
+                                      selectedOne.year,
+                                      selectedOne.month,
+                                      selectedOne.day);
 
-                                chartData = weeklyChart;
-                                setState(() {});
-                              } else if (dropdownvalue == '1 Month') {
-                                print(data);
-                                List monthlyDates = [];
-                                DateTime selectedOne = DateFormat('dd-MM-yyyy')
-                                    .parse(selectedDate);
-                                DateTime todayDate = DateTime.now();
+                                  while (currentDate.isBefore(today) ||
+                                      (currentDate.year == today.year &&
+                                          currentDate.month == today.month &&
+                                          currentDate.day == today.day)) {
+                                    yearlyDates.add(DateFormat('dd-MM-yyyy')
+                                        .format(currentDate));
+                                    currentDate = DateTime(currentDate.year + 1,
+                                        selectedOne.month, selectedOne.day);
+                                  }
+                                  // print(yearlyDates);
+                                  List<ChartData> yearChart = [];
+                                  for (int i = 0; i < yearlyDates.length; i++) {
+                                    yearChart.add(ChartData(yearlyDates[i], 300));
+                                  }
 
-                                while (selectedOne.isBefore(todayDate) ||
-                                    selectedOne.month == todayDate.month) {
-                                  monthlyDates.add(DateFormat('dd-MM-yyyy')
-                                      .format(selectedOne));
-                                  selectedOne = DateTime(selectedOne.year,
-                                      selectedOne.month + 1, selectedOne.day);
-                                }
+                                  List<ChartData> yearlyChart = [];
+                                  for (int i = 0; i < yearlyDates.length; i++) {
+                                    yearlyChart.add(ChartData(yearlyDates[i], 0));
+                                  }
 
-                                // print(monthlyDates);
+                                  // data.sort((a, b) => a.date.compareTo(b.date),);
 
-                                List<ChartData> monthlyChart = [];
-                                for (int i = 0; i < monthlyDates.length; i++) {
-                                  monthlyChart
-                                      .add(ChartData(monthlyDates[i], 0));
-                                }
+                                  List myYearList = [];
 
-                                // data.sort((a, b) => a.date.compareTo(b.date),);
+                                  for (int i = 0; i < data.length; i++) {
+                                    bool found = false;
+                                    for (int j = 0;
+                                    j < yearlyDates.length - 1;
+                                    j++) {
+                                      DateTime startDate =
+                                      DateFormat('dd-MM-yyyy')
+                                          .parse(yearlyDates[j]);
+                                      DateTime endDate = DateFormat('dd-MM-yyyy')
+                                          .parse(yearlyDates[j + 1]);
+                                      DateTime date2 =
+                                      DateTime.parse(data[i].date);
 
-                                List myMonthList = [];
+                                      if (date2.isAfter(startDate) &&
+                                          date2.isBefore(endDate)) {
+                                        print(myYearList);
+                                        print('Yes');
 
-                                for (int i = 0; i < data.length; i++) {
-                                  bool found = false;
-                                  for (int j = 0;
-                                      j < monthlyDates.length - 1;
-                                      j++) {
-                                    DateTime startDate =
-                                        DateFormat('dd-MM-yyyy')
-                                            .parse(monthlyDates[j]);
-                                    DateTime endDate = DateFormat('dd-MM-yyyy')
-                                        .parse(monthlyDates[j + 1]);
-                                    DateTime date2 =
-                                        DateTime.parse(data[i].date);
+                                        myYearList.add({
+                                          'index': j + 1,
+                                          'amt': data[i].amount
+                                        });
 
-                                    if (date2.isAfter(startDate) &&
-                                        date2.isBefore(endDate)) {
-                                      print(myMonthList);
-                                      print('Yes');
+                                        // monthlyChart[j] = ChartData(
+                                        //     monthlyDates[j + 1],
+                                        //     data[i].amount);
 
-                                      myMonthList.add({
-                                        'index': j + 1,
-                                        'amt': data[i].amount
-                                      });
-
-                                      // monthlyChart[j] = ChartData(
-                                      //     monthlyDates[j + 1],
-                                      //     data[i].amount);
-
-                                      found = true;
-                                      break;
-                                    } else {
-                                      print('no');
+                                        found = true;
+                                        break;
+                                      } else {
+                                        print('no');
+                                      }
+                                    }
+                                    if (!found) {
+                                      print(
+                                          'Item from list2 at index $i is not within any date range of list1.');
                                     }
                                   }
-                                  if (!found) {
-                                    print(
-                                        'Item from list2 at index $i is not within any date range of list1.');
+
+                                  print(myYearList);
+
+                                  Map<int, double> indexAmtMap = {};
+                                  for (var data in myYearList) {
+                                    int index = data['index'];
+                                    double amt = data['amt'];
+                                    indexAmtMap[index] =
+                                        (indexAmtMap[index] ?? 0) + amt;
                                   }
-                                }
 
-                                print(myMonthList);
+                                  List<Map<String, dynamic>> finalList = [];
+                                  indexAmtMap.forEach((index, totalAmt) {
+                                    finalList.add(
+                                        {'index': index, 'totalamt': totalAmt});
+                                  });
 
-                                Map<int, double> indexAmtMap = {};
-                                for (var data in myMonthList) {
-                                  int index = data['index'];
-                                  double amt = data['amt'];
-                                  indexAmtMap[index] =
-                                      (indexAmtMap[index] ?? 0) + amt;
-                                }
+                                  print(finalList);
 
-                                List<Map<String, dynamic>> finalList = [];
-                                indexAmtMap.forEach((index, totalAmt) {
-                                  finalList.add(
-                                      {'index': index, 'totalamt': totalAmt});
-                                });
-
-                                print(finalList);
-
-                                // for (int i = 0; i < finalList.length; i++) {
-                                //   monthlyChart[finalList[i]['index']] =
-                                //       ChartData(
-                                //           monthlyDates[finalList[i]['index']],
-                                //           finalList[i]['totalamt']);
-                                // }
-                                double finalTotal = 0;
-                                for (int k = 0; k < monthlyChart.length; k++) {
-                                  for (int i = 0; i < finalList.length; i++) {
-                                    if (finalList[i]['index'] == k) {
-                                      // weeklyChart[k] = ChartData(
-                                      //     weeklyDates[k],
-                                      //     finalList[i]
-                                      //         ['totalamt']);
-                                      finalTotal =
-                                          finalTotal + finalList[i]['totalamt'];
+                                  // for (int i = 0; i < finalList.length; i++) {
+                                  //   yearlyChart[finalList[i]['index']] =
+                                  //       ChartData(
+                                  //           yearlyDates[finalList[i]['index']],
+                                  //           finalList[i]['totalamt']);
+                                  // }
+                                  double finalTotal = 0;
+                                  for (int k = 0; k < yearlyChart.length; k++) {
+                                    for (int i = 0; i < finalList.length; i++) {
+                                      if (finalList[i]['index'] == k) {
+                                        // weeklyChart[k] = ChartData(
+                                        //     weeklyDates[k],
+                                        //     finalList[i]
+                                        //         ['totalamt']);
+                                        finalTotal =
+                                            finalTotal + finalList[i]['totalamt'];
+                                      }
                                     }
+                                    DateTime dateTime = DateFormat("dd-MM-yyyy")
+                                        .parse(yearlyDates[k]);
+
+                                    String formattedDate =
+                                    DateFormat("dd-MM-yyyy").format(dateTime);
+
+                                    yearlyChart[k] =
+                                        ChartData(formattedDate, finalTotal);
                                   }
-                                  DateTime dateTime = DateFormat("dd-MM-yyyy")
-                                      .parse(monthlyDates[k]);
 
-                                  String formattedDate =
-                                      DateFormat("dd-MM-yyyy").format(dateTime);
+                                  chartData = yearlyChart;
 
-                                  monthlyChart[k] =
-                                      ChartData(formattedDate, finalTotal);
+                                  setState(() {});
                                 }
-
-                                chartData = monthlyChart;
-
-                                setState(() {});
-                              } else if (dropdownvalue == '1 Year') {
-                                List yearlyDates = [];
-                                DateTime selectedOne = DateFormat('dd-MM-yyyy')
-                                    .parse(selectedDate);
-                                DateTime today = DateTime.now();
-                                DateTime currentDate = DateTime(
-                                    selectedOne.year,
-                                    selectedOne.month,
-                                    selectedOne.day);
-
-                                while (currentDate.isBefore(today) ||
-                                    (currentDate.year == today.year &&
-                                        currentDate.month == today.month &&
-                                        currentDate.day == today.day)) {
-                                  yearlyDates.add(DateFormat('dd-MM-yyyy')
-                                      .format(currentDate));
-                                  currentDate = DateTime(currentDate.year + 1,
-                                      selectedOne.month, selectedOne.day);
-                                }
-                                // print(yearlyDates);
-                                List<ChartData> yearChart = [];
-                                for (int i = 0; i < yearlyDates.length; i++) {
-                                  yearChart.add(ChartData(yearlyDates[i], 300));
-                                }
-
-                                List<ChartData> yearlyChart = [];
-                                for (int i = 0; i < yearlyDates.length; i++) {
-                                  yearlyChart.add(ChartData(yearlyDates[i], 0));
-                                }
-
-                                // data.sort((a, b) => a.date.compareTo(b.date),);
-
-                                List myYearList = [];
-
-                                for (int i = 0; i < data.length; i++) {
-                                  bool found = false;
-                                  for (int j = 0;
-                                      j < yearlyDates.length - 1;
-                                      j++) {
-                                    DateTime startDate =
-                                        DateFormat('dd-MM-yyyy')
-                                            .parse(yearlyDates[j]);
-                                    DateTime endDate = DateFormat('dd-MM-yyyy')
-                                        .parse(yearlyDates[j + 1]);
-                                    DateTime date2 =
-                                        DateTime.parse(data[i].date);
-
-                                    if (date2.isAfter(startDate) &&
-                                        date2.isBefore(endDate)) {
-                                      print(myYearList);
-                                      print('Yes');
-
-                                      myYearList.add({
-                                        'index': j + 1,
-                                        'amt': data[i].amount
-                                      });
-
-                                      // monthlyChart[j] = ChartData(
-                                      //     monthlyDates[j + 1],
-                                      //     data[i].amount);
-
-                                      found = true;
-                                      break;
-                                    } else {
-                                      print('no');
-                                    }
-                                  }
-                                  if (!found) {
-                                    print(
-                                        'Item from list2 at index $i is not within any date range of list1.');
-                                  }
-                                }
-
-                                print(myYearList);
-
-                                Map<int, double> indexAmtMap = {};
-                                for (var data in myYearList) {
-                                  int index = data['index'];
-                                  double amt = data['amt'];
-                                  indexAmtMap[index] =
-                                      (indexAmtMap[index] ?? 0) + amt;
-                                }
-
-                                List<Map<String, dynamic>> finalList = [];
-                                indexAmtMap.forEach((index, totalAmt) {
-                                  finalList.add(
-                                      {'index': index, 'totalamt': totalAmt});
-                                });
-
-                                print(finalList);
-
-                                // for (int i = 0; i < finalList.length; i++) {
-                                //   yearlyChart[finalList[i]['index']] =
-                                //       ChartData(
-                                //           yearlyDates[finalList[i]['index']],
-                                //           finalList[i]['totalamt']);
-                                // }
-                                double finalTotal = 0;
-                                for (int k = 0; k < yearlyChart.length; k++) {
-                                  for (int i = 0; i < finalList.length; i++) {
-                                    if (finalList[i]['index'] == k) {
-                                      // weeklyChart[k] = ChartData(
-                                      //     weeklyDates[k],
-                                      //     finalList[i]
-                                      //         ['totalamt']);
-                                      finalTotal =
-                                          finalTotal + finalList[i]['totalamt'];
-                                    }
-                                  }
-                                  DateTime dateTime = DateFormat("dd-MM-yyyy")
-                                      .parse(yearlyDates[k]);
-
-                                  String formattedDate =
-                                      DateFormat("dd-MM-yyyy").format(dateTime);
-
-                                  yearlyChart[k] =
-                                      ChartData(formattedDate, finalTotal);
-                                }
-
-                                chartData = yearlyChart;
-
-                                setState(() {});
                               }
+
+
+
                             });
                           },
                           child: Container(
@@ -1251,72 +1401,80 @@ class _GraphScreenState extends State<GraphScreen> {
                             var data = TransactionDB
                                 .instance.transactionListNotifier.value;
                             data = filterList;
-                            if (dropdownvalue == '1 Day') {
-                              List dailyDates = [];
-                              DateTime selectedOne =
-                                  DateFormat('dd-MM-yyyy').parse(selectedDate);
-                              DateTime today = DateTime.now();
-                              DateTime currentDate = DateTime(selectedOne.year,
-                                  selectedOne.month, selectedOne.day);
 
-                              while (currentDate.isBefore(today) ||
-                                  (currentDate.year == today.year &&
-                                      currentDate.month == today.month &&
-                                      currentDate.day == today.day)) {
-                                dailyDates.add(
-                                    DateFormat('dd-MM-yyyy').format(currentDate));
+                            if(cycleOrAllTime=='All Time'){
+                              allTimeExpenseButton();
+                              setState(() {
 
-                                currentDate =
-                                    currentDate.add(Duration(days: 1));
-                              }
+                              });
+                            }
+                            else {
+                              if (dropdownvalue == '1 Day') {
+                                List dailyDates = [];
+                                DateTime selectedOne =
+                                DateFormat('dd-MM-yyyy').parse(selectedDate);
+                                DateTime today = DateTime.now();
+                                DateTime currentDate = DateTime(selectedOne.year,
+                                    selectedOne.month, selectedOne.day);
 
-                              List<ChartData> dailyChart = [];
+                                while (currentDate.isBefore(today) ||
+                                    (currentDate.year == today.year &&
+                                        currentDate.month == today.month &&
+                                        currentDate.day == today.day)) {
+                                  dailyDates.add(
+                                      DateFormat('dd-MM-yyyy').format(currentDate));
 
-                              for (int i = 0; i < dailyDates.length; i++) {
-                                dailyChart.add(ChartData(dailyDates[i], 0.0));
-                              }
-                              double total = -0;
-                              double dateTotal = -0;
-                              for (int i = 0; i < dailyDates.length; i++) {
-                                String date2 = dailyDates[i];
-
-                                for (int j = 0; j < data.length; j++) {
-                                  DateTime localDate =
-                                      DateTime.parse(data[j].date);
-                                  String localDate1 =
-                                      DateFormat('dd-MM-yyyy').format(localDate);
-
-                                  if (localDate1 == date2) {
-                                    dateTotal = -0;
-
-                                    for (int i = 0; i < data.length; i++) {
-                                      if (data[i].categoryType ==
-                                          CategoryType.expense) {
-                                        if (localDate1 ==
-                                            DateFormat('dd-MM-yyyy').format(
-                                                DateTime.parse(data[i].date))) {
-                                          dateTotal =
-                                              dateTotal - data[i].amount;
-                                        } else {}
-                                      } else {}
-                                    }
-
-                                    // dailyChart[i] = ChartData(dailyDates[i], dateTotal);
-                                    total = total + dateTotal;
-                                    break;
-                                  } else {
-                                    print('no');
-                                  }
+                                  currentDate =
+                                      currentDate.add(Duration(days: 1));
                                 }
 
-                                dailyChart[i] = ChartData(dailyDates[i], total);
-                              }
+                                List<ChartData> dailyChart = [];
 
-                              chartData = dailyChart;
+                                for (int i = 0; i < dailyDates.length; i++) {
+                                  dailyChart.add(ChartData(dailyDates[i], 0.0));
+                                }
+                                double total = -0;
+                                double dateTotal = -0;
+                                for (int i = 0; i < dailyDates.length; i++) {
+                                  String date2 = dailyDates[i];
 
-                              setState(() {});
+                                  for (int j = 0; j < data.length; j++) {
+                                    DateTime localDate =
+                                    DateTime.parse(data[j].date);
+                                    String localDate1 =
+                                    DateFormat('dd-MM-yyyy').format(localDate);
 
-                              /*            List dailyDates = [];
+                                    if (localDate1 == date2) {
+                                      dateTotal = -0;
+
+                                      for (int i = 0; i < data.length; i++) {
+                                        if (data[i].categoryType ==
+                                            CategoryType.expense) {
+                                          if (localDate1 ==
+                                              DateFormat('dd-MM-yyyy').format(
+                                                  DateTime.parse(data[i].date))) {
+                                            dateTotal =
+                                                dateTotal - data[i].amount;
+                                          } else {}
+                                        } else {}
+                                      }
+
+                                      // dailyChart[i] = ChartData(dailyDates[i], dateTotal);
+                                      total = total + dateTotal;
+                                      break;
+                                    } else {
+                                      print('no');
+                                    }
+                                  }
+
+                                  dailyChart[i] = ChartData(dailyDates[i], total);
+                                }
+
+                                chartData = dailyChart;
+
+                                setState(() {});
+
+                                /*            List dailyDates = [];
                               DateTime selectedOne =
                                   DateFormat('dd-MM-yyyy').parse(selectedDate);
                               DateTime today = DateTime.now();
@@ -1374,474 +1532,376 @@ class _GraphScreenState extends State<GraphScreen> {
 
                               chartData = dailyChart;
                               setState(() {});*/
-                            } else if (dropdownvalue == '1 Week') {
-                              List weeklyDates = [];
-                              DateTime selectedOne =
-                                  DateFormat('dd-MM-yyyy').parse(selectedDate);
-                              DateTime todayDate = DateTime.now();
-
-                              while (selectedOne.isBefore(todayDate)) {
-                                weeklyDates.add(DateFormat('dd-MM-yyyy')
-                                    .format(selectedOne));
-                                selectedOne =
-                                    selectedOne.add(Duration(days: 7));
                               }
+                              else if (dropdownvalue == '1 Week') {
+                                List weeklyDates = [];
+                                DateTime selectedOne =
+                                DateFormat('dd-MM-yyyy').parse(selectedDate);
+                                DateTime todayDate = DateTime.now();
 
-                              // print(weeklyDates);
+                                while (selectedOne.isBefore(todayDate)) {
+                                  weeklyDates.add(DateFormat('dd-MM-yyyy')
+                                      .format(selectedOne));
+                                  selectedOne =
+                                      selectedOne.add(Duration(days: 7));
+                                }
 
-                              List<ChartData> weekChart = [];
-                              for (int i = 0; i < weeklyDates.length; i++) {
-                                weekChart.add(ChartData(weeklyDates[i], 300));
-                              }
+                                // print(weeklyDates);
 
-                              List<ChartData> weeklyChart = [];
-                              for (int i = 0; i < weeklyDates.length; i++) {
-                                weeklyChart.add(ChartData(weeklyDates[i], 0));
-                              }
+                                List<ChartData> weekChart = [];
+                                for (int i = 0; i < weeklyDates.length; i++) {
+                                  weekChart.add(ChartData(weeklyDates[i], 300));
+                                }
 
-                              // data.sort((a, b) => a.date.compareTo(b.date),);
+                                List<ChartData> weeklyChart = [];
+                                for (int i = 0; i < weeklyDates.length; i++) {
+                                  weeklyChart.add(ChartData(weeklyDates[i], 0));
+                                }
 
-                              List myweekList = [];
+                                // data.sort((a, b) => a.date.compareTo(b.date),);
 
-                              for (int i = 0; i < data.length; i++) {
-                                if (data[i].categoryType ==
-                                    CategoryType.expense) {
-                                  bool found = false;
-                                  for (int j = 0;
-                                      j < weeklyDates.length - 1;
-                                      j++) {
-                                    DateTime startDate =
-                                        DateFormat('dd-MM-yyyy')
-                                            .parse(weeklyDates[j]);
-                                    DateTime endDate = DateFormat('dd-MM-yyyy')
-                                        .parse(weeklyDates[j + 1]);
-                                    DateTime date2 =
-                                        DateTime.parse(data[i].date);
+                                List myweekList = [];
 
-                                    if (date2.isAfter(startDate) &&
-                                        date2.isBefore(endDate)) {
-                                      print(myweekList);
-                                      print('Yes');
+                                for (int i = 0; i < data.length; i++) {
+                                  if (data[i].categoryType ==
+                                      CategoryType.expense) {
+                                    bool found = false;
+                                    for (int j = 0;
+                                    j < weeklyDates.length - 1;
+                                    j++) {
+                                      DateTime startDate =
+                                      DateFormat('dd-MM-yyyy')
+                                          .parse(weeklyDates[j]);
+                                      DateTime endDate = DateFormat('dd-MM-yyyy')
+                                          .parse(weeklyDates[j + 1]);
+                                      DateTime date2 =
+                                      DateTime.parse(data[i].date);
 
-                                      myweekList.add({
-                                        'index': j + 1,
-                                        'amt': data[i].amount
-                                      });
+                                      if (date2.isAfter(startDate) &&
+                                          date2.isBefore(endDate)) {
+                                        print(myweekList);
+                                        print('Yes');
 
-                                      // monthlyChart[j] = ChartData(
-                                      //     monthlyDates[j + 1],
-                                      //     data[i].amount);
+                                        myweekList.add({
+                                          'index': j + 1,
+                                          'amt': data[i].amount
+                                        });
 
-                                      found = true;
-                                      break;
-                                    } else {
-                                      print('no');
+                                        // monthlyChart[j] = ChartData(
+                                        //     monthlyDates[j + 1],
+                                        //     data[i].amount);
+
+                                        found = true;
+                                        break;
+                                      } else {
+                                        print('no');
+                                      }
+                                    }
+                                    if (!found) {
+                                      print(
+                                          'Item from list2 at index $i is not within any date range of list1.');
                                     }
                                   }
-                                  if (!found) {
-                                    print(
-                                        'Item from list2 at index $i is not within any date range of list1.');
-                                  }
                                 }
-                              }
 
-                              print(myweekList);
+                                print(myweekList);
 
-                              Map<int, double> indexAmtMap = {};
-                              for (var data in myweekList) {
-                                int index = data['index'];
-                                double amt = data['amt'];
-                                indexAmtMap[index] =
-                                    (indexAmtMap[index] ?? 0) + amt;
-                              }
-
-                              List<Map<String, dynamic>> finalList = [];
-                              indexAmtMap.forEach((index, totalAmt) {
-                                finalList.add(
-                                    {'index': index, 'totalamt': totalAmt});
-                              });
-
-                              print(finalList);
-
-                              // for (int i = 0;
-                              //     i < finalList.length;
-                              //     i++) {
-                              //   weeklyChart[
-                              //       finalList[i]
-                              //           ['index']] = ChartData(
-                              //       weeklyDates[finalList[i]
-                              //           ['index']],
-                              //       finalList[i]['totalamt']);
-                              // }
-                              double finalTotal = -0;
-                              for (int k = 0; k < weeklyChart.length; k++) {
-                                for (int i = 0; i < finalList.length; i++) {
-                                  if (finalList[i]['index'] == k) {
-                                    // weeklyChart[k] = ChartData(
-                                    //     weeklyDates[k],
-                                    //     finalList[i]
-                                    //         ['totalamt']);
-                                    finalTotal =
-                                        finalTotal - finalList[i]['totalamt'];
-                                  }
+                                Map<int, double> indexAmtMap = {};
+                                for (var data in myweekList) {
+                                  int index = data['index'];
+                                  double amt = data['amt'];
+                                  indexAmtMap[index] =
+                                      (indexAmtMap[index] ?? 0) + amt;
                                 }
-                                DateTime dateTime = DateFormat("dd-MM-yyyy")
-                                    .parse(weeklyDates[k]);
 
-                                String formattedDate =
-                                    DateFormat('dd-MM-yyyy').format(dateTime);
+                                List<Map<String, dynamic>> finalList = [];
+                                indexAmtMap.forEach((index, totalAmt) {
+                                  finalList.add(
+                                      {'index': index, 'totalamt': totalAmt});
+                                });
 
-                                weeklyChart[k] =
-                                    ChartData(formattedDate, finalTotal);
-                              }
+                                print(finalList);
 
-                              chartData = weeklyChart;
-                              setState(() {});
-                            } else if (dropdownvalue == '1 Month') {
-                              print(data);
-                              List monthlyDates = [];
-                              DateTime selectedOne =
-                                  DateFormat('dd-MM-yyyy').parse(selectedDate);
-                              DateTime todayDate = DateTime.now();
-
-                              while (selectedOne.isBefore(todayDate) ||
-                                  selectedOne.month == todayDate.month) {
-                                monthlyDates.add(DateFormat('dd-MM-yyyy')
-                                    .format(selectedOne));
-                                selectedOne = DateTime(selectedOne.year,
-                                    selectedOne.month + 1, selectedOne.day);
-                              }
-
-                              // print(monthlyDates);
-
-                              List<ChartData> monthlyChart = [];
-                              for (int i = 0; i < monthlyDates.length; i++) {
-                                monthlyChart.add(ChartData(monthlyDates[i], 0));
-                              }
-
-                              // data.sort((a, b) => a.date.compareTo(b.date),);
-
-                              List myMonthList = [];
-
-                              for (int i = 0; i < data.length; i++) {
-                                if (data[i].categoryType ==
-                                    CategoryType.expense) {
-                                  bool found = false;
-                                  for (int j = 0;
-                                      j < monthlyDates.length - 1;
-                                      j++) {
-                                    DateTime startDate =
-                                        DateFormat('dd-MM-yyyy')
-                                            .parse(monthlyDates[j]);
-                                    DateTime endDate = DateFormat('dd-MM-yyyy')
-                                        .parse(monthlyDates[j + 1]);
-                                    DateTime date2 =
-                                        DateTime.parse(data[i].date);
-
-                                    if (date2.isAfter(startDate) &&
-                                        date2.isBefore(endDate)) {
-                                      print(myMonthList);
-                                      print('Yes');
-
-                                      myMonthList.add({
-                                        'index': j + 1,
-                                        'amt': data[i].amount
-                                      });
-
-                                      // monthlyChart[j] = ChartData(
-                                      //     monthlyDates[j + 1],
-                                      //     data[i].amount);
-
-                                      found = true;
-                                      break;
-                                    } else {
-                                      print('no');
+                                // for (int i = 0;
+                                //     i < finalList.length;
+                                //     i++) {
+                                //   weeklyChart[
+                                //       finalList[i]
+                                //           ['index']] = ChartData(
+                                //       weeklyDates[finalList[i]
+                                //           ['index']],
+                                //       finalList[i]['totalamt']);
+                                // }
+                                double finalTotal = -0;
+                                for (int k = 0; k < weeklyChart.length; k++) {
+                                  for (int i = 0; i < finalList.length; i++) {
+                                    if (finalList[i]['index'] == k) {
+                                      // weeklyChart[k] = ChartData(
+                                      //     weeklyDates[k],
+                                      //     finalList[i]
+                                      //         ['totalamt']);
+                                      finalTotal =
+                                          finalTotal - finalList[i]['totalamt'];
                                     }
                                   }
-                                  if (!found) {
-                                    print(
-                                        'Item from list2 at index $i is not within any date range of list1.');
+                                  DateTime dateTime = DateFormat("dd-MM-yyyy")
+                                      .parse(weeklyDates[k]);
+
+                                  String formattedDate =
+                                  DateFormat('dd-MM-yyyy').format(dateTime);
+
+                                  weeklyChart[k] =
+                                      ChartData(formattedDate, finalTotal);
+                                }
+
+                                chartData = weeklyChart;
+                                setState(() {});
+                              }
+                              else if (dropdownvalue == '1 Month') {
+                                print(data);
+                                List monthlyDates = [];
+                                DateTime selectedOne =
+                                DateFormat('dd-MM-yyyy').parse(selectedDate);
+                                DateTime todayDate = DateTime.now();
+
+                                while (selectedOne.isBefore(todayDate) ||
+                                    selectedOne.month == todayDate.month) {
+                                  monthlyDates.add(DateFormat('dd-MM-yyyy')
+                                      .format(selectedOne));
+                                  selectedOne = DateTime(selectedOne.year,
+                                      selectedOne.month + 1, selectedOne.day);
+                                }
+
+                                // print(monthlyDates);
+
+                                List<ChartData> monthlyChart = [];
+                                for (int i = 0; i < monthlyDates.length; i++) {
+                                  monthlyChart.add(ChartData(monthlyDates[i], 0));
+                                }
+
+                                // data.sort((a, b) => a.date.compareTo(b.date),);
+
+                                List myMonthList = [];
+
+                                for (int i = 0; i < data.length; i++) {
+                                  if (data[i].categoryType ==
+                                      CategoryType.expense) {
+                                    bool found = false;
+                                    for (int j = 0;
+                                    j < monthlyDates.length - 1;
+                                    j++) {
+                                      DateTime startDate =
+                                      DateFormat('dd-MM-yyyy')
+                                          .parse(monthlyDates[j]);
+                                      DateTime endDate = DateFormat('dd-MM-yyyy')
+                                          .parse(monthlyDates[j + 1]);
+                                      DateTime date2 =
+                                      DateTime.parse(data[i].date);
+
+                                      if (date2.isAfter(startDate) &&
+                                          date2.isBefore(endDate)) {
+                                        print(myMonthList);
+                                        print('Yes');
+
+                                        myMonthList.add({
+                                          'index': j + 1,
+                                          'amt': data[i].amount
+                                        });
+
+                                        // monthlyChart[j] = ChartData(
+                                        //     monthlyDates[j + 1],
+                                        //     data[i].amount);
+
+                                        found = true;
+                                        break;
+                                      } else {
+                                        print('no');
+                                      }
+                                    }
+                                    if (!found) {
+                                      print(
+                                          'Item from list2 at index $i is not within any date range of list1.');
+                                    }
                                   }
                                 }
-                              }
 
-                              print(myMonthList);
+                                print(myMonthList);
 
-                              Map<int, double> indexAmtMap = {};
-                              for (var data in myMonthList) {
-                                int index = data['index'];
-                                double amt = data['amt'];
-                                indexAmtMap[index] =
-                                    (indexAmtMap[index] ?? 0) + amt;
-                              }
-
-                              List<Map<String, dynamic>> finalList = [];
-                              indexAmtMap.forEach((index, totalAmt) {
-                                finalList.add(
-                                    {'index': index, 'totalamt': totalAmt});
-                              });
-
-                              print(finalList);
-
-                              // for (int i = 0; i < finalList.length; i++) {
-                              //   monthlyChart[finalList[i]['index']] =
-                              //       ChartData(
-                              //           monthlyDates[finalList[i]['index']],
-                              //           finalList[i]['totalamt']);
-                              // }
-                              double finalTotal = -0;
-                              for (int k = 0; k < monthlyChart.length; k++) {
-                                for (int i = 0; i < finalList.length; i++) {
-                                  if (finalList[i]['index'] == k) {
-                                    // weeklyChart[k] = ChartData(
-                                    //     weeklyDates[k],
-                                    //     finalList[i]
-                                    //         ['totalamt']);
-                                    finalTotal =
-                                        finalTotal - finalList[i]['totalamt'];
-                                  }
+                                Map<int, double> indexAmtMap = {};
+                                for (var data in myMonthList) {
+                                  int index = data['index'];
+                                  double amt = data['amt'];
+                                  indexAmtMap[index] =
+                                      (indexAmtMap[index] ?? 0) + amt;
                                 }
-                                DateTime dateTime = DateFormat("dd-MM-yyyy")
-                                    .parse(monthlyDates[k]);
 
-                                String formattedDate =
-                                    DateFormat("dd-MM-yyyy").format(dateTime);
+                                List<Map<String, dynamic>> finalList = [];
+                                indexAmtMap.forEach((index, totalAmt) {
+                                  finalList.add(
+                                      {'index': index, 'totalamt': totalAmt});
+                                });
 
-                                monthlyChart[k] =
-                                    ChartData(formattedDate, finalTotal);
+                                print(finalList);
+
+                                // for (int i = 0; i < finalList.length; i++) {
+                                //   monthlyChart[finalList[i]['index']] =
+                                //       ChartData(
+                                //           monthlyDates[finalList[i]['index']],
+                                //           finalList[i]['totalamt']);
+                                // }
+                                double finalTotal = -0;
+                                for (int k = 0; k < monthlyChart.length; k++) {
+                                  for (int i = 0; i < finalList.length; i++) {
+                                    if (finalList[i]['index'] == k) {
+                                      // weeklyChart[k] = ChartData(
+                                      //     weeklyDates[k],
+                                      //     finalList[i]
+                                      //         ['totalamt']);
+                                      finalTotal =
+                                          finalTotal - finalList[i]['totalamt'];
+                                    }
+                                  }
+                                  DateTime dateTime = DateFormat("dd-MM-yyyy")
+                                      .parse(monthlyDates[k]);
+
+                                  String formattedDate =
+                                  DateFormat("dd-MM-yyyy").format(dateTime);
+
+                                  monthlyChart[k] =
+                                      ChartData(formattedDate, finalTotal);
+                                }
+
+                                chartData = monthlyChart;
+                                setState(() {});
                               }
-
-                              chartData = monthlyChart;
-                              setState(() {});
-                            } else if (dropdownvalue == '1 Year')
-                            /*   {
-
-                              List yearlyDates = [];
-                              DateTime selectedOne =
-                                  DateFormat('dd-MM-yyyy').parse(selectedDate);
-                              DateTime today = DateTime.now();
-                              DateTime currentDate = DateTime(selectedOne.year,
-                                  selectedOne.month, selectedOne.day);
-
-                              while (currentDate.isBefore(today) ||
-                                  (currentDate.year == today.year &&
-                                      currentDate.month == today.month &&
-                                      currentDate.day == today.day)) {
-                                yearlyDates.add(DateFormat('dd-MM-yyyy')
-                                    .format(currentDate));
-                                currentDate = DateTime(currentDate.year + 1,
+                              else if (dropdownvalue == '1 Year') {
+                                List yearlyDates = [];
+                                DateTime selectedOne =
+                                DateFormat('dd-MM-yyyy').parse(selectedDate);
+                                DateTime today = DateTime.now();
+                                DateTime currentDate = DateTime(selectedOne.year,
                                     selectedOne.month, selectedOne.day);
-                              }
-                              // print(yearlyDates);
-                              List<ChartData> yearChart = [];
-                              for (int i = 0; i < yearlyDates.length; i++) {
-                                yearChart.add(ChartData(yearlyDates[i], 300));
-                              }
 
-                              List<ChartData> yearlyChart = [];
-                              for (int i = 0; i < yearlyDates.length; i++) {
-                                yearlyChart.add(ChartData(yearlyDates[i], 0));
-                              }
+                                while (currentDate.isBefore(today) ||
+                                    (currentDate.year == today.year &&
+                                        currentDate.month == today.month &&
+                                        currentDate.day == today.day)) {
+                                  yearlyDates.add(DateFormat('dd-MM-yyyy')
+                                      .format(currentDate));
+                                  currentDate = DateTime(currentDate.year + 1,
+                                      selectedOne.month, selectedOne.day);
+                                }
+                                // print(yearlyDates);
+                                List<ChartData> yearChart = [];
+                                for (int i = 0; i < yearlyDates.length; i++) {
+                                  yearChart.add(ChartData(yearlyDates[i], 300));
+                                }
 
-                              // data.sort((a, b) => a.date.compareTo(b.date),);
+                                List<ChartData> yearlyChart = [];
+                                for (int i = 0; i < yearlyDates.length; i++) {
+                                  yearlyChart.add(ChartData(yearlyDates[i], 0));
+                                }
 
-                              List myYearList = [];
+                                // data.sort((a, b) => a.date.compareTo(b.date),);
 
-                              for (int i = 0; i < data.length; i++) {
-                                if (data[i].categoryType ==
-                                    CategoryType.expense) {
-                                  bool found = false;
-                                  for (int j = 0;
-                                      j < yearlyDates.length - 1;
-                                      j++) {
-                                    DateTime startDate =
-                                        DateFormat('dd-MM-yyyy')
-                                            .parse(yearlyDates[j]);
-                                    DateTime endDate = DateFormat('dd-MM-yyyy')
-                                        .parse(yearlyDates[j + 1]);
-                                    DateTime date2 =
-                                        DateTime.parse(data[i].date);
+                                List myYearList = [];
 
-                                    if (date2.isAfter(startDate) &&
-                                        date2.isBefore(endDate)) {
-                                      print(myYearList);
-                                      print('Yes');
+                                for (int i = 0; i < data.length; i++) {
+                                  if (data[i].categoryType ==
+                                      CategoryType.expense) {
+                                    bool found = false;
+                                    for (int j = 0;
+                                    j < yearlyDates.length - 1;
+                                    j++) {
+                                      DateTime startDate =
+                                      DateFormat('dd-MM-yyyy')
+                                          .parse(yearlyDates[j]);
+                                      DateTime endDate = DateFormat('dd-MM-yyyy')
+                                          .parse(yearlyDates[j + 1]);
+                                      DateTime date2 =
+                                      DateTime.parse(data[i].date);
 
-                                      myYearList.add({
-                                        'index': j + 1,
-                                        'amt': data[i].amount
-                                      });
+                                      if (date2.isAfter(startDate) &&
+                                          date2.isBefore(endDate)) {
+                                        print(myYearList);
+                                        print('Yes');
 
-                                      // monthlyChart[j] = ChartData(
-                                      //     monthlyDates[j + 1],
-                                      //     data[i].amount);
+                                        myYearList.add({
+                                          'index': j + 1,
+                                          'amt': data[i].amount
+                                        });
 
-                                      found = true;
-                                      break;
-                                    } else {
-                                      print('no');
+                                        // monthlyChart[j] = ChartData(
+                                        //     monthlyDates[j + 1],
+                                        //     data[i].amount);
+
+                                        found = true;
+                                        break;
+                                      } else {
+                                        print('no');
+                                      }
+                                    }
+                                    if (!found) {
+                                      print(
+                                          'Item from list2 at index $i is not within any date range of list1.');
                                     }
                                   }
-                                  if (!found) {
-                                    print(
-                                        'Item from list2 at index $i is not within any date range of list1.');
-                                  }
                                 }
-                              }
 
-                              print(myYearList);
+                                print(myYearList);
 
-                              Map<int, double> indexAmtMap = {};
-                              for (var data in myYearList) {
-                                int index = data['index'];
-                                double amt = data['amt'];
-                                indexAmtMap[index] =
-                                    (indexAmtMap[index] ?? 0) + amt;
-                              }
+                                Map<int, double> indexAmtMap = {};
+                                for (var data in myYearList) {
+                                  int index = data['index'];
+                                  double amt = data['amt'];
+                                  indexAmtMap[index] =
+                                      (indexAmtMap[index] ?? 0) + amt;
+                                }
 
-                              List<Map<String, dynamic>> finalList = [];
-                              indexAmtMap.forEach((index, totalAmt) {
-                                finalList.add(
-                                    {'index': index, 'totalamt': totalAmt});
-                              });
+                                List<Map<String, dynamic>> finalList = [];
+                                indexAmtMap.forEach((index, totalAmt) {
+                                  finalList.add(
+                                      {'index': index, 'totalamt': totalAmt});
+                                });
 
-                              print(finalList);
+                                print(finalList);
 
-                              for (int i = 0; i < finalList.length; i++) {
-                                yearlyChart[finalList[i]['index']] = ChartData(
-                                    yearlyDates[finalList[i]['index']],
-                                    finalList[i]['totalamt']);
-                              }
+                                // for (int i = 0; i < finalList.length; i++) {
+                                //   yearlyChart[finalList[i]['index']] =
+                                //       ChartData(
+                                //           yearlyDates[finalList[i]['index']],
+                                //           finalList[i]['totalamt']);
+                                // }
 
-                              chartData = yearlyChart;
-
-                              setState(() {});
-                            }*/
-                            {
-                              List yearlyDates = [];
-                              DateTime selectedOne =
-                                  DateFormat('dd-MM-yyyy').parse(selectedDate);
-                              DateTime today = DateTime.now();
-                              DateTime currentDate = DateTime(selectedOne.year,
-                                  selectedOne.month, selectedOne.day);
-
-                              while (currentDate.isBefore(today) ||
-                                  (currentDate.year == today.year &&
-                                      currentDate.month == today.month &&
-                                      currentDate.day == today.day)) {
-                                yearlyDates.add(DateFormat('dd-MM-yyyy')
-                                    .format(currentDate));
-                                currentDate = DateTime(currentDate.year + 1,
-                                    selectedOne.month, selectedOne.day);
-                              }
-                              // print(yearlyDates);
-                              List<ChartData> yearChart = [];
-                              for (int i = 0; i < yearlyDates.length; i++) {
-                                yearChart.add(ChartData(yearlyDates[i], 300));
-                              }
-
-                              List<ChartData> yearlyChart = [];
-                              for (int i = 0; i < yearlyDates.length; i++) {
-                                yearlyChart.add(ChartData(yearlyDates[i], 0));
-                              }
-
-                              // data.sort((a, b) => a.date.compareTo(b.date),);
-
-                              List myYearList = [];
-
-                              for (int i = 0; i < data.length; i++) {
-                                if (data[i].categoryType ==
-                                    CategoryType.expense) {
-                                  bool found = false;
-                                  for (int j = 0;
-                                      j < yearlyDates.length - 1;
-                                      j++) {
-                                    DateTime startDate =
-                                        DateFormat('dd-MM-yyyy')
-                                            .parse(yearlyDates[j]);
-                                    DateTime endDate = DateFormat('dd-MM-yyyy')
-                                        .parse(yearlyDates[j + 1]);
-                                    DateTime date2 =
-                                        DateTime.parse(data[i].date);
-
-                                    if (date2.isAfter(startDate) &&
-                                        date2.isBefore(endDate)) {
-                                      print(myYearList);
-                                      print('Yes');
-
-                                      myYearList.add({
-                                        'index': j + 1,
-                                        'amt': data[i].amount
-                                      });
-
-                                      // monthlyChart[j] = ChartData(
-                                      //     monthlyDates[j + 1],
-                                      //     data[i].amount);
-
-                                      found = true;
-                                      break;
-                                    } else {
-                                      print('no');
+                                double finalTotal = -0;
+                                for (int k = 0; k < yearlyChart.length; k++) {
+                                  for (int i = 0; i < finalList.length; i++) {
+                                    if (finalList[i]['index'] == k) {
+                                      // weeklyChart[k] = ChartData(
+                                      //     weeklyDates[k],
+                                      //     finalList[i]
+                                      //         ['totalamt']);
+                                      finalTotal =
+                                          finalTotal - finalList[i]['totalamt'];
                                     }
                                   }
-                                  if (!found) {
-                                    print(
-                                        'Item from list2 at index $i is not within any date range of list1.');
-                                  }
+                                  DateTime dateTime = DateFormat("dd-MM-yyyy")
+                                      .parse(yearlyDates[k]);
+
+                                  String formattedDate =
+                                  DateFormat("dd-MM-yyyy").format(dateTime);
+
+                                  yearlyChart[k] =
+                                      ChartData(formattedDate, finalTotal);
                                 }
+
+                                chartData = yearlyChart;
+
+                                setState(() {});
                               }
-
-                              print(myYearList);
-
-                              Map<int, double> indexAmtMap = {};
-                              for (var data in myYearList) {
-                                int index = data['index'];
-                                double amt = data['amt'];
-                                indexAmtMap[index] =
-                                    (indexAmtMap[index] ?? 0) + amt;
-                              }
-
-                              List<Map<String, dynamic>> finalList = [];
-                              indexAmtMap.forEach((index, totalAmt) {
-                                finalList.add(
-                                    {'index': index, 'totalamt': totalAmt});
-                              });
-
-                              print(finalList);
-
-                              // for (int i = 0; i < finalList.length; i++) {
-                              //   yearlyChart[finalList[i]['index']] =
-                              //       ChartData(
-                              //           yearlyDates[finalList[i]['index']],
-                              //           finalList[i]['totalamt']);
-                              // }
-
-                              double finalTotal = -0;
-                              for (int k = 0; k < yearlyChart.length; k++) {
-                                for (int i = 0; i < finalList.length; i++) {
-                                  if (finalList[i]['index'] == k) {
-                                    // weeklyChart[k] = ChartData(
-                                    //     weeklyDates[k],
-                                    //     finalList[i]
-                                    //         ['totalamt']);
-                                    finalTotal =
-                                        finalTotal - finalList[i]['totalamt'];
-                                  }
-                                }
-                                DateTime dateTime = DateFormat("dd-MM-yyyy")
-                                    .parse(yearlyDates[k]);
-
-                                String formattedDate =
-                                    DateFormat("dd-MM-yyyy").format(dateTime);
-
-                                yearlyChart[k] =
-                                    ChartData(formattedDate, finalTotal);
-                              }
-
-                              chartData = yearlyChart;
-
-                              setState(() {});
                             }
+
+
                           },
                           child: Container(
                             alignment: Alignment.center,
@@ -1874,76 +1934,84 @@ class _GraphScreenState extends State<GraphScreen> {
                               var data = TransactionDB
                                   .instance.transactionListNotifier.value;
                               data = filterList;
-                              if (dropdownvalue == '1 Day') {
-                                List dailyDates = [];
-                                DateTime selectedOne = DateFormat('dd-MM-yyyy')
-                                    .parse(selectedDate);
-                                DateTime today = DateTime.now();
-                                DateTime currentDate = DateTime(
-                                    selectedOne.year,
-                                    selectedOne.month,
-                                    selectedOne.day);
+                              if(cycleOrAllTime=='All Time'){
+                                allTimeIncomeButton();
+                                setState(() {
 
-                                while (currentDate.isBefore(today) ||
-                                    (currentDate.year == today.year &&
-                                        currentDate.month == today.month &&
-                                        currentDate.day == today.day)) {
-                                  dailyDates.add(
-                                      DateFormat('dd-MM-yyyy').format(currentDate));
+                                });
+                              }
+                              else {
+                                if (dropdownvalue == '1 Day') {
+                                  List dailyDates = [];
+                                  DateTime selectedOne = DateFormat('dd-MM-yyyy')
+                                      .parse(selectedDate);
+                                  DateTime today = DateTime.now();
+                                  DateTime currentDate = DateTime(
+                                      selectedOne.year,
+                                      selectedOne.month,
+                                      selectedOne.day);
 
-                                  currentDate =
-                                      currentDate.add(Duration(days: 1));
-                                }
+                                  while (currentDate.isBefore(today) ||
+                                      (currentDate.year == today.year &&
+                                          currentDate.month == today.month &&
+                                          currentDate.day == today.day)) {
+                                    dailyDates.add(
+                                        DateFormat('dd-MM-yyyy').format(currentDate));
 
-                                List<ChartData> dailyChart = [];
-
-                                for (int i = 0; i < dailyDates.length; i++) {
-                                  dailyChart.add(ChartData(dailyDates[i], 0.0));
-                                }
-                                double total = 0;
-                                double dateTotal = 0;
-                                for (int i = 0; i < dailyDates.length; i++) {
-                                  String date2 = dailyDates[i];
-
-                                  for (int j = 0; j < data.length; j++) {
-                                    DateTime localDate =
-                                        DateTime.parse(data[j].date);
-                                    String localDate1 =
-                                        DateFormat('dd-MM-yyyy').format(localDate);
-
-                                    if (localDate1 == date2) {
-                                      dateTotal = 0;
-
-                                      for (int i = 0; i < data.length; i++) {
-                                        if (data[i].categoryType ==
-                                            CategoryType.income) {
-                                          if (localDate1 ==
-                                              DateFormat('dd-MM-yyyy').format(
-                                                  DateTime.parse(
-                                                      data[i].date))) {
-                                            dateTotal =
-                                                dateTotal + data[i].amount;
-                                          } else {}
-                                        } else {}
-                                      }
-
-                                      // dailyChart[i] = ChartData(dailyDates[i], dateTotal);
-                                      total = total + dateTotal;
-                                      break;
-                                    } else {
-                                      print('no');
-                                    }
+                                    currentDate =
+                                        currentDate.add(Duration(days: 1));
                                   }
 
-                                  dailyChart[i] =
-                                      ChartData(dailyDates[i], total);
+                                  List<ChartData> dailyChart = [];
+
+                                  for (int i = 0; i < dailyDates.length; i++) {
+                                    dailyChart.add(ChartData(dailyDates[i], 0.0));
+                                  }
+                                  double total = 0;
+                                  double dateTotal = 0;
+                                  for (int i = 0; i < dailyDates.length; i++) {
+                                    String date2 = dailyDates[i];
+
+                                    for (int j = 0; j < data.length; j++) {
+                                      DateTime localDate =
+                                      DateTime.parse(data[j].date);
+                                      String localDate1 =
+                                      DateFormat('dd-MM-yyyy').format(localDate);
+
+                                      if (localDate1 == date2) {
+                                        dateTotal = 0;
+
+                                        for (int i = 0; i < data.length; i++) {
+                                          if (data[i].categoryType ==
+                                              CategoryType.income) {
+                                            if (localDate1 ==
+                                                DateFormat('dd-MM-yyyy').format(
+                                                    DateTime.parse(
+                                                        data[i].date))) {
+                                              dateTotal =
+                                                  dateTotal + data[i].amount;
+                                            } else {}
+                                          } else {}
+                                        }
+
+                                        // dailyChart[i] = ChartData(dailyDates[i], dateTotal);
+                                        total = total + dateTotal;
+                                        break;
+                                      } else {
+                                        print('no');
+                                      }
+                                    }
+
+                                    dailyChart[i] =
+                                        ChartData(dailyDates[i], total);
+                                  }
+
+                                  chartData = dailyChart;
+
+                                  setState(() {});
                                 }
-
-                                chartData = dailyChart;
-
-                                setState(() {});
-                              } else if (dropdownvalue == '1 Week') {
-                                /*                         List weeklyDates = [];
+                                else if (dropdownvalue == '1 Week') {
+                                  /*                         List weeklyDates = [];
                                 DateTime selectedOne = DateFormat('dd-MM-yyyy')
                                     .parse(selectedDate);
                                 DateTime todayDate = DateTime.now();
@@ -2042,375 +2110,380 @@ class _GraphScreenState extends State<GraphScreen> {
 
                                 chartData = weeklyChart;
                                 setState(() {});*/
-                                List weeklyDates = [];
-                                DateTime selectedOne = DateFormat('dd-MM-yyyy')
-                                    .parse(selectedDate);
-                                DateTime todayDate = DateTime.now();
+                                  List weeklyDates = [];
+                                  DateTime selectedOne = DateFormat('dd-MM-yyyy')
+                                      .parse(selectedDate);
+                                  DateTime todayDate = DateTime.now();
 
-                                while (selectedOne.isBefore(todayDate)) {
-                                  weeklyDates.add(DateFormat('dd-MM-yyyy')
-                                      .format(selectedOne));
-                                  selectedOne =
-                                      selectedOne.add(Duration(days: 7));
-                                }
+                                  while (selectedOne.isBefore(todayDate)) {
+                                    weeklyDates.add(DateFormat('dd-MM-yyyy')
+                                        .format(selectedOne));
+                                    selectedOne =
+                                        selectedOne.add(Duration(days: 7));
+                                  }
 
-                                // print(weeklyDates);
+                                  // print(weeklyDates);
 
-                                List<ChartData> weekChart = [];
-                                for (int i = 0; i < weeklyDates.length; i++) {
-                                  weekChart.add(ChartData(weeklyDates[i], 300));
-                                }
+                                  List<ChartData> weekChart = [];
+                                  for (int i = 0; i < weeklyDates.length; i++) {
+                                    weekChart.add(ChartData(weeklyDates[i], 300));
+                                  }
 
-                                List<ChartData> weeklyChart = [];
-                                for (int i = 0; i < weeklyDates.length; i++) {
-                                  weeklyChart.add(ChartData(weeklyDates[i], 0));
-                                }
+                                  List<ChartData> weeklyChart = [];
+                                  for (int i = 0; i < weeklyDates.length; i++) {
+                                    weeklyChart.add(ChartData(weeklyDates[i], 0));
+                                  }
 
-                                // data.sort((a, b) => a.date.compareTo(b.date),);
+                                  // data.sort((a, b) => a.date.compareTo(b.date),);
 
-                                List myweekList = [];
+                                  List myweekList = [];
 
-                                for (int i = 0; i < data.length; i++) {
-                                  if (data[i].categoryType ==
-                                      CategoryType.income) {
-                                    bool found = false;
-                                    for (int j = 0;
-                                        j < weeklyDates.length - 1;
-                                        j++) {
-                                      DateTime startDate =
-                                          DateFormat('dd-MM-yyyy')
-                                              .parse(weeklyDates[j]);
-                                      DateTime endDate =
-                                          DateFormat('dd-MM-yyyy')
-                                              .parse(weeklyDates[j + 1]);
-                                      DateTime date2 =
-                                          DateTime.parse(data[i].date);
+                                  for (int i = 0; i < data.length; i++) {
+                                    if (data[i].categoryType ==
+                                        CategoryType.income) {
+                                      bool found = false;
+                                      for (int j = 0;
+                                      j < weeklyDates.length - 1;
+                                      j++) {
+                                        DateTime startDate =
+                                        DateFormat('dd-MM-yyyy')
+                                            .parse(weeklyDates[j]);
+                                        DateTime endDate =
+                                        DateFormat('dd-MM-yyyy')
+                                            .parse(weeklyDates[j + 1]);
+                                        DateTime date2 =
+                                        DateTime.parse(data[i].date);
 
-                                      if (date2.isAfter(startDate) &&
-                                          date2.isBefore(endDate)) {
-                                        print(myweekList);
-                                        print('Yes');
+                                        if (date2.isAfter(startDate) &&
+                                            date2.isBefore(endDate)) {
+                                          print(myweekList);
+                                          print('Yes');
 
-                                        myweekList.add({
-                                          'index': j + 1,
-                                          'amt': data[i].amount
-                                        });
+                                          myweekList.add({
+                                            'index': j + 1,
+                                            'amt': data[i].amount
+                                          });
 
-                                        // monthlyChart[j] = ChartData(
-                                        //     monthlyDates[j + 1],
-                                        //     data[i].amount);
+                                          // monthlyChart[j] = ChartData(
+                                          //     monthlyDates[j + 1],
+                                          //     data[i].amount);
 
-                                        found = true;
-                                        break;
-                                      } else {
-                                        print('no');
+                                          found = true;
+                                          break;
+                                        } else {
+                                          print('no');
+                                        }
+                                      }
+                                      if (!found) {
+                                        print(
+                                            'Item from list2 at index $i is not within any date range of list1.');
                                       }
                                     }
-                                    if (!found) {
-                                      print(
-                                          'Item from list2 at index $i is not within any date range of list1.');
-                                    }
                                   }
-                                }
 
-                                print(myweekList);
+                                  print(myweekList);
 
-                                Map<int, double> indexAmtMap = {};
-                                for (var data in myweekList) {
-                                  int index = data['index'];
-                                  double amt = data['amt'];
-                                  indexAmtMap[index] =
-                                      (indexAmtMap[index] ?? 0) + amt;
-                                }
-
-                                List<Map<String, dynamic>> finalList = [];
-                                indexAmtMap.forEach((index, totalAmt) {
-                                  finalList.add(
-                                      {'index': index, 'totalamt': totalAmt});
-                                });
-
-                                print(finalList);
-
-                                // for (int i = 0;
-                                //     i < finalList.length;
-                                //     i++) {
-                                //   weeklyChart[
-                                //       finalList[i]
-                                //           ['index']] = ChartData(
-                                //       weeklyDates[finalList[i]
-                                //           ['index']],
-                                //       finalList[i]['totalamt']);
-                                // }
-                                double finalTotal = 0;
-                                for (int k = 0; k < weeklyChart.length; k++) {
-                                  for (int i = 0; i < finalList.length; i++) {
-                                    if (finalList[i]['index'] == k) {
-                                      // weeklyChart[k] = ChartData(
-                                      //     weeklyDates[k],
-                                      //     finalList[i]
-                                      //         ['totalamt']);
-                                      finalTotal =
-                                          finalTotal + finalList[i]['totalamt'];
-                                    }
+                                  Map<int, double> indexAmtMap = {};
+                                  for (var data in myweekList) {
+                                    int index = data['index'];
+                                    double amt = data['amt'];
+                                    indexAmtMap[index] =
+                                        (indexAmtMap[index] ?? 0) + amt;
                                   }
-                                  DateTime dateTime = DateFormat("dd-MM-yyyy")
-                                      .parse(weeklyDates[k]);
 
-                                  String formattedDate =
-                                      DateFormat("dd-MM-yyyy").format(dateTime);
+                                  List<Map<String, dynamic>> finalList = [];
+                                  indexAmtMap.forEach((index, totalAmt) {
+                                    finalList.add(
+                                        {'index': index, 'totalamt': totalAmt});
+                                  });
 
-                                  weeklyChart[k] =
-                                      ChartData(formattedDate, finalTotal);
-                                }
+                                  print(finalList);
 
-                                chartData = weeklyChart;
-                                setState(() {});
-                              } else if (dropdownvalue == '1 Month') {
-                                print(data);
-                                List monthlyDates = [];
-                                DateTime selectedOne = DateFormat('dd-MM-yyyy')
-                                    .parse(selectedDate);
-                                DateTime todayDate = DateTime.now();
-
-                                while (selectedOne.isBefore(todayDate) ||
-                                    selectedOne.month == todayDate.month) {
-                                  monthlyDates.add(DateFormat('dd-MM-yyyy')
-                                      .format(selectedOne));
-                                  selectedOne = DateTime(selectedOne.year,
-                                      selectedOne.month + 1, selectedOne.day);
-                                }
-
-                                // print(monthlyDates);
-
-                                List<ChartData> monthlyChart = [];
-                                for (int i = 0; i < monthlyDates.length; i++) {
-                                  monthlyChart
-                                      .add(ChartData(monthlyDates[i], 0));
-                                }
-
-                                // data.sort((a, b) => a.date.compareTo(b.date),);
-
-                                List myMonthList = [];
-
-                                for (int i = 0; i < data.length; i++) {
-                                  if (data[i].categoryType ==
-                                      CategoryType.income) {
-                                    bool found = false;
-                                    for (int j = 0;
-                                        j < monthlyDates.length - 1;
-                                        j++) {
-                                      DateTime startDate =
-                                          DateFormat('dd-MM-yyyy')
-                                              .parse(monthlyDates[j]);
-                                      DateTime endDate =
-                                          DateFormat('dd-MM-yyyy')
-                                              .parse(monthlyDates[j + 1]);
-                                      DateTime date2 =
-                                          DateTime.parse(data[i].date);
-
-                                      if (date2.isAfter(startDate) &&
-                                          date2.isBefore(endDate)) {
-                                        print(myMonthList);
-                                        print('Yes');
-
-                                        myMonthList.add({
-                                          'index': j + 1,
-                                          'amt': data[i].amount
-                                        });
-
-                                        // monthlyChart[j] = ChartData(
-                                        //     monthlyDates[j + 1],
-                                        //     data[i].amount);
-
-                                        found = true;
-                                        break;
-                                      } else {
-                                        print('no');
+                                  // for (int i = 0;
+                                  //     i < finalList.length;
+                                  //     i++) {
+                                  //   weeklyChart[
+                                  //       finalList[i]
+                                  //           ['index']] = ChartData(
+                                  //       weeklyDates[finalList[i]
+                                  //           ['index']],
+                                  //       finalList[i]['totalamt']);
+                                  // }
+                                  double finalTotal = 0;
+                                  for (int k = 0; k < weeklyChart.length; k++) {
+                                    for (int i = 0; i < finalList.length; i++) {
+                                      if (finalList[i]['index'] == k) {
+                                        // weeklyChart[k] = ChartData(
+                                        //     weeklyDates[k],
+                                        //     finalList[i]
+                                        //         ['totalamt']);
+                                        finalTotal =
+                                            finalTotal + finalList[i]['totalamt'];
                                       }
                                     }
-                                    if (!found) {
-                                      print(
-                                          'Item from list2 at index $i is not within any date range of list1.');
-                                    }
+                                    DateTime dateTime = DateFormat("dd-MM-yyyy")
+                                        .parse(weeklyDates[k]);
+
+                                    String formattedDate =
+                                    DateFormat("dd-MM-yyyy").format(dateTime);
+
+                                    weeklyChart[k] =
+                                        ChartData(formattedDate, finalTotal);
                                   }
+
+                                  chartData = weeklyChart;
+                                  setState(() {});
                                 }
+                                else if (dropdownvalue == '1 Month') {
+                                  print(data);
+                                  List monthlyDates = [];
+                                  DateTime selectedOne = DateFormat('dd-MM-yyyy')
+                                      .parse(selectedDate);
+                                  DateTime todayDate = DateTime.now();
 
-                                print(myMonthList);
-
-                                Map<int, double> indexAmtMap = {};
-                                for (var data in myMonthList) {
-                                  int index = data['index'];
-                                  double amt = data['amt'];
-                                  indexAmtMap[index] =
-                                      (indexAmtMap[index] ?? 0) + amt;
-                                }
-
-                                List<Map<String, dynamic>> finalList = [];
-                                indexAmtMap.forEach((index, totalAmt) {
-                                  finalList.add(
-                                      {'index': index, 'totalamt': totalAmt});
-                                });
-
-                                print(finalList);
-
-                                // for (int i = 0; i < finalList.length; i++) {
-                                //   monthlyChart[finalList[i]['index']] =
-                                //       ChartData(
-                                //           monthlyDates[finalList[i]['index']],
-                                //           finalList[i]['totalamt']);
-                                // }
-                                double finalTotal = 0;
-                                for (int k = 0; k < monthlyChart.length; k++) {
-                                  for (int i = 0; i < finalList.length; i++) {
-                                    if (finalList[i]['index'] == k) {
-                                      // weeklyChart[k] = ChartData(
-                                      //     weeklyDates[k],
-                                      //     finalList[i]
-                                      //         ['totalamt']);
-                                      finalTotal =
-                                          finalTotal + finalList[i]['totalamt'];
-                                    }
+                                  while (selectedOne.isBefore(todayDate) ||
+                                      selectedOne.month == todayDate.month) {
+                                    monthlyDates.add(DateFormat('dd-MM-yyyy')
+                                        .format(selectedOne));
+                                    selectedOne = DateTime(selectedOne.year,
+                                        selectedOne.month + 1, selectedOne.day);
                                   }
-                                  DateTime dateTime = DateFormat("dd-MM-yyyy")
-                                      .parse(monthlyDates[k]);
 
-                                  String formattedDate =
-                                      DateFormat("dd-MM-yyyy").format(dateTime);
+                                  // print(monthlyDates);
 
-                                  monthlyChart[k] =
-                                      ChartData(formattedDate, finalTotal);
-                                }
+                                  List<ChartData> monthlyChart = [];
+                                  for (int i = 0; i < monthlyDates.length; i++) {
+                                    monthlyChart
+                                        .add(ChartData(monthlyDates[i], 0));
+                                  }
 
-                                chartData = monthlyChart;
-                                setState(() {});
-                              } else if (dropdownvalue == '1 Year') {
-                                List yearlyDates = [];
-                                DateTime selectedOne = DateFormat('dd-MM-yyyy')
-                                    .parse(selectedDate);
-                                DateTime today = DateTime.now();
-                                DateTime currentDate = DateTime(
-                                    selectedOne.year,
-                                    selectedOne.month,
-                                    selectedOne.day);
+                                  // data.sort((a, b) => a.date.compareTo(b.date),);
 
-                                while (currentDate.isBefore(today) ||
-                                    (currentDate.year == today.year &&
-                                        currentDate.month == today.month &&
-                                        currentDate.day == today.day)) {
-                                  yearlyDates.add(DateFormat('dd-MM-yyyy')
-                                      .format(currentDate));
-                                  currentDate = DateTime(currentDate.year + 1,
-                                      selectedOne.month, selectedOne.day);
-                                }
-                                // print(yearlyDates);
-                                List<ChartData> yearChart = [];
-                                for (int i = 0; i < yearlyDates.length; i++) {
-                                  yearChart.add(ChartData(yearlyDates[i], 300));
-                                }
+                                  List myMonthList = [];
 
-                                List<ChartData> yearlyChart = [];
-                                for (int i = 0; i < yearlyDates.length; i++) {
-                                  yearlyChart.add(ChartData(yearlyDates[i], 0));
-                                }
+                                  for (int i = 0; i < data.length; i++) {
+                                    if (data[i].categoryType ==
+                                        CategoryType.income) {
+                                      bool found = false;
+                                      for (int j = 0;
+                                      j < monthlyDates.length - 1;
+                                      j++) {
+                                        DateTime startDate =
+                                        DateFormat('dd-MM-yyyy')
+                                            .parse(monthlyDates[j]);
+                                        DateTime endDate =
+                                        DateFormat('dd-MM-yyyy')
+                                            .parse(monthlyDates[j + 1]);
+                                        DateTime date2 =
+                                        DateTime.parse(data[i].date);
 
-                                // data.sort((a, b) => a.date.compareTo(b.date),);
+                                        if (date2.isAfter(startDate) &&
+                                            date2.isBefore(endDate)) {
+                                          print(myMonthList);
+                                          print('Yes');
 
-                                List myYearList = [];
+                                          myMonthList.add({
+                                            'index': j + 1,
+                                            'amt': data[i].amount
+                                          });
 
-                                for (int i = 0; i < data.length; i++) {
-                                  if (data[i].categoryType ==
-                                      CategoryType.income) {
-                                    bool found = false;
-                                    for (int j = 0;
-                                        j < yearlyDates.length - 1;
-                                        j++) {
-                                      DateTime startDate =
-                                          DateFormat('dd-MM-yyyy')
-                                              .parse(yearlyDates[j]);
-                                      DateTime endDate =
-                                          DateFormat('dd-MM-yyyy')
-                                              .parse(yearlyDates[j + 1]);
-                                      DateTime date2 =
-                                          DateTime.parse(data[i].date);
+                                          // monthlyChart[j] = ChartData(
+                                          //     monthlyDates[j + 1],
+                                          //     data[i].amount);
 
-                                      if (date2.isAfter(startDate) &&
-                                          date2.isBefore(endDate)) {
-                                        print(myYearList);
-                                        print('Yes');
-
-                                        myYearList.add({
-                                          'index': j + 1,
-                                          'amt': data[i].amount
-                                        });
-
-                                        // monthlyChart[j] = ChartData(
-                                        //     monthlyDates[j + 1],
-                                        //     data[i].amount);
-
-                                        found = true;
-                                        break;
-                                      } else {
-                                        print('no');
+                                          found = true;
+                                          break;
+                                        } else {
+                                          print('no');
+                                        }
+                                      }
+                                      if (!found) {
+                                        print(
+                                            'Item from list2 at index $i is not within any date range of list1.');
                                       }
                                     }
-                                    if (!found) {
-                                      print(
-                                          'Item from list2 at index $i is not within any date range of list1.');
+                                  }
+
+                                  print(myMonthList);
+
+                                  Map<int, double> indexAmtMap = {};
+                                  for (var data in myMonthList) {
+                                    int index = data['index'];
+                                    double amt = data['amt'];
+                                    indexAmtMap[index] =
+                                        (indexAmtMap[index] ?? 0) + amt;
+                                  }
+
+                                  List<Map<String, dynamic>> finalList = [];
+                                  indexAmtMap.forEach((index, totalAmt) {
+                                    finalList.add(
+                                        {'index': index, 'totalamt': totalAmt});
+                                  });
+
+                                  print(finalList);
+
+                                  // for (int i = 0; i < finalList.length; i++) {
+                                  //   monthlyChart[finalList[i]['index']] =
+                                  //       ChartData(
+                                  //           monthlyDates[finalList[i]['index']],
+                                  //           finalList[i]['totalamt']);
+                                  // }
+                                  double finalTotal = 0;
+                                  for (int k = 0; k < monthlyChart.length; k++) {
+                                    for (int i = 0; i < finalList.length; i++) {
+                                      if (finalList[i]['index'] == k) {
+                                        // weeklyChart[k] = ChartData(
+                                        //     weeklyDates[k],
+                                        //     finalList[i]
+                                        //         ['totalamt']);
+                                        finalTotal =
+                                            finalTotal + finalList[i]['totalamt'];
+                                      }
+                                    }
+                                    DateTime dateTime = DateFormat("dd-MM-yyyy")
+                                        .parse(monthlyDates[k]);
+
+                                    String formattedDate =
+                                    DateFormat("dd-MM-yyyy").format(dateTime);
+
+                                    monthlyChart[k] =
+                                        ChartData(formattedDate, finalTotal);
+                                  }
+
+                                  chartData = monthlyChart;
+                                  setState(() {});
+                                }
+                                else if (dropdownvalue == '1 Year') {
+                                  List yearlyDates = [];
+                                  DateTime selectedOne = DateFormat('dd-MM-yyyy')
+                                      .parse(selectedDate);
+                                  DateTime today = DateTime.now();
+                                  DateTime currentDate = DateTime(
+                                      selectedOne.year,
+                                      selectedOne.month,
+                                      selectedOne.day);
+
+                                  while (currentDate.isBefore(today) ||
+                                      (currentDate.year == today.year &&
+                                          currentDate.month == today.month &&
+                                          currentDate.day == today.day)) {
+                                    yearlyDates.add(DateFormat('dd-MM-yyyy')
+                                        .format(currentDate));
+                                    currentDate = DateTime(currentDate.year + 1,
+                                        selectedOne.month, selectedOne.day);
+                                  }
+                                  // print(yearlyDates);
+                                  List<ChartData> yearChart = [];
+                                  for (int i = 0; i < yearlyDates.length; i++) {
+                                    yearChart.add(ChartData(yearlyDates[i], 300));
+                                  }
+
+                                  List<ChartData> yearlyChart = [];
+                                  for (int i = 0; i < yearlyDates.length; i++) {
+                                    yearlyChart.add(ChartData(yearlyDates[i], 0));
+                                  }
+
+                                  // data.sort((a, b) => a.date.compareTo(b.date),);
+
+                                  List myYearList = [];
+
+                                  for (int i = 0; i < data.length; i++) {
+                                    if (data[i].categoryType ==
+                                        CategoryType.income) {
+                                      bool found = false;
+                                      for (int j = 0;
+                                      j < yearlyDates.length - 1;
+                                      j++) {
+                                        DateTime startDate =
+                                        DateFormat('dd-MM-yyyy')
+                                            .parse(yearlyDates[j]);
+                                        DateTime endDate =
+                                        DateFormat('dd-MM-yyyy')
+                                            .parse(yearlyDates[j + 1]);
+                                        DateTime date2 =
+                                        DateTime.parse(data[i].date);
+
+                                        if (date2.isAfter(startDate) &&
+                                            date2.isBefore(endDate)) {
+                                          print(myYearList);
+                                          print('Yes');
+
+                                          myYearList.add({
+                                            'index': j + 1,
+                                            'amt': data[i].amount
+                                          });
+
+                                          // monthlyChart[j] = ChartData(
+                                          //     monthlyDates[j + 1],
+                                          //     data[i].amount);
+
+                                          found = true;
+                                          break;
+                                        } else {
+                                          print('no');
+                                        }
+                                      }
+                                      if (!found) {
+                                        print(
+                                            'Item from list2 at index $i is not within any date range of list1.');
+                                      }
                                     }
                                   }
-                                }
 
-                                print(myYearList);
+                                  print(myYearList);
 
-                                Map<int, double> indexAmtMap = {};
-                                for (var data in myYearList) {
-                                  int index = data['index'];
-                                  double amt = data['amt'];
-                                  indexAmtMap[index] =
-                                      (indexAmtMap[index] ?? 0) + amt;
-                                }
-
-                                List<Map<String, dynamic>> finalList = [];
-                                indexAmtMap.forEach((index, totalAmt) {
-                                  finalList.add(
-                                      {'index': index, 'totalamt': totalAmt});
-                                });
-
-                                print(finalList);
-
-                                // for (int i = 0; i < finalList.length; i++) {
-                                //   yearlyChart[finalList[i]['index']] =
-                                //       ChartData(
-                                //           yearlyDates[finalList[i]['index']],
-                                //           finalList[i]['totalamt']);
-                                // }
-
-                                double finalTotal = 0;
-                                for (int k = 0; k < yearlyChart.length; k++) {
-                                  for (int i = 0; i < finalList.length; i++) {
-                                    if (finalList[i]['index'] == k) {
-                                      // weeklyChart[k] = ChartData(
-                                      //     weeklyDates[k],
-                                      //     finalList[i]
-                                      //         ['totalamt']);
-                                      finalTotal =
-                                          finalTotal + finalList[i]['totalamt'];
-                                    }
+                                  Map<int, double> indexAmtMap = {};
+                                  for (var data in myYearList) {
+                                    int index = data['index'];
+                                    double amt = data['amt'];
+                                    indexAmtMap[index] =
+                                        (indexAmtMap[index] ?? 0) + amt;
                                   }
-                                  DateTime dateTime = DateFormat("dd-MM-yyyy")
-                                      .parse(yearlyDates[k]);
 
-                                  String formattedDate =
-                                      DateFormat("dd-MM-yyyy").format(dateTime);
+                                  List<Map<String, dynamic>> finalList = [];
+                                  indexAmtMap.forEach((index, totalAmt) {
+                                    finalList.add(
+                                        {'index': index, 'totalamt': totalAmt});
+                                  });
 
-                                  yearlyChart[k] =
-                                      ChartData(formattedDate, finalTotal);
+                                  print(finalList);
+
+                                  // for (int i = 0; i < finalList.length; i++) {
+                                  //   yearlyChart[finalList[i]['index']] =
+                                  //       ChartData(
+                                  //           yearlyDates[finalList[i]['index']],
+                                  //           finalList[i]['totalamt']);
+                                  // }
+
+                                  double finalTotal = 0;
+                                  for (int k = 0; k < yearlyChart.length; k++) {
+                                    for (int i = 0; i < finalList.length; i++) {
+                                      if (finalList[i]['index'] == k) {
+                                        // weeklyChart[k] = ChartData(
+                                        //     weeklyDates[k],
+                                        //     finalList[i]
+                                        //         ['totalamt']);
+                                        finalTotal =
+                                            finalTotal + finalList[i]['totalamt'];
+                                      }
+                                    }
+                                    DateTime dateTime = DateFormat("dd-MM-yyyy")
+                                        .parse(yearlyDates[k]);
+
+                                    String formattedDate =
+                                    DateFormat("dd-MM-yyyy").format(dateTime);
+
+                                    yearlyChart[k] =
+                                        ChartData(formattedDate, finalTotal);
+                                  }
+
+                                  chartData = yearlyChart;
+
+                                  setState(() {});
                                 }
-
-                                chartData = yearlyChart;
-
-                                setState(() {});
                               }
+
+
                             });
                           },
                           child: Container(
@@ -2731,591 +2804,600 @@ class _GraphScreenState extends State<GraphScreen> {
                                                     ),
                                                   ],
                                                 ),
+                                                Spacer(),
+                                                GestureDetector(
+                                                  onTap: () {
+
+                                                    cycleOrAllTime='Cycle';
+
+
+                                                    // var data = TransactionDB.instance.transactionMonthListNotifier.value;
+
+                                                    selected = 'All';
+                                                    data = filterList;
+
+                                                    print(data);
+
+                                                    if (dropdownvalue == '1 Week') {
+                                                      List weeklyDates = [];
+                                                      DateTime selectedOne =
+                                                      DateFormat('dd-MM-yyyy')
+                                                          .parse(selectedDate);
+                                                      DateTime todayDate =
+                                                      DateTime.now();
+
+                                                      while (selectedOne
+                                                          .isBefore(todayDate)) {
+                                                        weeklyDates.add(
+                                                            DateFormat('dd-MM-yyyy')
+                                                                .format(selectedOne));
+                                                        selectedOne = selectedOne
+                                                            .add(Duration(days: 7));
+                                                      }
+
+                                                      // print(weeklyDates);
+
+                                                      List<ChartData> weekChart = [];
+                                                      for (int i = 0;
+                                                      i < weeklyDates.length;
+                                                      i++) {
+                                                        weekChart.add(ChartData(
+                                                            weeklyDates[i], 300));
+                                                      }
+
+                                                      List<ChartData> weeklyChart = [];
+                                                      for (int i = 0;
+                                                      i < weeklyDates.length;
+                                                      i++) {
+                                                        weeklyChart.add(ChartData(
+                                                            weeklyDates[i], 0));
+                                                      }
+
+                                                      // data.sort((a, b) => a.date.compareTo(b.date),);
+
+                                                      List myweekList = [];
+
+                                                      for (int i = 0;
+                                                      i < data.length;
+                                                      i++) {
+                                                        bool found = false;
+                                                        for (int j = 0;
+                                                        j < weeklyDates.length - 1;
+                                                        j++) {
+                                                          DateTime startDate =
+                                                          DateFormat('dd-MM-yyyy')
+                                                              .parse(
+                                                              weeklyDates[j]);
+                                                          DateTime endDate = DateFormat(
+                                                              'dd-MM-yyyy')
+                                                              .parse(
+                                                              weeklyDates[j + 1]);
+                                                          DateTime date2 =
+                                                          DateTime.parse(
+                                                              data[i].date);
+
+                                                          if (date2
+                                                              .isAfter(startDate) &&
+                                                              date2.isBefore(endDate)) {
+                                                            print(myweekList);
+                                                            print('Yes');
+
+                                                            myweekList.add({
+                                                              'index': j + 1,
+                                                              'amt': data[i].amount
+                                                            });
+
+                                                            // monthlyChart[j] = ChartData(
+                                                            //     monthlyDates[j + 1],
+                                                            //     data[i].amount);
+
+                                                            found = true;
+                                                            break;
+                                                          } else {
+                                                            print('no');
+                                                          }
+                                                        }
+                                                        if (!found) {
+                                                          print(
+                                                              'Item from list2 at index $i is not within any date range of list1.');
+                                                        }
+                                                      }
+
+                                                      print(myweekList);
+
+                                                      Map<int, double> indexAmtMap = {};
+                                                      for (var data in myweekList) {
+                                                        int index = data['index'];
+                                                        double amt = data['amt'];
+                                                        indexAmtMap[index] =
+                                                            (indexAmtMap[index] ?? 0) +
+                                                                amt;
+                                                      }
+
+                                                      List<Map<String, dynamic>>
+                                                      finalList = [];
+                                                      indexAmtMap
+                                                          .forEach((index, totalAmt) {
+                                                        finalList.add({
+                                                          'index': index,
+                                                          'totalamt': totalAmt
+                                                        });
+                                                      });
+
+                                                      print(finalList);
+
+                                                      // for (int i = 0;
+                                                      //     i < finalList.length;
+                                                      //     i++) {
+                                                      //   weeklyChart[
+                                                      //       finalList[i]
+                                                      //           ['index']] = ChartData(
+                                                      //       weeklyDates[finalList[i]
+                                                      //           ['index']],
+                                                      //       finalList[i]['totalamt']);
+                                                      // }
+                                                      double finalTotal = 0;
+                                                      for (int k = 0;
+                                                      k < weeklyChart.length;
+                                                      k++) {
+                                                        for (int i = 0;
+                                                        i < finalList.length;
+                                                        i++) {
+                                                          if (finalList[i]['index'] ==
+                                                              k) {
+                                                            // weeklyChart[k] = ChartData(
+                                                            //     weeklyDates[k],
+                                                            //     finalList[i]
+                                                            //         ['totalamt']);
+                                                            finalTotal = finalTotal +
+                                                                finalList[i]
+                                                                ['totalamt'];
+                                                          }
+                                                        }
+                                                        DateTime dateTime =
+                                                        DateFormat("dd-MM-yyyy")
+                                                            .parse(weeklyDates[k]);
+
+                                                        String formattedDate =
+                                                        DateFormat("dd-MM-yyyy")
+                                                            .format(dateTime);
+
+                                                        weeklyChart[k] = ChartData(
+                                                            formattedDate, finalTotal);
+                                                      }
+
+                                                      chartData = weeklyChart;
+                                                      setState(() {});
+                                                    }
+                                                    else if (dropdownvalue ==
+                                                        '1 Month') {
+                                                      print(data);
+                                                      List monthlyDates = [];
+                                                      DateTime selectedOne =
+                                                      DateFormat('dd-MM-yyyy')
+                                                          .parse(selectedDate);
+                                                      DateTime todayDate =
+                                                      DateTime.now();
+
+                                                      while (selectedOne
+                                                          .isBefore(todayDate) ||
+                                                          selectedOne.month ==
+                                                              todayDate.month) {
+                                                        monthlyDates.add(
+                                                            DateFormat('dd-MM-yyyy')
+                                                                .format(selectedOne));
+                                                        selectedOne = DateTime(
+                                                            selectedOne.year,
+                                                            selectedOne.month + 1,
+                                                            selectedOne.day);
+                                                      }
+
+                                                      // print(monthlyDates);
+
+                                                      List<ChartData> monthlyChart = [];
+                                                      for (int i = 0;
+                                                      i < monthlyDates.length;
+                                                      i++) {
+                                                        monthlyChart.add(ChartData(
+                                                            monthlyDates[i], 0));
+                                                      }
+
+                                                      // data.sort((a, b) => a.date.compareTo(b.date),);
+
+                                                      List myMonthList = [];
+
+                                                      for (int i = 0;
+                                                      i < data.length;
+                                                      i++) {
+                                                        bool found = false;
+                                                        for (int j = 0;
+                                                        j < monthlyDates.length - 1;
+                                                        j++) {
+                                                          DateTime startDate =
+                                                          DateFormat('dd-MM-yyyy')
+                                                              .parse(
+                                                              monthlyDates[j]);
+                                                          DateTime endDate = DateFormat(
+                                                              'dd-MM-yyyy')
+                                                              .parse(
+                                                              monthlyDates[j + 1]);
+                                                          DateTime date2 =
+                                                          DateTime.parse(
+                                                              data[i].date);
+
+                                                          if (date2
+                                                              .isAfter(startDate) &&
+                                                              date2.isBefore(endDate)) {
+                                                            print(myMonthList);
+                                                            print('Yes');
+
+                                                            myMonthList.add({
+                                                              'index': j + 1,
+                                                              'amt': data[i].amount
+                                                            });
+
+                                                            // monthlyChart[j] = ChartData(
+                                                            //     monthlyDates[j + 1],
+                                                            //     data[i].amount);
+
+                                                            found = true;
+                                                            break;
+                                                          } else {
+                                                            print('no');
+                                                          }
+                                                        }
+                                                        if (!found) {
+                                                          print(
+                                                              'Item from list2 at index $i is not within any date range of list1.');
+                                                        }
+                                                      }
+
+                                                      print(myMonthList);
+
+                                                      Map<int, double> indexAmtMap = {};
+                                                      for (var data in myMonthList) {
+                                                        int index = data['index'];
+                                                        double amt = data['amt'];
+                                                        indexAmtMap[index] =
+                                                            (indexAmtMap[index] ?? 0) +
+                                                                amt;
+                                                      }
+
+                                                      List<Map<String, dynamic>>
+                                                      finalList = [];
+                                                      indexAmtMap
+                                                          .forEach((index, totalAmt) {
+                                                        finalList.add({
+                                                          'index': index,
+                                                          'totalamt': totalAmt
+                                                        });
+                                                      });
+
+                                                      print(finalList);
+
+                                                      // for (int i = 0;
+                                                      //     i < finalList.length;
+                                                      //     i++) {
+                                                      //   monthlyChart[
+                                                      //       finalList[i]
+                                                      //           ['index']] = ChartData(
+                                                      //       monthlyDates[finalList[i]
+                                                      //           ['index']],
+                                                      //       finalList[i]['totalamt']);
+                                                      // }
+                                                      double finalTotal = 0;
+                                                      for (int k = 0;
+                                                      k < monthlyChart.length;
+                                                      k++) {
+                                                        for (int i = 0;
+                                                        i < finalList.length;
+                                                        i++) {
+                                                          if (finalList[i]['index'] ==
+                                                              k) {
+                                                            // weeklyChart[k] = ChartData(
+                                                            //     weeklyDates[k],
+                                                            //     finalList[i]
+                                                            //         ['totalamt']);
+                                                            finalTotal = finalTotal +
+                                                                finalList[i]
+                                                                ['totalamt'];
+                                                          }
+                                                        }
+                                                        DateTime dateTime =
+                                                        DateFormat("dd-MM-yyyy")
+                                                            .parse(monthlyDates[k]);
+
+                                                        String formattedDate =
+                                                        DateFormat("dd-MM-yyyy")
+                                                            .format(dateTime);
+
+                                                        monthlyChart[k] = ChartData(
+                                                            formattedDate, finalTotal);
+                                                      }
+
+                                                      chartData = monthlyChart;
+                                                      setState(() {});
+                                                    } else if (dropdownvalue ==
+                                                        '1 Year') {
+                                                      List yearlyDates = [];
+                                                      DateTime selectedOne =
+                                                      DateFormat('dd-MM-yyyy')
+                                                          .parse(selectedDate);
+                                                      DateTime today = DateTime.now();
+                                                      DateTime currentDate = DateTime(
+                                                          selectedOne.year,
+                                                          selectedOne.month,
+                                                          selectedOne.day);
+
+                                                      while (currentDate
+                                                          .isBefore(today) ||
+                                                          (currentDate.year ==
+                                                              today.year &&
+                                                              currentDate.month ==
+                                                                  today.month &&
+                                                              currentDate.day ==
+                                                                  today.day)) {
+                                                        yearlyDates.add(
+                                                            DateFormat('dd-MM-yyyy')
+                                                                .format(currentDate));
+                                                        currentDate = DateTime(
+                                                            currentDate.year + 1,
+                                                            selectedOne.month,
+                                                            selectedOne.day);
+                                                      }
+                                                      // print(yearlyDates);
+                                                      List<ChartData> yearChart = [];
+                                                      for (int i = 0;
+                                                      i < yearlyDates.length;
+                                                      i++) {
+                                                        yearChart.add(ChartData(
+                                                            yearlyDates[i], 300));
+                                                      }
+
+                                                      List<ChartData> yearlyChart = [];
+                                                      for (int i = 0;
+                                                      i < yearlyDates.length;
+                                                      i++) {
+                                                        yearlyChart.add(ChartData(
+                                                            yearlyDates[i], 0));
+                                                      }
+
+                                                      // data.sort((a, b) => a.date.compareTo(b.date),);
+
+                                                      List myYearList = [];
+
+                                                      for (int i = 0;
+                                                      i < data.length;
+                                                      i++) {
+                                                        bool found = false;
+                                                        for (int j = 0;
+                                                        j < yearlyDates.length - 1;
+                                                        j++) {
+                                                          DateTime startDate =
+                                                          DateFormat('dd-MM-yyyy')
+                                                              .parse(
+                                                              yearlyDates[j]);
+                                                          DateTime endDate = DateFormat(
+                                                              'dd-MM-yyyy')
+                                                              .parse(
+                                                              yearlyDates[j + 1]);
+                                                          DateTime date2 =
+                                                          DateTime.parse(
+                                                              data[i].date);
+
+                                                          if (date2
+                                                              .isAfter(startDate) &&
+                                                              date2.isBefore(endDate)) {
+                                                            print(myYearList);
+                                                            print('Yes');
+
+                                                            myYearList.add({
+                                                              'index': j + 1,
+                                                              'amt': data[i].amount
+                                                            });
+
+                                                            // monthlyChart[j] = ChartData(
+                                                            //     monthlyDates[j + 1],
+                                                            //     data[i].amount);
+
+                                                            found = true;
+                                                            break;
+                                                          } else {
+                                                            print('no');
+                                                          }
+                                                        }
+                                                        if (!found) {
+                                                          print(
+                                                              'Item from list2 at index $i is not within any date range of list1.');
+                                                        }
+                                                      }
+
+                                                      print(myYearList);
+
+                                                      Map<int, double> indexAmtMap = {};
+                                                      for (var data in myYearList) {
+                                                        int index = data['index'];
+                                                        double amt = data['amt'];
+                                                        indexAmtMap[index] =
+                                                            (indexAmtMap[index] ?? 0) +
+                                                                amt;
+                                                      }
+
+                                                      List<Map<String, dynamic>>
+                                                      finalList = [];
+                                                      indexAmtMap
+                                                          .forEach((index, totalAmt) {
+                                                        finalList.add({
+                                                          'index': index,
+                                                          'totalamt': totalAmt
+                                                        });
+                                                      });
+
+                                                      print(finalList);
+
+                                                      // for (int i = 0;
+                                                      //     i < finalList.length;
+                                                      //     i++) {
+                                                      //   yearlyChart[
+                                                      //       finalList[i]
+                                                      //           ['index']] = ChartData(
+                                                      //       yearlyDates[finalList[i]
+                                                      //           ['index']],
+                                                      //       finalList[i]['totalamt']);
+                                                      // }
+
+                                                      double finalTotal = 0;
+                                                      for (int k = 0;
+                                                      k < yearlyChart.length;
+                                                      k++) {
+                                                        for (int i = 0;
+                                                        i < finalList.length;
+                                                        i++) {
+                                                          if (finalList[i]['index'] ==
+                                                              k) {
+                                                            // weeklyChart[k] = ChartData(
+                                                            //     weeklyDates[k],
+                                                            //     finalList[i]
+                                                            //         ['totalamt']);
+                                                            finalTotal = finalTotal +
+                                                                finalList[i]
+                                                                ['totalamt'];
+                                                          }
+                                                        }
+                                                        DateTime dateTime =
+                                                        DateFormat("dd-MM-yyyy")
+                                                            .parse(yearlyDates[k]);
+
+                                                        String formattedDate =
+                                                        DateFormat("dd-MM-yyyy")
+                                                            .format(dateTime);
+
+                                                        yearlyChart[k] = ChartData(
+                                                            formattedDate, finalTotal);
+                                                      }
+
+                                                      chartData = yearlyChart;
+
+                                                      setState(() {});
+                                                    }
+                                                    else if (dropdownvalue ==
+                                                        '1 Day') {
+                                                      List dailyDates = [];
+                                                      DateTime selectedOne =
+                                                      DateFormat('dd-MM-yyyy')
+                                                          .parse(selectedDate);
+                                                      DateTime today = DateTime.now();
+                                                      DateTime currentDate = DateTime(
+                                                          selectedOne.year,
+                                                          selectedOne.month,
+                                                          selectedOne.day);
+
+                                                      while (currentDate
+                                                          .isBefore(today) ||
+                                                          (currentDate.year ==
+                                                              today.year &&
+                                                              currentDate.month ==
+                                                                  today.month &&
+                                                              currentDate.day ==
+                                                                  today.day)) {
+                                                        dailyDates.add(
+                                                            DateFormat('dd-MM-yyyy')
+                                                                .format(currentDate));
+
+                                                        currentDate = currentDate
+                                                            .add(Duration(days: 1));
+                                                      }
+
+                                                      List<ChartData> dailyChart = [];
+
+                                                      for (int i = 0;
+                                                      i < dailyDates.length;
+                                                      i++) {
+                                                        dailyChart.add(ChartData(
+                                                            dailyDates[i], 0.0));
+                                                      }
+                                                      double total = 0;
+                                                      double dateTotal = 0;
+                                                      for (int i = 0;
+                                                      i < dailyDates.length;
+                                                      i++) {
+                                                        String date2 = dailyDates[i];
+
+                                                        for (int j = 0;
+                                                        j < data.length;
+                                                        j++) {
+                                                          DateTime localDate =
+                                                          DateTime.parse(
+                                                              data[j].date);
+                                                          String localDate1 =
+                                                          DateFormat('dd-MM-yyyy')
+                                                              .format(localDate);
+
+                                                          if (localDate1 == date2) {
+                                                            dateTotal = 0;
+
+                                                            for (int i = 0;
+                                                            i < data.length;
+                                                            i++) {
+                                                              if (localDate1 ==
+                                                                  DateFormat('dd-MM-yyyy')
+                                                                      .format(DateTime
+                                                                      .parse(data[i]
+                                                                      .date))) {
+                                                                dateTotal = dateTotal +
+                                                                    data[i].amount;
+                                                              }
+                                                            }
+
+                                                            // dailyChart[i] = ChartData(dailyDates[i], dateTotal);
+                                                            total = total + dateTotal;
+                                                            break;
+                                                          } else {
+                                                            print('no');
+                                                          }
+                                                        }
+
+                                                        dailyChart[i] = ChartData(
+                                                            dailyDates[i], total);
+                                                      }
+
+                                                      chartData = dailyChart;
+                                                      setState(() {});
+                                                    }
+
+                                                    Navigator.pop(context);
+                                                  },
+                                                  child: Container(
+                                                    width: 100,
+                                                    decoration: BoxDecoration(
+                                                      color:
+                                                      Colors.white.withOpacity(0.2),
+                                                      border: Border.all(
+                                                          color: Colors.white,
+                                                          width: 0.5),
+                                                      borderRadius:
+                                                      BorderRadius.circular(
+                                                        7,
+                                                      ),
+                                                    ),
+                                                    alignment: Alignment.center,
+                                                    height: 30,
+                                                    child: Text(
+                                                      'Done',
+                                                      style: TextStyle(
+                                                          color: Colors.white,
+                                                          fontWeight: FontWeight.w500,
+                                                          fontSize: 16),
+                                                    ),
+                                                  ),
+                                                ),
+
                                               ],
                                             ),
                                           ),
                                         ),
-                                        SizedBox(
-                                          height: 10,
-                                        ),
-                                        GestureDetector(
-                                          onTap: () {
-                                            // var data = TransactionDB.instance.transactionMonthListNotifier.value;
-                                            data = filterList;
 
-                                            print(data);
 
-                                            if (dropdownvalue == '1 Week') {
-                                              List weeklyDates = [];
-                                              DateTime selectedOne =
-                                                  DateFormat('dd-MM-yyyy')
-                                                      .parse(selectedDate);
-                                              DateTime todayDate =
-                                                  DateTime.now();
-
-                                              while (selectedOne
-                                                  .isBefore(todayDate)) {
-                                                weeklyDates.add(
-                                                    DateFormat('dd-MM-yyyy')
-                                                        .format(selectedOne));
-                                                selectedOne = selectedOne
-                                                    .add(Duration(days: 7));
-                                              }
-
-                                              // print(weeklyDates);
-
-                                              List<ChartData> weekChart = [];
-                                              for (int i = 0;
-                                                  i < weeklyDates.length;
-                                                  i++) {
-                                                weekChart.add(ChartData(
-                                                    weeklyDates[i], 300));
-                                              }
-
-                                              List<ChartData> weeklyChart = [];
-                                              for (int i = 0;
-                                                  i < weeklyDates.length;
-                                                  i++) {
-                                                weeklyChart.add(ChartData(
-                                                    weeklyDates[i], 0));
-                                              }
-
-                                              // data.sort((a, b) => a.date.compareTo(b.date),);
-
-                                              List myweekList = [];
-
-                                              for (int i = 0;
-                                                  i < data.length;
-                                                  i++) {
-                                                bool found = false;
-                                                for (int j = 0;
-                                                    j < weeklyDates.length - 1;
-                                                    j++) {
-                                                  DateTime startDate =
-                                                      DateFormat('dd-MM-yyyy')
-                                                          .parse(
-                                                              weeklyDates[j]);
-                                                  DateTime endDate = DateFormat(
-                                                          'dd-MM-yyyy')
-                                                      .parse(
-                                                          weeklyDates[j + 1]);
-                                                  DateTime date2 =
-                                                      DateTime.parse(
-                                                          data[i].date);
-
-                                                  if (date2
-                                                          .isAfter(startDate) &&
-                                                      date2.isBefore(endDate)) {
-                                                    print(myweekList);
-                                                    print('Yes');
-
-                                                    myweekList.add({
-                                                      'index': j + 1,
-                                                      'amt': data[i].amount
-                                                    });
-
-                                                    // monthlyChart[j] = ChartData(
-                                                    //     monthlyDates[j + 1],
-                                                    //     data[i].amount);
-
-                                                    found = true;
-                                                    break;
-                                                  } else {
-                                                    print('no');
-                                                  }
-                                                }
-                                                if (!found) {
-                                                  print(
-                                                      'Item from list2 at index $i is not within any date range of list1.');
-                                                }
-                                              }
-
-                                              print(myweekList);
-
-                                              Map<int, double> indexAmtMap = {};
-                                              for (var data in myweekList) {
-                                                int index = data['index'];
-                                                double amt = data['amt'];
-                                                indexAmtMap[index] =
-                                                    (indexAmtMap[index] ?? 0) +
-                                                        amt;
-                                              }
-
-                                              List<Map<String, dynamic>>
-                                                  finalList = [];
-                                              indexAmtMap
-                                                  .forEach((index, totalAmt) {
-                                                finalList.add({
-                                                  'index': index,
-                                                  'totalamt': totalAmt
-                                                });
-                                              });
-
-                                              print(finalList);
-
-                                              // for (int i = 0;
-                                              //     i < finalList.length;
-                                              //     i++) {
-                                              //   weeklyChart[
-                                              //       finalList[i]
-                                              //           ['index']] = ChartData(
-                                              //       weeklyDates[finalList[i]
-                                              //           ['index']],
-                                              //       finalList[i]['totalamt']);
-                                              // }
-                                              double finalTotal = 0;
-                                              for (int k = 0;
-                                                  k < weeklyChart.length;
-                                                  k++) {
-                                                for (int i = 0;
-                                                    i < finalList.length;
-                                                    i++) {
-                                                  if (finalList[i]['index'] ==
-                                                      k) {
-                                                    // weeklyChart[k] = ChartData(
-                                                    //     weeklyDates[k],
-                                                    //     finalList[i]
-                                                    //         ['totalamt']);
-                                                    finalTotal = finalTotal +
-                                                        finalList[i]
-                                                            ['totalamt'];
-                                                  }
-                                                }
-                                                DateTime dateTime =
-                                                    DateFormat("dd-MM-yyyy")
-                                                        .parse(weeklyDates[k]);
-
-                                                String formattedDate =
-                                                    DateFormat("dd-MM-yyyy")
-                                                        .format(dateTime);
-
-                                                weeklyChart[k] = ChartData(
-                                                    formattedDate, finalTotal);
-                                              }
-
-                                              chartData = weeklyChart;
-                                              setState(() {});
-                                            } else if (dropdownvalue ==
-                                                '1 Month') {
-                                              print(data);
-                                              List monthlyDates = [];
-                                              DateTime selectedOne =
-                                                  DateFormat('dd-MM-yyyy')
-                                                      .parse(selectedDate);
-                                              DateTime todayDate =
-                                                  DateTime.now();
-
-                                              while (selectedOne
-                                                      .isBefore(todayDate) ||
-                                                  selectedOne.month ==
-                                                      todayDate.month) {
-                                                monthlyDates.add(
-                                                    DateFormat('dd-MM-yyyy')
-                                                        .format(selectedOne));
-                                                selectedOne = DateTime(
-                                                    selectedOne.year,
-                                                    selectedOne.month + 1,
-                                                    selectedOne.day);
-                                              }
-
-                                              // print(monthlyDates);
-
-                                              List<ChartData> monthlyChart = [];
-                                              for (int i = 0;
-                                                  i < monthlyDates.length;
-                                                  i++) {
-                                                monthlyChart.add(ChartData(
-                                                    monthlyDates[i], 0));
-                                              }
-
-                                              // data.sort((a, b) => a.date.compareTo(b.date),);
-
-                                              List myMonthList = [];
-
-                                              for (int i = 0;
-                                                  i < data.length;
-                                                  i++) {
-                                                bool found = false;
-                                                for (int j = 0;
-                                                    j < monthlyDates.length - 1;
-                                                    j++) {
-                                                  DateTime startDate =
-                                                      DateFormat('dd-MM-yyyy')
-                                                          .parse(
-                                                              monthlyDates[j]);
-                                                  DateTime endDate = DateFormat(
-                                                          'dd-MM-yyyy')
-                                                      .parse(
-                                                          monthlyDates[j + 1]);
-                                                  DateTime date2 =
-                                                      DateTime.parse(
-                                                          data[i].date);
-
-                                                  if (date2
-                                                          .isAfter(startDate) &&
-                                                      date2.isBefore(endDate)) {
-                                                    print(myMonthList);
-                                                    print('Yes');
-
-                                                    myMonthList.add({
-                                                      'index': j + 1,
-                                                      'amt': data[i].amount
-                                                    });
-
-                                                    // monthlyChart[j] = ChartData(
-                                                    //     monthlyDates[j + 1],
-                                                    //     data[i].amount);
-
-                                                    found = true;
-                                                    break;
-                                                  } else {
-                                                    print('no');
-                                                  }
-                                                }
-                                                if (!found) {
-                                                  print(
-                                                      'Item from list2 at index $i is not within any date range of list1.');
-                                                }
-                                              }
-
-                                              print(myMonthList);
-
-                                              Map<int, double> indexAmtMap = {};
-                                              for (var data in myMonthList) {
-                                                int index = data['index'];
-                                                double amt = data['amt'];
-                                                indexAmtMap[index] =
-                                                    (indexAmtMap[index] ?? 0) +
-                                                        amt;
-                                              }
-
-                                              List<Map<String, dynamic>>
-                                                  finalList = [];
-                                              indexAmtMap
-                                                  .forEach((index, totalAmt) {
-                                                finalList.add({
-                                                  'index': index,
-                                                  'totalamt': totalAmt
-                                                });
-                                              });
-
-                                              print(finalList);
-
-                                              // for (int i = 0;
-                                              //     i < finalList.length;
-                                              //     i++) {
-                                              //   monthlyChart[
-                                              //       finalList[i]
-                                              //           ['index']] = ChartData(
-                                              //       monthlyDates[finalList[i]
-                                              //           ['index']],
-                                              //       finalList[i]['totalamt']);
-                                              // }
-                                              double finalTotal = 0;
-                                              for (int k = 0;
-                                                  k < monthlyChart.length;
-                                                  k++) {
-                                                for (int i = 0;
-                                                    i < finalList.length;
-                                                    i++) {
-                                                  if (finalList[i]['index'] ==
-                                                      k) {
-                                                    // weeklyChart[k] = ChartData(
-                                                    //     weeklyDates[k],
-                                                    //     finalList[i]
-                                                    //         ['totalamt']);
-                                                    finalTotal = finalTotal +
-                                                        finalList[i]
-                                                            ['totalamt'];
-                                                  }
-                                                }
-                                                DateTime dateTime =
-                                                    DateFormat("dd-MM-yyyy")
-                                                        .parse(monthlyDates[k]);
-
-                                                String formattedDate =
-                                                    DateFormat("dd-MM-yyyy")
-                                                        .format(dateTime);
-
-                                                monthlyChart[k] = ChartData(
-                                                    formattedDate, finalTotal);
-                                              }
-
-                                              chartData = monthlyChart;
-                                              setState(() {});
-                                            } else if (dropdownvalue ==
-                                                '1 Year') {
-                                              List yearlyDates = [];
-                                              DateTime selectedOne =
-                                                  DateFormat('dd-MM-yyyy')
-                                                      .parse(selectedDate);
-                                              DateTime today = DateTime.now();
-                                              DateTime currentDate = DateTime(
-                                                  selectedOne.year,
-                                                  selectedOne.month,
-                                                  selectedOne.day);
-
-                                              while (currentDate
-                                                      .isBefore(today) ||
-                                                  (currentDate.year ==
-                                                          today.year &&
-                                                      currentDate.month ==
-                                                          today.month &&
-                                                      currentDate.day ==
-                                                          today.day)) {
-                                                yearlyDates.add(
-                                                    DateFormat('dd-MM-yyyy')
-                                                        .format(currentDate));
-                                                currentDate = DateTime(
-                                                    currentDate.year + 1,
-                                                    selectedOne.month,
-                                                    selectedOne.day);
-                                              }
-                                              // print(yearlyDates);
-                                              List<ChartData> yearChart = [];
-                                              for (int i = 0;
-                                                  i < yearlyDates.length;
-                                                  i++) {
-                                                yearChart.add(ChartData(
-                                                    yearlyDates[i], 300));
-                                              }
-
-                                              List<ChartData> yearlyChart = [];
-                                              for (int i = 0;
-                                                  i < yearlyDates.length;
-                                                  i++) {
-                                                yearlyChart.add(ChartData(
-                                                    yearlyDates[i], 0));
-                                              }
-
-                                              // data.sort((a, b) => a.date.compareTo(b.date),);
-
-                                              List myYearList = [];
-
-                                              for (int i = 0;
-                                                  i < data.length;
-                                                  i++) {
-                                                bool found = false;
-                                                for (int j = 0;
-                                                    j < yearlyDates.length - 1;
-                                                    j++) {
-                                                  DateTime startDate =
-                                                      DateFormat('dd-MM-yyyy')
-                                                          .parse(
-                                                              yearlyDates[j]);
-                                                  DateTime endDate = DateFormat(
-                                                          'dd-MM-yyyy')
-                                                      .parse(
-                                                          yearlyDates[j + 1]);
-                                                  DateTime date2 =
-                                                      DateTime.parse(
-                                                          data[i].date);
-
-                                                  if (date2
-                                                          .isAfter(startDate) &&
-                                                      date2.isBefore(endDate)) {
-                                                    print(myYearList);
-                                                    print('Yes');
-
-                                                    myYearList.add({
-                                                      'index': j + 1,
-                                                      'amt': data[i].amount
-                                                    });
-
-                                                    // monthlyChart[j] = ChartData(
-                                                    //     monthlyDates[j + 1],
-                                                    //     data[i].amount);
-
-                                                    found = true;
-                                                    break;
-                                                  } else {
-                                                    print('no');
-                                                  }
-                                                }
-                                                if (!found) {
-                                                  print(
-                                                      'Item from list2 at index $i is not within any date range of list1.');
-                                                }
-                                              }
-
-                                              print(myYearList);
-
-                                              Map<int, double> indexAmtMap = {};
-                                              for (var data in myYearList) {
-                                                int index = data['index'];
-                                                double amt = data['amt'];
-                                                indexAmtMap[index] =
-                                                    (indexAmtMap[index] ?? 0) +
-                                                        amt;
-                                              }
-
-                                              List<Map<String, dynamic>>
-                                                  finalList = [];
-                                              indexAmtMap
-                                                  .forEach((index, totalAmt) {
-                                                finalList.add({
-                                                  'index': index,
-                                                  'totalamt': totalAmt
-                                                });
-                                              });
-
-                                              print(finalList);
-
-                                              // for (int i = 0;
-                                              //     i < finalList.length;
-                                              //     i++) {
-                                              //   yearlyChart[
-                                              //       finalList[i]
-                                              //           ['index']] = ChartData(
-                                              //       yearlyDates[finalList[i]
-                                              //           ['index']],
-                                              //       finalList[i]['totalamt']);
-                                              // }
-
-                                              double finalTotal = 0;
-                                              for (int k = 0;
-                                                  k < yearlyChart.length;
-                                                  k++) {
-                                                for (int i = 0;
-                                                    i < finalList.length;
-                                                    i++) {
-                                                  if (finalList[i]['index'] ==
-                                                      k) {
-                                                    // weeklyChart[k] = ChartData(
-                                                    //     weeklyDates[k],
-                                                    //     finalList[i]
-                                                    //         ['totalamt']);
-                                                    finalTotal = finalTotal +
-                                                        finalList[i]
-                                                            ['totalamt'];
-                                                  }
-                                                }
-                                                DateTime dateTime =
-                                                    DateFormat("dd-MM-yyyy")
-                                                        .parse(yearlyDates[k]);
-
-                                                String formattedDate =
-                                                    DateFormat("dd-MM-yyyy")
-                                                        .format(dateTime);
-
-                                                yearlyChart[k] = ChartData(
-                                                    formattedDate, finalTotal);
-                                              }
-
-                                              chartData = yearlyChart;
-
-                                              setState(() {});
-                                            } else if (dropdownvalue ==
-                                                '1 Day') {
-                                              List dailyDates = [];
-                                              DateTime selectedOne =
-                                                  DateFormat('dd-MM-yyyy')
-                                                      .parse(selectedDate);
-                                              DateTime today = DateTime.now();
-                                              DateTime currentDate = DateTime(
-                                                  selectedOne.year,
-                                                  selectedOne.month,
-                                                  selectedOne.day);
-
-                                              while (currentDate
-                                                      .isBefore(today) ||
-                                                  (currentDate.year ==
-                                                          today.year &&
-                                                      currentDate.month ==
-                                                          today.month &&
-                                                      currentDate.day ==
-                                                          today.day)) {
-                                                dailyDates.add(
-                                                    DateFormat('dd-MM-yyyy')
-                                                        .format(currentDate));
-
-                                                currentDate = currentDate
-                                                    .add(Duration(days: 1));
-                                              }
-
-                                              List<ChartData> dailyChart = [];
-
-                                              for (int i = 0;
-                                                  i < dailyDates.length;
-                                                  i++) {
-                                                dailyChart.add(ChartData(
-                                                    dailyDates[i], 0.0));
-                                              }
-                                              double total = 0;
-                                              double dateTotal = 0;
-                                              for (int i = 0;
-                                                  i < dailyDates.length;
-                                                  i++) {
-                                                String date2 = dailyDates[i];
-
-                                                for (int j = 0;
-                                                    j < data.length;
-                                                    j++) {
-                                                  DateTime localDate =
-                                                      DateTime.parse(
-                                                          data[j].date);
-                                                  String localDate1 =
-                                                      DateFormat('dd-MM-yyyy')
-                                                          .format(localDate);
-
-                                                  if (localDate1 == date2) {
-                                                    dateTotal = 0;
-
-                                                    for (int i = 0;
-                                                        i < data.length;
-                                                        i++) {
-                                                      if (localDate1 ==
-                                                          DateFormat('dd-MM-yyyy')
-                                                              .format(DateTime
-                                                                  .parse(data[i]
-                                                                      .date))) {
-                                                        dateTotal = dateTotal +
-                                                            data[i].amount;
-                                                      }
-                                                    }
-
-                                                    // dailyChart[i] = ChartData(dailyDates[i], dateTotal);
-                                                    total = total + dateTotal;
-                                                    break;
-                                                  } else {
-                                                    print('no');
-                                                  }
-                                                }
-
-                                                dailyChart[i] = ChartData(
-                                                    dailyDates[i], total);
-                                              }
-
-                                              chartData = dailyChart;
-                                              setState(() {});
-                                            }
-
-                                            Navigator.pop(context);
-                                          },
-                                          child: Container(
-                                            width: 100,
-                                            decoration: BoxDecoration(
-                                              color:
-                                                  Colors.white.withOpacity(0.2),
-                                              border: Border.all(
-                                                  color: Colors.white,
-                                                  width: 0.5),
-                                              borderRadius:
-                                                  BorderRadius.circular(
-                                                7,
-                                              ),
-                                            ),
-                                            alignment: Alignment.center,
-                                            height: 30,
-                                            child: Text(
-                                              'Done',
-                                              style: TextStyle(
-                                                  color: Colors.white,
-                                                  fontWeight: FontWeight.w500,
-                                                  fontSize: 16),
-                                            ),
-                                          ),
-                                        ),
                                       ],
                                     ),
                                   ),
@@ -3372,7 +3454,7 @@ class _GraphScreenState extends State<GraphScreen> {
                             print(data);
 
                             return Container(
-                              height: 220.0,
+                              height: 180.0,
                               width: MediaQuery.of(context).size.width,
                               child: Container(
                                 padding: EdgeInsets.all(20.0),
@@ -3402,47 +3484,47 @@ class _GraphScreenState extends State<GraphScreen> {
                                       height: 1,
                                       color: Colors.white,
                                     ),
-                                    const SizedBox(
-                                      height: 10,
-                                    ),
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        GestureDetector(
-                                          onTap: () {
-                                            selectedCategory = 'All Time';
-                                            filterList = TransactionDB.instance
-                                                .transactionListNotifier.value;
-                                            setState(() {});
-                                            Navigator.pop(context);
-                                          },
-                                          child: Container(
-                                            width: 120,
-                                            decoration: BoxDecoration(
-                                              color:
-                                                  Colors.white.withOpacity(0.2),
-                                              border: Border.all(
-                                                  color: Colors.white,
-                                                  width: 0.5),
-                                              borderRadius:
-                                                  BorderRadius.circular(
-                                                7,
-                                              ),
-                                            ),
-                                            alignment: Alignment.center,
-                                            height: 40,
-                                            child: Text(
-                                              'All Time',
-                                              style: TextStyle(
-                                                  color: Colors.white,
-                                                  fontWeight: FontWeight.w500,
-                                                  fontSize: 16),
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
+                                    // const SizedBox(
+                                    //   height: 10,
+                                    // ),
+                                    // Row(
+                                    //   mainAxisAlignment:
+                                    //       MainAxisAlignment.center,
+                                    //   children: [
+                                    //     GestureDetector(
+                                    //       onTap: () {
+                                    //         selectedCategory = 'All Time';
+                                    //         filterList = TransactionDB.instance
+                                    //             .transactionListNotifier.value;
+                                    //         setState(() {});
+                                    //         Navigator.pop(context);
+                                    //       },
+                                    //       child: Container(
+                                    //         width: 120,
+                                    //         decoration: BoxDecoration(
+                                    //           color:
+                                    //               Colors.white.withOpacity(0.2),
+                                    //           border: Border.all(
+                                    //               color: Colors.white,
+                                    //               width: 0.5),
+                                    //           borderRadius:
+                                    //               BorderRadius.circular(
+                                    //             7,
+                                    //           ),
+                                    //         ),
+                                    //         alignment: Alignment.center,
+                                    //         height: 40,
+                                    //         child: Text(
+                                    //           'All Time',
+                                    //           style: TextStyle(
+                                    //               color: Colors.white,
+                                    //               fontWeight: FontWeight.w500,
+                                    //               fontSize: 16),
+                                    //         ),
+                                    //       ),
+                                    //     ),
+                                    //   ],
+                                    // ),
                                     SizedBox(
                                       height: 10,
                                     ),
