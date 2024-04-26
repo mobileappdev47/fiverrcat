@@ -79,7 +79,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
       String amountText;
 
-
       if (totalAmount < 0) {
         amountText =
             '- ${currencySymboleUpdate.value} ${formatter.format(totalAmount.abs())}';
@@ -88,7 +87,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
         });
 
       } else {
-
         amountText =
             '+ ${currencySymboleUpdate.value} ${formatter.format(totalAmount.abs())}';
         colorM = Colors.green;
@@ -104,10 +102,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
           endTime,
           colorM,
           totalAmount < 0,
-
         ),
       );
-
     });
 
     setState(() {});
@@ -129,6 +125,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
     return _AppointmentDataSource(appointments);
   }
+
 
   // List<Meeting> _getDataSource() {
   //   final List<Meeting> meetings = <Meeting>[];
@@ -323,42 +320,48 @@ class _CalendarScreenState extends State<CalendarScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             SizedBox(
-              height: 500,
+              height: 550,
               child: SfCalendar(
-
-                headerStyle:  CalendarHeaderStyle(
+                headerStyle: const CalendarHeaderStyle(
                   textStyle: TextStyle(color: Colors.black),
                 ),
-                //cellBorderColor: Colors.purple,
-                // key: _calendarKey,
                 controller: _calendarController,
-
                 appointmentBuilder: (context, calendarAppointmentDetails) {
-
-                  print(calendarAppointmentDetails.appointments.first.background);
-
-                  final Meeting meeting = calendarAppointmentDetails.appointments.last;
-
+                  print(
+                      calendarAppointmentDetails.appointments.first.background);
+                  final Meeting meeting =
+                      calendarAppointmentDetails.appointments.last;
                   return SizedBox(
+                    width: 10,
                     child: Text(
                       meeting.eventName,
-                      style: TextStyle(color:meeting.background, fontSize: 9),
+                      style: TextStyle(
+                        color: meeting.background,
+                        fontSize: meeting.eventName.length <= 9 ? 9 : 9,
+                      ),
+                      overflow: TextOverflow.visible,
+                      maxLines: 3,
                     ),
+
                   );
                 },
                 todayTextStyle: const TextStyle(color: Colors.black),
                 monthViewSettings: const MonthViewSettings(
-
                   appointmentDisplayMode:
                       MonthAppointmentDisplayMode.appointment,
                   monthCellStyle: MonthCellStyle(
-                    textStyle: TextStyle(color: Colors.white),
+                    textStyle: TextStyle(
+                      color: Colors.white,
+                      fontSize: 10,
+                    ),
                   ),
                 ),
 
                 onViewChanged: (viewChangedDetails) {
-                  SchedulerBinding.instance!.addPostFrameCallback((Duration duration) {
-                    _calendarController.selectedDate = viewChangedDetails.visibleDates[0];
+                  SchedulerBinding.instance!
+                      .addPostFrameCallback((Duration duration) {
+                    _calendarController.selectedDate =
+                        viewChangedDetails.visibleDates[0];
                   });
                   if (click) {
                     final DateTime firstVisibleDate =
@@ -898,7 +901,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   });
                   // Refresh the transaction list
                     Navigator.of(context).pop();
-                  // Close the dialog
+                  }); // Close the dialog
                 },
                 child: const Text(
                   'Yes',
@@ -928,8 +931,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
     );
   }
 }
-
-
 
 class _AppointmentDataSource extends CalendarDataSource {
   _AppointmentDataSource(List<Appointment> source) {
