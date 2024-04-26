@@ -94,7 +94,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       backgroundColor: AppTheme.pcPrimaryColor,
-      appBar: Appbar(
+      appBar: const Appbar(
         titleStr: 'Income and expense',
       ),
       body: Column(
@@ -186,7 +186,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
           //     ],
           //   ),
           // ),
-          Container(
+          SizedBox(
             height: 80,
             child: Row(
               children: [
@@ -228,17 +228,25 @@ class _TransactionScreenState extends State<TransactionScreen> {
                             padding: const EdgeInsets.all(8.0),
                             child: InkWell(
                               onTap: () {
-                                setState(() {
-                                  indexAll = index;
-                                  // selectedDate = SelectDate().selectMonth(
-                                  //     index + 1, DateTime.now().year);
-                                  selectedDate = SelectDate()
-                                      .selectMonth(monthIndex + 1, year);
-                                  TransactionDB.instance.filterForHome(
-                                      selectedDate.start, selectedDate.end);
-                                  TransactionDB.instance
-                                      .getTransactionsForCurrentMonth();
-                                });
+                                if (year != 2025) {
+                                  setState(() {
+                                    indexAll = index;
+                                    selectedDate = SelectDate().selectMonth(monthIndex + 1, year);
+                                    TransactionDB.instance.filterForHome(selectedDate.start, selectedDate.end);
+                                    TransactionDB.instance.getTransactionsForCurrentMonth();
+                                  });
+                                }
+                                // setState(() {
+                                //   indexAll = index;
+                                //   // selectedDate = SelectDate().selectMonth(
+                                //   //     index + 1, DateTime.now().year);
+                                //   selectedDate = SelectDate()
+                                //       .selectMonth(monthIndex + 1, year);
+                                //   TransactionDB.instance.filterForHome(
+                                //       selectedDate.start, selectedDate.end);
+                                //   TransactionDB.instance
+                                //       .getTransactionsForCurrentMonth();
+                                // });
                               },
                               child: Column(
                                 children: [

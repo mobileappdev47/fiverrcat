@@ -1,3 +1,4 @@
+import 'package:flutter/scheduler.dart';
 import 'package:pokercat/calander.dart';
 import 'package:pokercat/imports.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
@@ -28,8 +29,6 @@ class CalendarScreen extends StatefulWidget {
 }
 
 class _CalendarScreenState extends State<CalendarScreen> {
-  double selectData = 0;
-  double selectExpenseData = 0;
   List<String> transactionList = [];
   Map<String, List<TransactionModel>> newListData = {};
 
@@ -47,67 +46,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
     });
   }
 
-  List<Meeting> _getDataSource() {
-    final List<Meeting> meetings = <Meeting>[];
-    // Iterate through newListData to calculate total amount for each date
-
-    newListData.forEach((date, transactions) {
-      double totalAmount = 0;
-      for (var transaction in transactions) {
-        totalAmount += transaction.amount;
-      }
-      // Create Meeting object for each date
-      DateTime dateTime = DateTime.parse(date);
-      final DateTime startTime =
-          DateTime(dateTime.year, dateTime.month, dateTime.day, 9);
-      final DateTime endTime = startTime.add(const Duration(hours: 2));
-
-      meetings.add(
-        Meeting(
-          '${currencySymboleUpdate.value} ${formatter.format(totalAmount)}',
-          startTime,
-          endTime,
-          Colors.transparent,
-          false,
-        ),
-      );
-    });
-
-    return meetings;
-  }
-
   RxBool loader = false.obs;
 
-  List<Meeting> getDataSource1() {
-    loader.value = true;
-    final List<Meeting> meetings = <Meeting>[];
-    // Iterate through newListData to calculate total amount for each date
-    var data = TransactionDB.instance.transactionListNotifier.value;
-
-    for (int i = 0; i < data.length; i++) {
-      double totalAmount = 0;
-
-      totalAmount += data[i].amount;
-      DateTime dateTime = DateTime.parse(data[i].date);
-      final DateTime startTime =
-          DateTime(dateTime.year, dateTime.month, dateTime.day, 9);
-      final DateTime endTime = startTime.add(const Duration(hours: 2));
-
-      meetings.add(
-        Meeting(
-          '${currencySymboleUpdate.value} ${formatter.format(totalAmount)}',
-          startTime,
-          endTime,
-          Colors.transparent,
-          false,
-        ),
-      );
-    }
-    setState(() {});
-    loader.value = false;
-    Get.forceAppUpdate();
-    return meetings;
-  }
   List<Meeting> getDataSource() {
     loader.value = true;
     final List<Meeting> meetings = <Meeting>[];
@@ -122,22 +62,24 @@ class _CalendarScreenState extends State<CalendarScreen> {
       totalAmount += data[i].amount;
       totalAmountMap[dateTime] = totalAmount;
     }
-
     // Create Meeting objects with total amount for each date
     totalAmountMap.forEach((date, totalAmount) {
       final DateTime startTime = DateTime(date.year, date.month, date.day, 9);
       final DateTime endTime = startTime.add(const Duration(hours: 2));
 
       // Define color and whether it's income or expense
-      Color amountColor = totalAmount >= 0 ? Colors.green : Colors.red;
-      String formattedTotalAmount = formatter.format(totalAmount.abs());
-      String amountText = '${currencySymboleUpdate.value} $formattedTotalAmount';
 
+      String amountText;
+      Color amountColor;
 
       if (totalAmount < 0) {
-        amountText = '- $amountText';
-      }else{
-        amountText = '+ $amountText';
+        amountText =
+            '- ${currencySymboleUpdate.value} ${formatter.format(totalAmount.abs())}';
+        amountColor = Colors.red;
+      } else {
+        amountText =
+            '+ ${currencySymboleUpdate.value} ${formatter.format(totalAmount.abs())}';
+        amountColor = Colors.green;
       }
 
       meetings.add(
@@ -146,17 +88,16 @@ class _CalendarScreenState extends State<CalendarScreen> {
           startTime,
           endTime,
           Colors.transparent,
-          false,
+          totalAmount < 0,
         ),
       );
     });
 
     setState(() {});
     loader.value = false;
-    Get.forceAppUpdate();
+    // Get.forceAppUpdate();
     return meetings;
   }
-
 
   // List<Meeting> _getDataSource() {
   //   final List<Meeting> meetings = <Meeting>[];
@@ -289,7 +230,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
         print('myNumber= ${myNumber}');
         _selectedDay = selectedDay;
         _focusedDay = focusedDay;
-        _rangeStart = null; // Important to clean those
+        _rangeStart = null;
         _rangeEnd = null;
         _rangeSelectionMode = RangeSelectionMode.toggledOff;
         selectedDateRange = DateTimeRange(start: selectedDay, end: selectedDay);
@@ -352,7 +293,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
               height: 450,
               child: SfCalendar(
                 headerStyle: const CalendarHeaderStyle(
-                    textStyle: TextStyle(color: Colors.black)),
+                  textStyle: TextStyle(color: Colors.black),
+                ),
                 //cellBorderColor: Colors.purple,
                 // key: _calendarKey,
                 controller: _calendarController,
@@ -370,11 +312,14 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 ),
 
                 onViewChanged: (viewChangedDetails) {
+
                   if (click) {
                     final DateTime firstVisibleDate =
                         viewChangedDetails.visibleDates.first;
                     _calendarController.selectedDate = DateTime(
-                        firstVisibleDate.year, firstVisibleDate.month, 1);
+                        firstVisibleDate.year, firstVisibleDate.month + 1);
+                    onDaySelected(_calendarController.selectedDate!,
+                        _calendarController.selectedDate!);
                   } else {
                     click = true;
                   }
@@ -391,6 +336,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 ),
                 todayHighlightColor: Colors.blue,
                 view: CalendarView.month,
+
                 dataSource: MeetingDataSource(
                   // _getDataSource(),
                   getDataSource(),
@@ -613,23 +559,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
                               }
                               return previousValue;
                             });
-                            selectData = calculationList.fold(0,
-                                (previousValue, transaction) {
-                              if (transaction.categoryType ==
-                                  CategoryType.income) {
-                                return previousValue + transaction.amount;
-                              }
-                              return previousValue;
-                            });
+
                             double expenseData = calculationList.fold(0,
-                                (previousValue, transaction) {
-                              if (transaction.categoryType ==
-                                  CategoryType.expense) {
-                                previousValue += transaction.amount;
-                              }
-                              return previousValue;
-                            });
-                            selectExpenseData = calculationList.fold(0,
                                 (previousValue, transaction) {
                               if (transaction.categoryType ==
                                   CategoryType.expense) {
@@ -702,10 +633,15 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                                 ),
                                                 IconButton(
                                                   onPressed: () {
-                                                    resetTransactionsOnly(context, mapList[keys[index]]!);
+                                                    resetTransactionsOnly(
+                                                        context,
+                                                        mapList[keys[index]]!);
                                                     setState(() {
-                                                      mapList.remove(keys[index].length);
-                                                      keys.removeAt(index).length;
+                                                      mapList.remove(
+                                                          keys[index].length);
+                                                      keys
+                                                          .removeAt(index)
+                                                          .length;
                                                     });
                                                   },
                                                   icon: const Icon(
@@ -731,6 +667,14 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                                     ),
                                                     Text(
                                                       '- ${currencySymboleUpdate.value} ${formatter.format(expenseData)}',
+                                                      style: const TextStyle(
+                                                        color: AppTheme
+                                                            .pcTextExpenseColor,
+                                                        fontSize: 13,
+                                                      ),
+                                                    ),
+                                                    Text(
+                                                      '= ${currencySymboleUpdate.value} ${formatter.format(incomeData - expenseData)}',
                                                       style: const TextStyle(
                                                         color: AppTheme
                                                             .pcTextExpenseColor,
@@ -792,9 +736,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
         ),
       ),
     );
-
-
-
   }
 
   // resetTransactionsOnly(value, id) {
@@ -862,8 +803,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
   //     },
   //   );
   // }
-
-  resetTransactionsOnly(BuildContext context, List<TransactionModel> transactions) {
+  resetTransactionsOnly(
+      BuildContext context, List<TransactionModel> transactions) {
     showDialog(
       context: context,
       builder: (context) {
@@ -884,16 +825,20 @@ class _CalendarScreenState extends State<CalendarScreen> {
             ),
             actions: [
               TextButton(
-                onPressed: ()  {
+                onPressed: () {
                   setState(() async {
-                    final transactionDB = await Hive.openBox<TransactionModel>(TRANSACTION_DB_NAME);
+                    final transactionDB = await Hive.openBox<TransactionModel>(
+                        TRANSACTION_DB_NAME);
                     for (var transaction in transactions) {
                       transactionDB.delete(transaction.id);
                     }
-                    update.call(() {},);
-                    TransactionDB.instance.refresh(); // Refresh the transaction list
+                    update.call(
+                      () {},
+                    );
+                    TransactionDB.instance
+                        .refresh(); // Refresh the transaction list
                     Navigator.of(context).pop();
-                  });// Close the dialog
+                  }); // Close the dialog
                 },
                 child: const Text(
                   'Yes',
@@ -921,5 +866,4 @@ class _CalendarScreenState extends State<CalendarScreen> {
       },
     );
   }
-
 }
