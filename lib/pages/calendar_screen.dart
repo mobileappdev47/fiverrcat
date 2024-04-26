@@ -312,7 +312,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 ),
 
                 onViewChanged: (viewChangedDetails) {
-
+                  SchedulerBinding.instance!.addPostFrameCallback((Duration duration) {
+                    _calendarController.selectedDate = viewChangedDetails.visibleDates[0];
+                  });
                   if (click) {
                     final DateTime firstVisibleDate =
                         viewChangedDetails.visibleDates.first;
