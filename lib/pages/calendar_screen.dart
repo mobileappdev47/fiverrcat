@@ -901,7 +901,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   });
                   // Refresh the transaction list
                     Navigator.of(context).pop();
-                  }); // Close the dialog
+       
                 },
                 child: const Text(
                   'Yes',
