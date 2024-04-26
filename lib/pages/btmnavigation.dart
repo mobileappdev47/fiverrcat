@@ -39,9 +39,11 @@ class _BtmNaviState extends State<BtmNavi> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    // WidgetsBinding.instance?.addPostFrameCallback((_) {
-    //   showDialogOnInit(context);
-    // });
+    WidgetsBinding.instance?.addPostFrameCallback((_) {
+
+      showDialogOnInit(context);
+
+    });
   }
   void showDialogOnInit(BuildContext context) {
     showDialog(

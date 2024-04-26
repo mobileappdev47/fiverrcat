@@ -28,7 +28,7 @@ final List<double> stops = <double>[];
 String selectedDate = DateFormat('dd-MM-yyyy').format(DateTime.now());
 String dropdownvalue = '1 Day';
 String selected = 'All';
-String cycleOrAllTime = 'Cycle';
+String cycleOrAllTime = 'All Time';
 
 initialize() {
   chartData = [
@@ -60,15 +60,36 @@ initialize() {
 }
 
 initialize1DayData() {
-  if (dropdownvalue == '1 Day') {
-    dayWiseDay();
-  } else if (dropdownvalue == '1 Week') {
-    weekWiseChart();
-  } else if (dropdownvalue == '1 Month') {
-    monthWiseChart();
-  } else if (dropdownvalue == '1 Year') {
-    yearWiseChart();
+  color.add(
+    AppTheme.chartColor.withOpacity(0.1),
+  );
+  color.add(
+    AppTheme.chartColor.withOpacity(0.3),
+  );
+  color.add(
+    AppTheme.chartColor.withOpacity(0.6),
+  );
+  stops.add(0.0);
+  stops.add(0.5);
+  stops.add(1.0);
+
+
+  if(cycleOrAllTime=='All Time'){
+    allTimeButton();
   }
+  else {
+    if (dropdownvalue == '1 Day') {
+      dayWiseDay();
+    } else if (dropdownvalue == '1 Week') {
+      weekWiseChart();
+    } else if (dropdownvalue == '1 Month') {
+      monthWiseChart();
+    } else if (dropdownvalue == '1 Year') {
+      yearWiseChart();
+    }
+  }
+
+
 }
 
 allTimeButton() {
@@ -280,7 +301,16 @@ allTimeCategoryButton(String type, List data) {
           for (int i = 0; i < data.length; i++) {
             if (localDate1 ==
                 DateFormat('dd-MM-yyyy').format(DateTime.parse(data[i].date))) {
-              dateTotal = dateTotal + data[i].amount;
+              if(data[i].categoryType== CategoryType.income){
+                dateTotal = dateTotal + data[i].amount;
+              }
+
+              else if(data[i].categoryType== CategoryType.expense){
+                dateTotal = dateTotal - data[i].amount;
+
+              }
+              else {}
+
             }
           }
           // dailyChart[i] = ChartData(dailyDates[i], dateTotal);
@@ -300,12 +330,10 @@ allTimeCategoryButton(String type, List data) {
 dayWiseDay() {
   var data = TransactionDB.instance.transactionListNotifier.value;
 
-  // DateTime firstDateOfCurrentMonth =
-  // DateTime(DateTime.now().year, DateTime.now().month, 1);
 
-  DateTime firstDateOfCurrentMonth =
-      DateTime.now().subtract(const Duration(days: 90));
-  selectedDate = DateFormat('dd-MM-yyyy').format(firstDateOfCurrentMonth);
+  // DateTime firstDateOfCurrentMonth =
+  //     DateTime.now().subtract(const Duration(days: 90));
+  // selectedDate = DateFormat('dd-MM-yyyy').format(firstDateOfCurrentMonth);
 
   List dailyDates = [];
   DateTime selectedOne = DateFormat('dd-MM-yyyy').parse(selectedDate);
@@ -346,7 +374,15 @@ dayWiseDay() {
         for (int i = 0; i < data.length; i++) {
           if (localDate1 ==
               DateFormat('dd-MM-yyyy').format(DateTime.parse(data[i].date))) {
-            dateTotal = dateTotal + data[i].amount;
+            if(data[i].categoryType== CategoryType.income){
+              dateTotal = dateTotal + data[i].amount;
+            }
+
+            else if(data[i].categoryType== CategoryType.expense){
+              dateTotal = dateTotal - data[i].amount;
+
+            }
+            else {}
           }
         }
         // dailyChart[i] = ChartData(dailyDates[i], dateTotal);
@@ -362,18 +398,7 @@ dayWiseDay() {
 
   chartData = dailyChart;
 
-  color.add(
-    AppTheme.chartColor.withOpacity(0.1),
-  );
-  color.add(
-    AppTheme.chartColor.withOpacity(0.3),
-  );
-  color.add(
-    AppTheme.chartColor.withOpacity(0.6),
-  );
-  stops.add(0.0);
-  stops.add(0.5);
-  stops.add(1.0);
+
 }
 
 weekWiseChart() {
@@ -415,7 +440,9 @@ weekWiseChart() {
         print(myweekList);
         print('Yes');
 
-        myweekList.add({'index': j + 1, 'amt': data[i].amount});
+        double amountToAdd = data[i].categoryType == CategoryType.income ? data[i].amount : -data[i].amount;
+
+        myweekList.add({'index': j + 1, 'amt': amountToAdd});
 
         // monthlyChart[j] = ChartData(
         //     monthlyDates[j + 1],
@@ -515,8 +542,9 @@ monthWiseChart() {
       if (date2.isAfter(startDate) && date2.isBefore(endDate)) {
         print(myMonthList);
         print('Yes');
+        double amountToAdd = data[i].categoryType == CategoryType.income ? data[i].amount : -data[i].amount;
 
-        myMonthList.add({'index': j + 1, 'amt': data[i].amount});
+        myMonthList.add({'index': j + 1, 'amt':amountToAdd});
 
         // monthlyChart[j] = ChartData(
         //     monthlyDates[j + 1],
@@ -621,8 +649,9 @@ yearWiseChart() {
       if (date2.isAfter(startDate) && date2.isBefore(endDate)) {
         print(myYearList);
         print('Yes');
+        double amountToAdd = data[i].categoryType == CategoryType.income ? data[i].amount : -data[i].amount;
 
-        myYearList.add({'index': j + 1, 'amt': data[i].amount});
+        myYearList.add({'index': j + 1, 'amt':amountToAdd});
 
         // monthlyChart[j] = ChartData(
         //     monthlyDates[j + 1],
@@ -757,7 +786,6 @@ class _GraphScreenState extends State<GraphScreen> {
               // ),
 
 
-
               /*         chartData.length > 20
                   ?
               SingleChildScrollView(
@@ -823,6 +851,7 @@ class _GraphScreenState extends State<GraphScreen> {
                       } else {
                         return ChartAxisLabel(axisLabelRenderArgs.text, TextStyle());
                       }
+
                     },
                   ),
 
@@ -905,7 +934,8 @@ class _GraphScreenState extends State<GraphScreen> {
 
                               if (cycleOrAllTime == 'All Time') {
                                 allTimeButton();
-                              } else {
+                              }
+                              else {
                                 if (dropdownvalue == '1 Day') {
                                   List dailyDates = [];
                                   DateTime selectedOne =
@@ -1112,6 +1142,7 @@ class _GraphScreenState extends State<GraphScreen> {
                                         .add(ChartData(weeklyDates[i], 0));
                                   }
 
+
                                   // data.sort((a, b) => a.date.compareTo(b.date),);
 
                                   List myweekList = [];
@@ -1134,10 +1165,10 @@ class _GraphScreenState extends State<GraphScreen> {
                                           date2.isBefore(endDate)) {
                                         print(myweekList);
                                         print('Yes');
-
+                                        double amountToAdd = data[i].categoryType == CategoryType.income ? data[i].amount : -data[i].amount;
                                         myweekList.add({
                                           'index': j + 1,
-                                          'amt': data[i].amount
+                                          'amt': amountToAdd
                                         });
 
                                         // monthlyChart[j] = ChartData(
@@ -1177,16 +1208,6 @@ class _GraphScreenState extends State<GraphScreen> {
 
                                   print(finalList);
 
-                                  // for (int i = 0;
-                                  //     i < finalList.length;
-                                  //     i++) {
-                                  //   weeklyChart[
-                                  //       finalList[i]
-                                  //           ['index']] = ChartData(
-                                  //       weeklyDates[finalList[i]
-                                  //           ['index']],
-                                  //       finalList[i]['totalamt']);
-                                  // }
 
 
 
@@ -1267,10 +1288,11 @@ class _GraphScreenState extends State<GraphScreen> {
                                           date2.isBefore(endDate)) {
                                         print(myMonthList);
                                         print('Yes');
+                                        double amountToAdd = data[i].categoryType == CategoryType.income ? data[i].amount : -data[i].amount;
 
                                         myMonthList.add({
                                           'index': j + 1,
-                                          'amt': data[i].amount
+                                          'amt': amountToAdd
                                         });
 
                                         // monthlyChart[j] = ChartData(
@@ -1396,10 +1418,11 @@ class _GraphScreenState extends State<GraphScreen> {
                                           date2.isBefore(endDate)) {
                                         print(myYearList);
                                         print('Yes');
+                                        double amountToAdd = data[i].categoryType == CategoryType.income ? data[i].amount : -data[i].amount;
 
                                         myYearList.add({
                                           'index': j + 1,
-                                          'amt': data[i].amount
+                                          'amt': amountToAdd
                                         });
 
                                         // monthlyChart[j] = ChartData(
@@ -2041,7 +2064,8 @@ class _GraphScreenState extends State<GraphScreen> {
                               if (cycleOrAllTime == 'All Time') {
                                 allTimeIncomeButton();
                                 setState(() {});
-                              } else {
+                              }
+                              else {
                                 if (dropdownvalue == '1 Day') {
                                   List dailyDates = [];
                                   DateTime selectedOne =
@@ -2684,6 +2708,7 @@ class _GraphScreenState extends State<GraphScreen> {
                                         GestureDetector(
                                           onTap: () {
                                             setState(() {
+                                              selected= 'All';
                                               cycleOrAllTime = 'All Time';
                                               allTimeButton();
                                             });
@@ -2937,6 +2962,10 @@ class _GraphScreenState extends State<GraphScreen> {
 
                                                     print(data);
 
+
+
+
+
                                                     if (dropdownvalue ==
                                                         '1 Week') {
                                                       List weeklyDates = [];
@@ -3024,11 +3053,12 @@ class _GraphScreenState extends State<GraphScreen> {
                                                                   endDate)) {
                                                             print(myweekList);
                                                             print('Yes');
+                                                            double amountToAdd = data[i].categoryType == CategoryType.income ? data[i].amount : -data[i].amount;
 
                                                             myweekList.add({
                                                               'index': j + 1,
                                                               'amt':
-                                                                  data[i].amount
+                                                              amountToAdd
                                                             });
 
                                                             // monthlyChart[j] = ChartData(
@@ -3211,11 +3241,12 @@ class _GraphScreenState extends State<GraphScreen> {
                                                                   endDate)) {
                                                             print(myMonthList);
                                                             print('Yes');
+                                                            double amountToAdd = data[i].categoryType == CategoryType.income ? data[i].amount : -data[i].amount;
 
                                                             myMonthList.add({
                                                               'index': j + 1,
                                                               'amt':
-                                                                  data[i].amount
+                                                              amountToAdd
                                                             });
 
                                                             // monthlyChart[j] = ChartData(
@@ -3417,11 +3448,12 @@ class _GraphScreenState extends State<GraphScreen> {
                                                                   endDate)) {
                                                             print(myYearList);
                                                             print('Yes');
+                                                            double amountToAdd = data[i].categoryType == CategoryType.income ? data[i].amount : -data[i].amount;
 
                                                             myYearList.add({
                                                               'index': j + 1,
                                                               'amt':
-                                                                  data[i].amount
+                                                              amountToAdd
                                                             });
 
                                                             // monthlyChart[j] = ChartData(
@@ -3608,10 +3640,20 @@ class _GraphScreenState extends State<GraphScreen> {
                                                                       .format(DateTime.parse(
                                                                           data[i]
                                                                               .date))) {
-                                                                dateTotal =
-                                                                    dateTotal +
-                                                                        data[i]
-                                                                            .amount;
+
+                                                                if(data[i].categoryType== CategoryType.income){
+                                                                  dateTotal = dateTotal + data[i].amount;
+                                                                }
+
+                                                                else if(data[i].categoryType== CategoryType.expense){
+                                                                  dateTotal = dateTotal - data[i].amount;
+
+                                                                }
+                                                                else {}
+
+
+
+
                                                               }
                                                             }
 
@@ -3892,10 +3934,15 @@ class _GraphScreenState extends State<GraphScreen> {
                                                                     .parse(data[
                                                                             i]
                                                                         .date))) {
-                                                          dateTotal =
-                                                              dateTotal +
-                                                                  data[i]
-                                                                      .amount;
+                                                          if(data[i].categoryType== CategoryType.income){
+                                                            dateTotal = dateTotal + data[i].amount;
+                                                          }
+
+                                                          else if(data[i].categoryType== CategoryType.expense){
+                                                            dateTotal = dateTotal - data[i].amount;
+
+                                                          }
+                                                          else {}
                                                         }
                                                       }
 
@@ -3981,10 +4028,11 @@ class _GraphScreenState extends State<GraphScreen> {
                                                             endDate)) {
                                                       print(myweekList);
                                                       print('Yes');
+                                                      double amountToAdd = data[i].categoryType == CategoryType.income ? data[i].amount : -data[i].amount;
 
                                                       myweekList.add({
                                                         'index': j + 1,
-                                                        'amt': data[i].amount
+                                                        'amt': amountToAdd
                                                       });
 
                                                       // monthlyChart[j] = ChartData(
@@ -4123,10 +4171,11 @@ class _GraphScreenState extends State<GraphScreen> {
                                                             endDate)) {
                                                       print(myMonthList);
                                                       print('Yes');
+                                                      double amountToAdd = data[i].categoryType == CategoryType.income ? data[i].amount : -data[i].amount;
 
                                                       myMonthList.add({
                                                         'index': j + 1,
-                                                        'amt': data[i].amount
+                                                        'amt': amountToAdd
                                                       });
 
                                                       // monthlyChart[j] = ChartData(
@@ -4278,10 +4327,11 @@ class _GraphScreenState extends State<GraphScreen> {
                                                             endDate)) {
                                                       print(myYearList);
                                                       print('Yes');
+                                                      double amountToAdd = data[i].categoryType == CategoryType.income ? data[i].amount : -data[i].amount;
 
                                                       myYearList.add({
                                                         'index': j + 1,
-                                                        'amt': data[i].amount
+                                                        'amt': amountToAdd
                                                       });
 
                                                       // monthlyChart[j] = ChartData(
@@ -4490,10 +4540,15 @@ class _GraphScreenState extends State<GraphScreen> {
                                                                     .parse(data[
                                                                             i]
                                                                         .date))) {
-                                                          dateTotal =
-                                                              dateTotal +
-                                                                  data[i]
-                                                                      .amount;
+                                                          if(data[i].categoryType== CategoryType.income){
+                                                            dateTotal = dateTotal + data[i].amount;
+                                                          }
+
+                                                          else if(data[i].categoryType== CategoryType.expense){
+                                                            dateTotal = dateTotal - data[i].amount;
+
+                                                          }
+                                                          else {}
                                                         }
                                                       }
 
@@ -4579,10 +4634,11 @@ class _GraphScreenState extends State<GraphScreen> {
                                                             endDate)) {
                                                       print(myweekList);
                                                       print('Yes');
+                                                      double amountToAdd = data[i].categoryType == CategoryType.income ? data[i].amount : -data[i].amount;
 
                                                       myweekList.add({
                                                         'index': j + 1,
-                                                        'amt': data[i].amount
+                                                        'amt': amountToAdd
                                                       });
 
                                                       // monthlyChart[j] = ChartData(
@@ -4721,10 +4777,11 @@ class _GraphScreenState extends State<GraphScreen> {
                                                             endDate)) {
                                                       print(myMonthList);
                                                       print('Yes');
+                                                      double amountToAdd = data[i].categoryType == CategoryType.income ? data[i].amount : -data[i].amount;
 
                                                       myMonthList.add({
                                                         'index': j + 1,
-                                                        'amt': data[i].amount
+                                                        'amt': amountToAdd
                                                       });
 
                                                       // monthlyChart[j] = ChartData(
@@ -4876,10 +4933,11 @@ class _GraphScreenState extends State<GraphScreen> {
                                                             endDate)) {
                                                       print(myYearList);
                                                       print('Yes');
+                                                      double amountToAdd = data[i].categoryType == CategoryType.income ? data[i].amount : -data[i].amount;
 
                                                       myYearList.add({
                                                         'index': j + 1,
-                                                        'amt': data[i].amount
+                                                        'amt': amountToAdd
                                                       });
 
                                                       // monthlyChart[j] = ChartData(
@@ -5094,10 +5152,15 @@ class _GraphScreenState extends State<GraphScreen> {
                                                                     .parse(data[
                                                                             i]
                                                                         .date))) {
-                                                          dateTotal =
-                                                              dateTotal +
-                                                                  data[i]
-                                                                      .amount;
+                                                          if(data[i].categoryType== CategoryType.income){
+                                                            dateTotal = dateTotal + data[i].amount;
+                                                          }
+
+                                                          else if(data[i].categoryType== CategoryType.expense){
+                                                            dateTotal = dateTotal - data[i].amount;
+
+                                                          }
+                                                          else {}
                                                         }
                                                       }
 
@@ -5183,10 +5246,11 @@ class _GraphScreenState extends State<GraphScreen> {
                                                             endDate)) {
                                                       print(myweekList);
                                                       print('Yes');
+                                                      double amountToAdd = data[i].categoryType == CategoryType.income ? data[i].amount : -data[i].amount;
 
                                                       myweekList.add({
                                                         'index': j + 1,
-                                                        'amt': data[i].amount
+                                                        'amt': amountToAdd
                                                       });
 
                                                       // monthlyChart[j] = ChartData(
@@ -5325,10 +5389,11 @@ class _GraphScreenState extends State<GraphScreen> {
                                                             endDate)) {
                                                       print(myMonthList);
                                                       print('Yes');
+                                                      double amountToAdd = data[i].categoryType == CategoryType.income ? data[i].amount : -data[i].amount;
 
                                                       myMonthList.add({
                                                         'index': j + 1,
-                                                        'amt': data[i].amount
+                                                        'amt': amountToAdd
                                                       });
 
                                                       // monthlyChart[j] = ChartData(
@@ -5480,10 +5545,11 @@ class _GraphScreenState extends State<GraphScreen> {
                                                             endDate)) {
                                                       print(myYearList);
                                                       print('Yes');
+                                                      double amountToAdd = data[i].categoryType == CategoryType.income ? data[i].amount : -data[i].amount;
 
                                                       myYearList.add({
                                                         'index': j + 1,
-                                                        'amt': data[i].amount
+                                                        'amt':amountToAdd
                                                       });
 
                                                       // monthlyChart[j] = ChartData(
@@ -5692,10 +5758,15 @@ class _GraphScreenState extends State<GraphScreen> {
                                                                     .parse(data[
                                                                             i]
                                                                         .date))) {
-                                                          dateTotal =
-                                                              dateTotal +
-                                                                  data[i]
-                                                                      .amount;
+                                                          if(data[i].categoryType== CategoryType.income){
+                                                            dateTotal = dateTotal + data[i].amount;
+                                                          }
+
+                                                          else if(data[i].categoryType== CategoryType.expense){
+                                                            dateTotal = dateTotal - data[i].amount;
+
+                                                          }
+                                                          else {}
                                                         }
                                                       }
 
@@ -5781,10 +5852,11 @@ class _GraphScreenState extends State<GraphScreen> {
                                                             endDate)) {
                                                       print(myweekList);
                                                       print('Yes');
+                                                      double amountToAdd = data[i].categoryType == CategoryType.income ? data[i].amount : -data[i].amount;
 
                                                       myweekList.add({
                                                         'index': j + 1,
-                                                        'amt': data[i].amount
+                                                        'amt': amountToAdd
                                                       });
 
                                                       // monthlyChart[j] = ChartData(
@@ -5923,10 +5995,11 @@ class _GraphScreenState extends State<GraphScreen> {
                                                             endDate)) {
                                                       print(myMonthList);
                                                       print('Yes');
+                                                      double amountToAdd = data[i].categoryType == CategoryType.income ? data[i].amount : -data[i].amount;
 
                                                       myMonthList.add({
                                                         'index': j + 1,
-                                                        'amt': data[i].amount
+                                                        'amt': amountToAdd
                                                       });
 
                                                       // monthlyChart[j] = ChartData(
@@ -6078,10 +6151,12 @@ class _GraphScreenState extends State<GraphScreen> {
                                                             endDate)) {
                                                       print(myYearList);
                                                       print('Yes');
+                                                      double amountToAdd = data[i].categoryType == CategoryType.income ? data[i].amount : -data[i].amount;
+
 
                                                       myYearList.add({
                                                         'index': j + 1,
-                                                        'amt': data[i].amount
+                                                        'amt': amountToAdd
                                                       });
 
                                                       // monthlyChart[j] = ChartData(
@@ -6224,95 +6299,95 @@ class _GraphScreenState extends State<GraphScreen> {
               SizedBox(
                 height: 10,
               ),
-              // ListView.separated(
-              //     itemCount: filterList.length,
-              //     shrinkWrap: true,
-              //     physics: NeverScrollableScrollPhysics(),
-              //     separatorBuilder: (context, index) => SizedBox(
-              //           height: 10,
-              //         ),
-              //     itemBuilder: (context, index) {
-              //       return Container(
-              //         padding: EdgeInsets.all(10),
-              //         decoration: BoxDecoration(
-              //           color: Colors.white10,
-              //           borderRadius: BorderRadius.circular(
-              //             10,
-              //           ),
-              //         ),
-              //         child: Column(
-              //           children: [
-              //             Row(
-              //               children: [
-              //                 Text(
-              //                   'Amount : ',
-              //                   style: TextStyle(color: Colors.white),
-              //                 ),
-              //                 Text(
-              //                   '${currencySymboleUpdate.value}${filterList[index].amount}',
-              //                   style: TextStyle(
-              //                       color: filterList[index].categoryType ==
-              //                               CategoryType.income
-              //                           ? Colors.green
-              //                           : Colors.red),
-              //                 ),
-              //               ],
-              //             ),
-              //             SizedBox(
-              //               height: 5,
-              //             ),
-              //             Row(
-              //               children: [
-              //                 Text(
-              //                   'Transaction Type : ',
-              //                   style: TextStyle(color: Colors.white),
-              //                 ),
-              //                 Text(
-              //                   '${filterList[index].category.name}',
-              //                   style: TextStyle(color: Colors.white),
-              //                 ),
-              //               ],
-              //             ),
-              //             SizedBox(
-              //               height: 5,
-              //             ),
-              //             Row(
-              //               children: [
-              //                 Text(
-              //                   'Date : ',
-              //                   style: TextStyle(color: Colors.white),
-              //                 ),
-              //                 Text(
-              //                   '${filterList[index].date}',
-              //                   style: TextStyle(color: Colors.white),
-              //                 ),
-              //               ],
-              //             ),
-              //             SizedBox(
-              //               height: 5,
-              //             ),
-              //             Row(
-              //               children: [
-              //                 Text(
-              //                   'Category : ',
-              //                   style: TextStyle(color: Colors.white),
-              //                 ),
-              //                 filterList[index].categoryType ==
-              //                         CategoryType.income
-              //                     ? Text(
-              //                         'Income',
-              //                         style: TextStyle(color: Colors.white),
-              //                       )
-              //                     : Text(
-              //                         'Expense',
-              //                         style: TextStyle(color: Colors.white),
-              //                       ),
-              //               ],
-              //             ),
-              //           ],
-              //         ),
-              //       );
-              //     }),
+              ListView.separated(
+                  itemCount: filterList.length,
+                  shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
+                  separatorBuilder: (context, index) => SizedBox(
+                        height: 10,
+                      ),
+                  itemBuilder: (context, index) {
+                    return Container(
+                      padding: EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: Colors.white10,
+                        borderRadius: BorderRadius.circular(
+                          10,
+                        ),
+                      ),
+                      child: Column(
+                        children: [
+                          Row(
+                            children: [
+                              Text(
+                                'Amount : ',
+                                style: TextStyle(color: Colors.white),
+                              ),
+                              Text(
+                                '${currencySymboleUpdate.value}${filterList[index].amount}',
+                                style: TextStyle(
+                                    color: filterList[index].categoryType ==
+                                            CategoryType.income
+                                        ? Colors.green
+                                        : Colors.red),
+                              ),
+                            ],
+                          ),
+                          SizedBox(
+                            height: 5,
+                          ),
+                          Row(
+                            children: [
+                              Text(
+                                'Transaction Type : ',
+                                style: TextStyle(color: Colors.white),
+                              ),
+                              Text(
+                                '${filterList[index].category.name}',
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            ],
+                          ),
+                          SizedBox(
+                            height: 5,
+                          ),
+                          Row(
+                            children: [
+                              Text(
+                                'Date : ',
+                                style: TextStyle(color: Colors.white),
+                              ),
+                              Text(
+                                '${filterList[index].date}',
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            ],
+                          ),
+                          SizedBox(
+                            height: 5,
+                          ),
+                          Row(
+                            children: [
+                              Text(
+                                'Category : ',
+                                style: TextStyle(color: Colors.white),
+                              ),
+                              filterList[index].categoryType ==
+                                      CategoryType.income
+                                  ? Text(
+                                      'Income',
+                                      style: TextStyle(color: Colors.white),
+                                    )
+                                  : Text(
+                                      'Expense',
+                                      style: TextStyle(color: Colors.white),
+                                    ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    );
+                  }),
             ],
           ),
         ));

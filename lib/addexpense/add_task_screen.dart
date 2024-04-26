@@ -226,8 +226,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                                       );
                                     },
                                     initialDate: selectedDate,
-                                    firstDate: DateTime.now()
-                                        .subtract(const Duration(days: 90)),
+                                    firstDate: DateTime.now().subtract(const Duration(days: (365 * 10)+ 3)),
                                     lastDate: DateTime.now(),
                                   );
                                   if (date != null && date != selectedDate) {
@@ -523,7 +522,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                                         //임의로
                                       await   TransactionDB.instance.refresh();
 
-                                        var data = TransactionDB
+                                        /*           var data = TransactionDB
                                             .instance.transactionListNotifier;
                                         print(data.value);
                                         Map<String, List<TransactionModel>>
@@ -921,7 +920,9 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                                           } else {}
                                         });
 
-                                        monthChartDataGraph = monthDataForGraph;
+                                        monthChartDataGraph = monthDataForGraph;*/
+
+
                                         setState(() {});
                                         Navigator.pop(context);
 
@@ -987,7 +988,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                                   //임의로
 
                                   await   TransactionDB.instance.refresh();
-
+                                /*
                                   var data = TransactionDB
                                       .instance.transactionListNotifier;
                                   print(data.value);
@@ -1386,7 +1387,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                                     } else {}
                                   });
 
-                                  monthChartDataGraph = monthDataForGraph;
+                                  monthChartDataGraph = monthDataForGraph;*/
                                   setState(() {});
                                   Navigator.pop(context);
 
