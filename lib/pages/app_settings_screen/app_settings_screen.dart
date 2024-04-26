@@ -21,6 +21,10 @@ import 'reset_app_settings/reset_app_settings.dart';
 class AppSettingsScreen extends StatelessWidget {
   const AppSettingsScreen({super.key});
 
+  void showBackupConfirmationDialog(BuildContext context) {
+
+  }
+
   @override
   Widget build(BuildContext context) {
     TransactionDB.instance.refresh();
@@ -234,8 +238,41 @@ class AppSettingsScreen extends StatelessWidget {
                     // List<TransactionModel> transactionsMonth=  await TransactionDB.instance.getTransactionsForCurrentMonth();
                     print(transactions);
                     //   print(transactionsMonth);
-                    HiveFirestoreBackupData.backupDataToFirestore(
-                        userCredential.user!.email);
+
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: const Text('Backup Data'),
+                          content: const Text('Are you sure you want to back up your data?'),
+                          actions: <Widget>[
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                TextButton(
+                                  onPressed: () {
+                                    HiveFirestoreBackupData.backupDataToFirestore(
+                                        userCredential.user!.email);
+                                    Navigator.of(context).pop(); // Closes the dialog
+
+                                  },
+                                  child: const Text('Yes'),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop(); // Closes the dialog
+                                  },
+                                  child: const Text('No'),
+                                ),
+                              ],
+                            ),
+
+                          ],
+                        );
+                      },
+                    );
+
+
                   },
                   child: Container(
                     decoration: BoxDecoration(
@@ -275,6 +312,7 @@ class AppSettingsScreen extends StatelessWidget {
           ),
         ),
       ),
+
     );
   }
 }
