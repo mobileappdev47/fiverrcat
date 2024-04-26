@@ -59,7 +59,16 @@ class _CalendarScreenState extends State<CalendarScreen> {
     for (int i = 0; i < data.length; i++) {
       DateTime dateTime = DateTime.parse(data[i].date);
       double totalAmount = totalAmountMap[dateTime] ?? 0;
-      totalAmount += data[i].amount;
+
+      if(data[i].categoryType==CategoryType.income){
+        totalAmount += data[i].amount;
+
+      }
+      else {
+        totalAmount -= data[i].amount;
+
+      }
+
       totalAmountMap[dateTime] = totalAmount;
     }
     // Create Meeting objects with total amount for each date
@@ -70,16 +79,22 @@ class _CalendarScreenState extends State<CalendarScreen> {
       // Define color and whether it's income or expense
 
       String amountText;
-      Color amountColor;
+
 
       if (totalAmount < 0) {
         amountText =
             '- ${currencySymboleUpdate.value} ${formatter.format(totalAmount.abs())}';
-        amountColor = Colors.red;
+        colorM = Colors.red;
+        setState(() {
+
+        });
       } else {
         amountText =
             '+ ${currencySymboleUpdate.value} ${formatter.format(totalAmount.abs())}';
-        amountColor = Colors.green;
+        colorM = Colors.green;
+        setState(() {
+
+        });
       }
 
       meetings.add(
@@ -89,8 +104,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
           endTime,
           Colors.transparent,
           totalAmount < 0,
+
         ),
       );
+
     });
 
     setState(() {});
@@ -159,6 +176,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
       SelectDate().currentDateForCalenderSelection();
 
   DateTime myChosenDate = DateTime.now();
+  Color colorM=  Colors.green;
 
   @override
   void initState() {
@@ -282,6 +300,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
     getCurrency();
 
+
     return Scaffold(
       resizeToAvoidBottomInset: false,
       backgroundColor: AppTheme.pcPrimaryColor,
@@ -292,14 +311,15 @@ class _CalendarScreenState extends State<CalendarScreen> {
             SizedBox(
               height: 450,
               child: SfCalendar(
-                headerStyle: const CalendarHeaderStyle(
+                headerStyle:  CalendarHeaderStyle(
                   textStyle: TextStyle(color: Colors.black),
                 ),
                 //cellBorderColor: Colors.purple,
                 // key: _calendarKey,
                 controller: _calendarController,
-                appointmentTextStyle: const TextStyle(
-                  color: Colors.green,
+
+                appointmentTextStyle:  TextStyle(
+                  color: colorM,
                   fontSize: 50,
                 ),
                 todayTextStyle: const TextStyle(color: Colors.black),
@@ -738,6 +758,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
         ),
       ),
     );
+
   }
 
   // resetTransactionsOnly(value, id) {

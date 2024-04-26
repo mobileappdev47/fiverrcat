@@ -6299,95 +6299,95 @@ class _GraphScreenState extends State<GraphScreen> {
               SizedBox(
                 height: 10,
               ),
-              ListView.separated(
-                  itemCount: filterList.length,
-                  shrinkWrap: true,
-                  physics: NeverScrollableScrollPhysics(),
-                  separatorBuilder: (context, index) => SizedBox(
-                        height: 10,
-                      ),
-                  itemBuilder: (context, index) {
-                    return Container(
-                      padding: EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: Colors.white10,
-                        borderRadius: BorderRadius.circular(
-                          10,
-                        ),
-                      ),
-                      child: Column(
-                        children: [
-                          Row(
-                            children: [
-                              Text(
-                                'Amount : ',
-                                style: TextStyle(color: Colors.white),
-                              ),
-                              Text(
-                                '${currencySymboleUpdate.value}${filterList[index].amount}',
-                                style: TextStyle(
-                                    color: filterList[index].categoryType ==
-                                            CategoryType.income
-                                        ? Colors.green
-                                        : Colors.red),
-                              ),
-                            ],
-                          ),
-                          SizedBox(
-                            height: 5,
-                          ),
-                          Row(
-                            children: [
-                              Text(
-                                'Transaction Type : ',
-                                style: TextStyle(color: Colors.white),
-                              ),
-                              Text(
-                                '${filterList[index].category.name}',
-                                style: TextStyle(color: Colors.white),
-                              ),
-                            ],
-                          ),
-                          SizedBox(
-                            height: 5,
-                          ),
-                          Row(
-                            children: [
-                              Text(
-                                'Date : ',
-                                style: TextStyle(color: Colors.white),
-                              ),
-                              Text(
-                                '${filterList[index].date}',
-                                style: TextStyle(color: Colors.white),
-                              ),
-                            ],
-                          ),
-                          SizedBox(
-                            height: 5,
-                          ),
-                          Row(
-                            children: [
-                              Text(
-                                'Category : ',
-                                style: TextStyle(color: Colors.white),
-                              ),
-                              filterList[index].categoryType ==
-                                      CategoryType.income
-                                  ? Text(
-                                      'Income',
-                                      style: TextStyle(color: Colors.white),
-                                    )
-                                  : Text(
-                                      'Expense',
-                                      style: TextStyle(color: Colors.white),
-                                    ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    );
-                  }),
+              // ListView.separated(
+              //     itemCount: filterList.length,
+              //     shrinkWrap: true,
+              //     physics: NeverScrollableScrollPhysics(),
+              //     separatorBuilder: (context, index) => SizedBox(
+              //           height: 10,
+              //         ),
+              //     itemBuilder: (context, index) {
+              //       return Container(
+              //         padding: EdgeInsets.all(10),
+              //         decoration: BoxDecoration(
+              //           color: Colors.white10,
+              //           borderRadius: BorderRadius.circular(
+              //             10,
+              //           ),
+              //         ),
+              //         child: Column(
+              //           children: [
+              //             Row(
+              //               children: [
+              //                 Text(
+              //                   'Amount : ',
+              //                   style: TextStyle(color: Colors.white),
+              //                 ),
+              //                 Text(
+              //                   '${currencySymboleUpdate.value}${filterList[index].amount}',
+              //                   style: TextStyle(
+              //                       color: filterList[index].categoryType ==
+              //                               CategoryType.income
+              //                           ? Colors.green
+              //                           : Colors.red),
+              //                 ),
+              //               ],
+              //             ),
+              //             SizedBox(
+              //               height: 5,
+              //             ),
+              //             Row(
+              //               children: [
+              //                 Text(
+              //                   'Transaction Type : ',
+              //                   style: TextStyle(color: Colors.white),
+              //                 ),
+              //                 Text(
+              //                   '${filterList[index].category.name}',
+              //                   style: TextStyle(color: Colors.white),
+              //                 ),
+              //               ],
+              //             ),
+              //             SizedBox(
+              //               height: 5,
+              //             ),
+              //             Row(
+              //               children: [
+              //                 Text(
+              //                   'Date : ',
+              //                   style: TextStyle(color: Colors.white),
+              //                 ),
+              //                 Text(
+              //                   '${filterList[index].date}',
+              //                   style: TextStyle(color: Colors.white),
+              //                 ),
+              //               ],
+              //             ),
+              //             SizedBox(
+              //               height: 5,
+              //             ),
+              //             Row(
+              //               children: [
+              //                 Text(
+              //                   'Category : ',
+              //                   style: TextStyle(color: Colors.white),
+              //                 ),
+              //                 filterList[index].categoryType ==
+              //                         CategoryType.income
+              //                     ? Text(
+              //                         'Income',
+              //                         style: TextStyle(color: Colors.white),
+              //                       )
+              //                     : Text(
+              //                         'Expense',
+              //                         style: TextStyle(color: Colors.white),
+              //                       ),
+              //               ],
+              //             ),
+              //           ],
+              //         ),
+              //       );
+              //     }),
             ],
           ),
         ));
