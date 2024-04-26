@@ -66,7 +66,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
       }
       else {
         totalAmount -= data[i].amount;
-
       }
 
       totalAmountMap[dateTime] = totalAmount;
@@ -86,9 +85,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
             '- ${currencySymboleUpdate.value} ${formatter.format(totalAmount.abs())}';
         colorM = Colors.red;
         setState(() {
-
         });
+
       } else {
+
         amountText =
             '+ ${currencySymboleUpdate.value} ${formatter.format(totalAmount.abs())}';
         colorM = Colors.green;
@@ -102,7 +102,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
           amountText,
           startTime,
           endTime,
-          Colors.transparent,
+          colorM,
           totalAmount < 0,
 
         ),
@@ -115,6 +115,21 @@ class _CalendarScreenState extends State<CalendarScreen> {
     // Get.forceAppUpdate();
     return meetings;
   }
+  _AppointmentDataSource _getCalendarDataSource() {
+    List<Appointment> appointments = <Appointment>[];
+    appointments.add(Appointment(
+
+      startTime: DateTime.now(),
+      endTime: DateTime.now().add(Duration(hours: 1)),
+      subject: 'hy',
+      color: Colors.pink,
+
+
+    ));
+
+    return _AppointmentDataSource(appointments);
+  }
+
 
   // List<Meeting> _getDataSource() {
   //   final List<Meeting> meetings = <Meeting>[];
@@ -311,6 +326,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
             SizedBox(
               height: 450,
               child: SfCalendar(
+
                 headerStyle:  CalendarHeaderStyle(
                   textStyle: TextStyle(color: Colors.black),
                 ),
@@ -318,16 +334,27 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 // key: _calendarKey,
                 controller: _calendarController,
 
-                appointmentTextStyle:  TextStyle(
-                  color: colorM,
-                  fontSize: 50,
-                ),
+                appointmentBuilder: (context, calendarAppointmentDetails) {
+
+                  print(calendarAppointmentDetails.appointments.first.background);
+
+                  final Meeting meeting = calendarAppointmentDetails.appointments.last;
+
+                  return SizedBox(
+                    child: Text(
+                      meeting.eventName,
+                      style: TextStyle(color:meeting.background, fontSize: 9),
+                    ),
+                  );
+                },
                 todayTextStyle: const TextStyle(color: Colors.black),
                 monthViewSettings: const MonthViewSettings(
+
                   appointmentDisplayMode:
                       MonthAppointmentDisplayMode.appointment,
                   monthCellStyle: MonthCellStyle(
                     textStyle: TextStyle(color: Colors.white),
+
                   ),
                 ),
 
@@ -358,8 +385,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 ),
                 todayHighlightColor: Colors.blue,
                 view: CalendarView.month,
-
+                // dataSource: _getCalendarDataSource(),
                 dataSource: MeetingDataSource(
+                  // []
                   // _getDataSource(),
                   getDataSource(),
                 ),
@@ -888,5 +916,13 @@ class _CalendarScreenState extends State<CalendarScreen> {
         );
       },
     );
+  }
+}
+
+
+
+class _AppointmentDataSource extends CalendarDataSource {
+  _AppointmentDataSource(List<Appointment> source) {
+    appointments = source;
   }
 }
