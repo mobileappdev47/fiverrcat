@@ -24,6 +24,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
 
   @override
   void initState() {
+    int aprilIndex = months.indexOf('April') + (12 * years.indexOf(DateTime.now().year));
     years.forEach((element) {
       if(element == DateTime.now().year)
         {
@@ -33,11 +34,11 @@ class _TransactionScreenState extends State<TransactionScreen> {
             }
           else if(years.indexOf(element) ==1)
           {
-            indexAll =( DateTime.now().month-1) +12;
+            indexAll =( DateTime.now().month-1) +5;
           }
           else
             {
-              indexAll = (DateTime.now().month-1 )+24;
+              indexAll = (DateTime.now().month-1 )+10;
             }
         }
     });
@@ -51,9 +52,11 @@ class _TransactionScreenState extends State<TransactionScreen> {
     super.initState();
   }
 
+
   ValueNotifier<double> incomeCustomDateNotifier = ValueNotifier(0);
   ValueNotifier<double> expenseCustomDateNotifier = ValueNotifier(0);
   ValueNotifier<double> totalCustomDateNotifier = ValueNotifier(0);
+
   PageController scrollController = PageController();
   int indexAll = DateTime.now().month;
   List<String> months = [
@@ -215,12 +218,14 @@ class _TransactionScreenState extends State<TransactionScreen> {
                 Expanded(
                   child: ListView.builder(
                     controller: scrollController,
-                    itemCount: months.length * years.length,
+                    itemCount:  3 * 12 * years.length,
                     scrollDirection: Axis.horizontal,
                     itemBuilder: (BuildContext context, int index) {
-                      int monthIndex = index % months.length;
-                      int yearIndex = index ~/ months.length;
-                      int year = years[yearIndex];
+                      int currentYear = DateTime.now().year;
+                      int currentMonth = DateTime.now().month;
+                      int monthIndex = (currentMonth - 9 + index) % 12;
+                      int yearIndex = (currentMonth - 9 + index) ~/ 12;
+                      int year = currentYear + yearIndex;
                       String month = months[monthIndex];
                       return Row(
                         children: [
@@ -228,7 +233,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
                             padding: const EdgeInsets.all(8.0),
                             child: InkWell(
                               onTap: () {
-                                if (year != 2025) {
+                                if (year <= 2024) {
                                   setState(() {
                                     indexAll = index;
                                     selectedDate = SelectDate().selectMonth(monthIndex + 1, year);
@@ -236,17 +241,6 @@ class _TransactionScreenState extends State<TransactionScreen> {
                                     TransactionDB.instance.getTransactionsForCurrentMonth();
                                   });
                                 }
-                                // setState(() {
-                                //   indexAll = index;
-                                //   // selectedDate = SelectDate().selectMonth(
-                                //   //     index + 1, DateTime.now().year);
-                                //   selectedDate = SelectDate()
-                                //       .selectMonth(monthIndex + 1, year);
-                                //   TransactionDB.instance.filterForHome(
-                                //       selectedDate.start, selectedDate.end);
-                                //   TransactionDB.instance
-                                //       .getTransactionsForCurrentMonth();
-                                // });
                               },
                               child: Column(
                                 children: [

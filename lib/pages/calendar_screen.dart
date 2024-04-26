@@ -60,11 +60,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
       DateTime dateTime = DateTime.parse(data[i].date);
       double totalAmount = totalAmountMap[dateTime] ?? 0;
 
-      if(data[i].categoryType==CategoryType.income){
+      if (data[i].categoryType == CategoryType.income) {
         totalAmount += data[i].amount;
-
-      }
-      else {
+      } else {
         totalAmount -= data[i].amount;
       }
 
@@ -79,22 +77,16 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
       String amountText;
 
-
       if (totalAmount < 0) {
         amountText =
             '- ${currencySymboleUpdate.value} ${formatter.format(totalAmount.abs())}';
         colorM = Colors.red;
-        setState(() {
-        });
-
+        setState(() {});
       } else {
-
         amountText =
             '+ ${currencySymboleUpdate.value} ${formatter.format(totalAmount.abs())}';
         colorM = Colors.green;
-        setState(() {
-
-        });
+        setState(() {});
       }
 
       meetings.add(
@@ -104,10 +96,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
           endTime,
           colorM,
           totalAmount < 0,
-
         ),
       );
-
     });
 
     setState(() {});
@@ -115,21 +105,18 @@ class _CalendarScreenState extends State<CalendarScreen> {
     // Get.forceAppUpdate();
     return meetings;
   }
+
   _AppointmentDataSource _getCalendarDataSource() {
     List<Appointment> appointments = <Appointment>[];
     appointments.add(Appointment(
-
       startTime: DateTime.now(),
       endTime: DateTime.now().add(Duration(hours: 1)),
       subject: 'hy',
       color: Colors.pink,
-
-
     ));
 
     return _AppointmentDataSource(appointments);
   }
-
 
   // List<Meeting> _getDataSource() {
   //   final List<Meeting> meetings = <Meeting>[];
@@ -191,7 +178,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
       SelectDate().currentDateForCalenderSelection();
 
   DateTime myChosenDate = DateTime.now();
-  Color colorM=  Colors.green;
+  Color colorM = Colors.green;
 
   @override
   void initState() {
@@ -315,7 +302,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
     getCurrency();
 
-
     return Scaffold(
       resizeToAvoidBottomInset: false,
       backgroundColor: AppTheme.pcPrimaryColor,
@@ -324,43 +310,48 @@ class _CalendarScreenState extends State<CalendarScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             SizedBox(
-              height: 450,
+              height: 550,
               child: SfCalendar(
-
-                headerStyle:  CalendarHeaderStyle(
+                headerStyle: const CalendarHeaderStyle(
                   textStyle: TextStyle(color: Colors.black),
                 ),
-                //cellBorderColor: Colors.purple,
-                // key: _calendarKey,
                 controller: _calendarController,
-
                 appointmentBuilder: (context, calendarAppointmentDetails) {
-
-                  print(calendarAppointmentDetails.appointments.first.background);
-
-                  final Meeting meeting = calendarAppointmentDetails.appointments.last;
-
+                  print(
+                      calendarAppointmentDetails.appointments.first.background);
+                  final Meeting meeting =
+                      calendarAppointmentDetails.appointments.last;
                   return SizedBox(
+                    width: 10,
                     child: Text(
                       meeting.eventName,
-                      style: TextStyle(color:meeting.background, fontSize: 9),
+                      style: TextStyle(
+                        color: meeting.background,
+                        fontSize: meeting.eventName.length <= 9 ? 9 : 9,
+                      ),
+                      overflow: TextOverflow.visible,
+                      maxLines: 3,
                     ),
+
                   );
                 },
                 todayTextStyle: const TextStyle(color: Colors.black),
                 monthViewSettings: const MonthViewSettings(
-
                   appointmentDisplayMode:
                       MonthAppointmentDisplayMode.appointment,
                   monthCellStyle: MonthCellStyle(
-                    textStyle: TextStyle(color: Colors.white),
-
+                    textStyle: TextStyle(
+                      color: Colors.white,
+                      fontSize: 10,
+                    ),
                   ),
                 ),
 
                 onViewChanged: (viewChangedDetails) {
-                  SchedulerBinding.instance!.addPostFrameCallback((Duration duration) {
-                    _calendarController.selectedDate = viewChangedDetails.visibleDates[0];
+                  SchedulerBinding.instance!
+                      .addPostFrameCallback((Duration duration) {
+                    _calendarController.selectedDate =
+                        viewChangedDetails.visibleDates[0];
                   });
                   if (click) {
                     final DateTime firstVisibleDate =
@@ -786,7 +777,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
         ),
       ),
     );
-
   }
 
   // resetTransactionsOnly(value, id) {
@@ -918,8 +908,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
     );
   }
 }
-
-
 
 class _AppointmentDataSource extends CalendarDataSource {
   _AppointmentDataSource(List<Appointment> source) {
