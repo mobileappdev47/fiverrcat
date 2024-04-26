@@ -59,9 +59,15 @@ class _CalendarScreenState extends State<CalendarScreen> {
     for (int i = 0; i < data.length; i++) {
       DateTime dateTime = DateTime.parse(data[i].date);
       double totalAmount = totalAmountMap[dateTime] ?? 0;
-      totalAmount += data[i].amount;
+
+      if (data[i].categoryType == CategoryType.income) {
+        totalAmount += data[i].amount;
+      } else {
+        totalAmount -= data[i].amount;
+      }
       totalAmountMap[dateTime] = totalAmount;
     }
+
     // Create Meeting objects with total amount for each date
     totalAmountMap.forEach((date, totalAmount) {
       final DateTime startTime = DateTime(date.year, date.month, date.day, 9);
@@ -98,44 +104,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
     // Get.forceAppUpdate();
     return meetings;
   }
-
-  // List<Meeting> _getDataSource() {
-  //   final List<Meeting> meetings = <Meeting>[];
-  //
-  //   setState(() {});
-  //   for (int i = 0; i < transactionList.length; i++) {
-  //     setState(() {
-  //       DateTime dateTime = DateTime.parse(transactionList[i]);
-  //
-  //       final DateTime startTime =
-  //           DateTime(dateTime.year, dateTime.month, dateTime.day, 9);
-  //       final DateTime endTime = startTime.add(const Duration(hours: 2));
-  //
-  //
-  //       print(newListData);
-  //       // if (newListData.containsKey(formatDate(selectDate))) {
-  //       //   double totalAmount = 0;
-  //       //
-  //       //   for (var transaction in newListData[formatDate(selectDate)]!) {
-  //       //     totalAmount += transaction.amount;
-  //       //   }
-  //       meetings.add(
-  //         Meeting(
-  //             '${currencySymboleUpdate.value} ${formatter.format(selectData - selectExpenseData)}',
-  //             startTime,
-  //             endTime,
-  //             Colors.transparent,
-  //             false),
-  //       );
-  //       // }
-  //       setState(() {
-  //
-  //       });
-  //     });
-  //   }
-  //   setState(() {});
-  //   return meetings;
-  // }
 
   int myNumber = 0;
   final CalendarController _calendarController = CalendarController();
@@ -295,8 +263,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 headerStyle: const CalendarHeaderStyle(
                   textStyle: TextStyle(color: Colors.black),
                 ),
-                //cellBorderColor: Colors.purple,
-                // key: _calendarKey,
                 controller: _calendarController,
                 appointmentTextStyle: const TextStyle(
                   color: Colors.green,
@@ -312,8 +278,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 ),
 
                 onViewChanged: (viewChangedDetails) {
-                  SchedulerBinding.instance!.addPostFrameCallback((Duration duration) {
-                    _calendarController.selectedDate = viewChangedDetails.visibleDates[0];
+                  SchedulerBinding.instance!
+                      .addPostFrameCallback((Duration duration) {
+                    _calendarController.selectedDate =
+                        viewChangedDetails.visibleDates[0];
                   });
                   if (click) {
                     final DateTime firstVisibleDate =
