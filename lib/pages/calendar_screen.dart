@@ -130,7 +130,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
     return _AppointmentDataSource(appointments);
   }
 
-
   // List<Meeting> _getDataSource() {
   //   final List<Meeting> meetings = <Meeting>[];
   //
@@ -324,7 +323,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             SizedBox(
-              height: 450,
+              height: 500,
               child: SfCalendar(
 
                 headerStyle:  CalendarHeaderStyle(
@@ -354,7 +353,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
                       MonthAppointmentDisplayMode.appointment,
                   monthCellStyle: MonthCellStyle(
                     textStyle: TextStyle(color: Colors.white),
-
                   ),
                 ),
 
@@ -682,7 +680,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                                   ),
                                                 ),
                                                 IconButton(
-                                                  onPressed: () {
+                                                  onPressed: () async {
                                                     resetTransactionsOnly(
                                                         context,
                                                         mapList[keys[index]]!);
@@ -693,6 +691,12 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                                           .removeAt(index)
                                                           .length;
                                                     });
+                                                    await   TransactionDB.instance.refresh();
+                                                    setState(() {
+
+                                                    });
+                                                    Get.forceAppUpdate();
+
                                                   },
                                                   icon: const Icon(
                                                       Icons.delete_forever,
@@ -876,8 +880,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
             ),
             actions: [
               TextButton(
-                onPressed: () {
-                  setState(() async {
+                onPressed: () async {
+
                     final transactionDB = await Hive.openBox<TransactionModel>(
                         TRANSACTION_DB_NAME);
                     for (var transaction in transactions) {
@@ -886,10 +890,15 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     update.call(
                       () {},
                     );
-                    TransactionDB.instance
-                        .refresh(); // Refresh the transaction list
+                  await  TransactionDB.instance
+                        .refresh();
+                  setState(() {
+
+
+                  });
+                  // Refresh the transaction list
                     Navigator.of(context).pop();
-                  }); // Close the dialog
+                  // Close the dialog
                 },
                 child: const Text(
                   'Yes',
@@ -911,6 +920,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   ),
                 ),
               ),
+
             ],
           ),
         );
