@@ -388,55 +388,7 @@ class TransactionDB implements TransactionDBFunctions {
 CollectionReference transactions =
     FirebaseFirestore.instance.collection('transactions');
 
-class FirebaseBackupDataRetrieval {
-  static FirebaseFirestore firestore = FirebaseFirestore.instance;
-  static FirebaseAuth auth = FirebaseAuth.instance;
 
-  static Future<void> getUserTransactionsAndStore() async {
-    try {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      User? user = auth.currentUser;
-      if (user != null) {
-        String authEmail = user.email!;
-        Set<String> savedIds = prefs.getStringList('ids')?.toSet() ?? {};
-
-        DocumentSnapshot userDataSnapshot = await firestore
-            .collection('transactions')
-            .doc(authEmail)
-            .collection('user_transactions')
-            .doc('65')
-            .get()
-            .then((value) async {
-          if (value.exists) {
-            Map<String, dynamic>? data = value.data();
-            print(data);
-            final transactionDB =
-                await Hive.openBox<TransactionModel>(TRANSACTION_DB_NAME);
-            if (data != null) {
-              TransactionModel transaction = TransactionModel(
-                id: data['id'],
-                amount: data['amount'],
-                date: data['date'],
-                account: data['account'],
-                categoryType: data['categoryType'],
-                category: data['category'],
-                note: data['note'],
-              );
-              await transactionDB.put(transaction.id, transaction);
-            }
-          } else {
-            print("No such document");
-          }
-          return value;
-        });
-      } else {
-        print('User not authenticated');
-      }
-    } catch (e) {
-      print('Error getting user transactions and storing: $e');
-    }
-  }
-}
 
 class HiveFirestoreBackupData {
   static const String TRANSACTION_DB_NAME = 'transaction-db';
