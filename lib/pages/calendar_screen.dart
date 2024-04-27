@@ -299,6 +299,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
   @override
   build(BuildContext context) {
+
     double incomeData = 0;
     double expenseData = 0;
 
@@ -347,6 +348,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 },
                 todayTextStyle: const TextStyle(color: Colors.black),
                 monthViewSettings: const MonthViewSettings(
+                  showTrailingAndLeadingDates: false ,
                   appointmentDisplayMode:
                       MonthAppointmentDisplayMode.appointment,
                   monthCellStyle: MonthCellStyle(
@@ -358,6 +360,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 ),
 
                 onViewChanged: (viewChangedDetails) {
+
                   SchedulerBinding.instance!
                       .addPostFrameCallback((Duration duration) {
                     _calendarController.selectedDate =

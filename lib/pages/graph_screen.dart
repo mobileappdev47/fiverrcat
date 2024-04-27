@@ -831,7 +831,14 @@ class _GraphScreenState extends State<GraphScreen> {
                     ):*/
 
               Container(
-                height: 300,
+                height: 260,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  color: Colors.grey.withOpacity(0.1),
+
+                ),
+                padding: EdgeInsets.only(top: 10,right: 10),
+                margin: EdgeInsets.symmetric(horizontal:  10),
                 child: SfCartesianChart(
                   // enableAxisAnimation: true,
                   primaryYAxis: NumericAxis(

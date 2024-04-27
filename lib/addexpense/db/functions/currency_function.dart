@@ -26,8 +26,17 @@ Future<void> getAllCurrency() async {
 }
 
 Future<void> getCurrency() async {
-  var currencyDB = await Hive.openBox<CurrencyModel>(CURENCY_DB_NAME);
-  currencySymboleUpdate.value = currencyDB.values.first.symbol;
-  // currencyNotifier.notifyListeners();
-  getAllCurrency();
+
+  try{
+    var currencyDB = await Hive.openBox<CurrencyModel>(CURENCY_DB_NAME);
+    currencySymboleUpdate.value = currencyDB.values.first.symbol;
+    // currencyNotifier.notifyListeners();
+    getAllCurrency();
+  }catch(e){
+    print(e.toString());
+
+  }
+
+
+
 }

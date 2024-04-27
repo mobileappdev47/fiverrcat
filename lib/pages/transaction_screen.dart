@@ -100,7 +100,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
     //         }
     //     }
     // });
-   
+
     selectedDate = SelectDate()
         .selectMonth(DateTime.now().month, DateTime.now().year);
     TransactionDB.instance.filterForHome(
@@ -214,9 +214,9 @@ print(Get.width);
 
                                 DateTime lastDateOfMonth = DateTime(selectedYear, monthIndex + 1, 0);
 
-                                print("${firstDateOfMonth}" + '${lastDateOfMonth}');
+                                print("$firstDateOfMonth" + '$lastDateOfMonth');
 
-                                if (selectedYear != 2025) {
+                                if (selectedYear <= DateTime.now().year) {
                                   setState(() {
                                     indexAll = index;
                                     TransactionDB.instance.filterForHome(firstDateOfMonth, lastDateOfMonth);
@@ -271,7 +271,6 @@ print(Get.width);
                     },
                   ),
                 ),
-
               ],
             ),
           ),
