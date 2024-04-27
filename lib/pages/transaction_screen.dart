@@ -8,6 +8,7 @@ import 'package:pokercat/addexpense/db/models/category/category_model_db.dart';
 import 'package:pokercat/addexpense/db/models/transactions/transaction_model_db.dart';
 import 'package:pokercat/addexpense/widget/transaction_helper.dart';
 import 'package:pokercat/constant.dart';
+import 'package:pokercat/imports.dart';
 import '../global/component/appbar.dart';
 
 // ignore: must_be_immutable
@@ -31,57 +32,46 @@ class _TransactionScreenState extends State<TransactionScreen> {
 
 
  getMonthNames() {
+   months.clear();
+   years.clear();
 
     DateTime currentMonth = DateTime.now();
 
     // Add nine months before the current month
     for (int i = 9; i > 0; i--) {
       DateTime month = DateTime(currentMonth.year, currentMonth.month - i);
-      String monthName = DateFormat.MMMM().format(month);
+      String monthName = DateFormat.MMMM().format(month) + " ${month.year}";
       months.add(monthName);
+      int year = month.year;
+
+      if(years.contains(year)==false){
+        years.add(year);
+      }
+
+
     }
 
     // Add the current month
-    String currentMonthName = DateFormat.MMMM().format(currentMonth);
+    String currentMonthName = DateFormat.MMMM().format(currentMonth)+ " ${currentMonth.year}";
     months.add(currentMonthName);
+     int year = currentMonth.year;
+   if(years.contains(year)==false){
+     years.add(year);
+   }
 
     // Add nine months after the current month
     for (int i = 1; i <= 9; i++) {
       DateTime month = DateTime(currentMonth.year, currentMonth.month + i);
-      String monthName = DateFormat.MMMM().format(month);
+      String monthName = DateFormat.MMMM().format(month)+ " ${month.year}";
       months.add(monthName);
-    }
-
-print(months);
-  }
-
-  getYears() {
-
-    DateTime currentMonth = DateTime.now();
-    int currentYear = currentMonth.year;
-
-    // Add nine years before the current year
-    for (int i = 9; i > 0; i--) {
-      int year = currentYear - i;
-      if (!years.contains(year)) {
+      int year = month.year;
+      if(years.contains(year)==false){
         years.add(year);
       }
     }
 
-    // Add the current year if not already added
-    if (!years.contains(currentYear)) {
-      years.add(currentYear);
-    }
-
-    // Add nine years after the current year
-    for (int i = 1; i <= 9; i++) {
-      int year = currentYear + i;
-      if (!years.contains(year)) {
-        years.add(year);
-      }
-    }
-
-   print(years);
+   print(months);
+    print(years);
   }
 
 
@@ -89,27 +79,27 @@ print(months);
 
   @override
   void initState() {
- years.clear();
- months.clear();
-    getYears();
+
+
    getMonthNames();
-    years.forEach((element) {
-      if(element == DateTime.now().year)
-        {
-          if(years.indexOf(element) ==0)
-            {
-              indexAll = DateTime.now().month-1;
-            }
-          else if(years.indexOf(element) ==1)
-          {
-            indexAll =( DateTime.now().month-1) +12;
-          }
-          else
-            {
-              indexAll = (DateTime.now().month-1 )+24;
-            }
-        }
-    });
+
+    // years.forEach((element) {
+    //   if(element == DateTime.now().year)
+    //     {
+    //       if(years.indexOf(element) ==0)
+    //         {
+    //           indexAll = DateTime.now().month-1;
+    //         }
+    //       else if(years.indexOf(element) ==1)
+    //       {
+    //         indexAll =( DateTime.now().month-1) +12;
+    //       }
+    //       else
+    //         {
+    //           indexAll = (DateTime.now().month-1 )+24;
+    //         }
+    //     }
+    // });
     selectedDate = SelectDate()
         .selectMonth(DateTime.now().month, DateTime.now().year);
     TransactionDB.instance.filterForHome(
@@ -124,14 +114,48 @@ print(months);
   ValueNotifier<double> expenseCustomDateNotifier = ValueNotifier(0);
   ValueNotifier<double> totalCustomDateNotifier = ValueNotifier(0);
   PageController scrollController = PageController();
-  int indexAll = DateTime.now().month;
+  // int indexAll = DateTime.now().month;
+  int indexAll = 9;
 
-  @override
-  Widget build(BuildContext context) {
 
-    // List<String> months = List.generate(12, (index) {
-    //   return DateFormat('MMMM').format(DateTime(2024, index + 1, 1));
-    // });
+  int getMonthIndex(String monthName) {
+    switch (monthName.toLowerCase()) {
+      case 'january':
+        return 1;
+      case 'february':
+        return 2;
+      case 'march':
+        return 3;
+      case 'april':
+        return 4;
+      case 'may':
+        return 5;
+      case 'june':
+        return 6;
+      case 'july':
+        return 7;
+      case 'august':
+        return 8;
+      case 'september':
+        return 9;
+      case 'october':
+        return 10;
+      case 'november':
+        return 11;
+      case 'december':
+        return 12;
+      default:
+        return -1; // Return -1 for invalid month names
+    }
+  }
+
+   @override
+   Widget build(BuildContext context) {
+
+
+    double initialScrollOffset = ((19/1.75) * 85) - (MediaQuery.of(context).size.width/ 2) + (85/ 2);
+
+
     final double screenWidth = MediaQuery.of(context).size.width;
     double fontSize = 13;
     if (screenWidth > 350) {
@@ -155,58 +179,90 @@ print(months);
         children: [
 
           SizedBox(
-            height: 80,
+            height: 65,
             child: Row(
               children: [
 
                 Expanded(
                   child: ListView.builder(
-                    controller: scrollController,
-                    itemCount: months.length * years.length,
+
+                    controller:  ScrollController(initialScrollOffset: initialScrollOffset),
+                    itemCount: months.length,
                     scrollDirection: Axis.horizontal,
                     itemBuilder: (BuildContext context, int index) {
-                      int monthIndex = index % months.length;
-                      int yearIndex = index ~/ months.length;
-                      int year = years[yearIndex];
-                      String month = months[monthIndex];
+                      // int monthIndex = index % months.length;
+                      // int yearIndex = index ~/ months.length;
+                      // int year = years[yearIndex];
+                      // String month = months[monthIndex];
+
+                      String currentYear = DateTime.now().year.toString();
+
                       return Row(
                         children: [
                           Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: InkWell(
                               onTap: () {
-                                if (year != 2025) {
+                                int  selectedYear = int.parse(months[index].toString().split(' ').last);
+                                String  selectedMonth = months[index].toString().split(' ').first;
+
+                                int monthIndex = getMonthIndex(selectedMonth);
+                                 print(selectedYear );
+                                 print(monthIndex );
+                                DateTime firstDateOfMonth = DateTime(selectedYear, monthIndex, 1);
+
+                                DateTime lastDateOfMonth = DateTime(selectedYear, monthIndex + 1, 0);
+
+                                print("${firstDateOfMonth}" + '${lastDateOfMonth}');
+
+                                if (selectedYear != 2025) {
                                   setState(() {
                                     indexAll = index;
-                                    selectedDate = SelectDate().selectMonth(monthIndex + 1, year);
-                                    TransactionDB.instance.filterForHome(selectedDate.start, selectedDate.end);
+                                    TransactionDB.instance.filterForHome(firstDateOfMonth, lastDateOfMonth);
                                     TransactionDB.instance.getTransactionsForCurrentMonth();
                                   });
                                 }
 
+                                // if (year != 2025) {
+                                //   setState(() {
+                                //     indexAll = index;
+                                //     selectedDate = SelectDate().selectMonth(monthIndex + 1, year);
+                                //     TransactionDB.instance.filterForHome(selectedDate.start, selectedDate.end);
+                                //     TransactionDB.instance.getTransactionsForCurrentMonth();
+                                //   });
+                                // }
+
+
+
                               },
-                              child: Column(
-                                children: [
-                                  Text(
-                                    month,
-                                    // months[index],
-                                    style: const TextStyle(color: Colors.white),
-                                  ),
-                                  Text(
-                                    '${year == 2024 ? '' : year}',
-                                    style: const TextStyle(color: Colors.white),
-                                  ),
-                                  const SizedBox(
-                                    height: 5,
-                                  ),
-                                  indexAll == index
-                                      ? Container(
-                                          height: 1,
-                                          width: 50,
-                                          color: Colors.white,
-                                        )
-                                      : const SizedBox()
-                                ],
+                              child: SizedBox(
+                                width : 85,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    (currentYear == months[index].split(' ').last)?     SizedBox(height: 12,):SizedBox(),
+                                    Text(
+                                      months[index].split(' ').first,
+                                      // months[index],
+                                      style: const TextStyle(color: Colors.white),
+                                    ),
+
+                                    (currentYear == months[index].split(' ').last)? SizedBox():  Text(
+                                      months[index].split(' ').last,
+                                      // months[index],
+                                      style: const TextStyle(color: Colors.white),
+                                    ),
+                                   Spacer(),
+                                    indexAll == index
+                                        ? Container(
+                                            height: 1,
+
+                                            color: Colors.white,
+                                          )
+                                        : const SizedBox()
+                                  ],
+                                ),
                               ),
                             ),
                           ),
