@@ -100,6 +100,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
     //         }
     //     }
     // });
+   
     selectedDate = SelectDate()
         .selectMonth(DateTime.now().month, DateTime.now().year);
     TransactionDB.instance.filterForHome(
@@ -151,7 +152,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
 
    @override
    Widget build(BuildContext context) {
-
+print(Get.width);
 
     double initialScrollOffset = ((19/1.75) * 85) - (MediaQuery.of(context).size.width/ 2) + (85/ 2);
 
@@ -231,7 +232,6 @@ class _TransactionScreenState extends State<TransactionScreen> {
                                 //     TransactionDB.instance.getTransactionsForCurrentMonth();
                                 //   });
                                 // }
-
 
 
                               },

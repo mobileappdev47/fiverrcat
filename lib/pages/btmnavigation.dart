@@ -30,7 +30,7 @@ class _BtmNaviState extends State<BtmNavi> {
     const Center(child: PushFold(),),
     const Center(child: Tournament(),),
     const Center(child: Bankroll(),),
-    const Center(child: AppSettingsScreen(),),
+     Center(child: AppSettingsScreen(),),
 
 
 

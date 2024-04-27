@@ -5,10 +5,13 @@ import 'dart:core';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:pokercat/addexpense/db/functions/account_group_function.dart';
 import 'package:pokercat/addexpense/db/models/account_group/account_group_model_db.dart';
+import 'package:pokercat/constant.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/category/category_model_db.dart';
@@ -401,7 +404,7 @@ class HiveFirestoreBackupData {
       if (user != null) {
         var transactionList = await getAllTransactions();
         await _backupTransactionsToFirestore(transactionList, user.email!);
-        print('Data backed up successfully to Firestore');
+
       } else {
         print('User is not authenticated. Cannot backup transactions.');
       }
@@ -450,7 +453,11 @@ class HiveFirestoreBackupData {
             .doc(transaction.id.toString())
             .set(firestoreData);
       }
+      Get.snackbar('Success', 'Data Stored successFully!',backgroundColor: Colors.green,colorText: AppTheme.white);
+
     } catch (e) {
+      Get.snackbar('Success', 'Sorry, Something went wrong!',backgroundColor: Colors.red,colorText: AppTheme.white);
+
       print('Error backing up transactions: $e');
     }
   }
@@ -474,80 +481,7 @@ Future<dynamic> signInWithGoogle() async {
     print('exception->$e');
   }
 }
-// class HiveFirestoreBackupData {
-//   static const String TRANSACTION_DB_NAE = 'transaction-db';
-//   static FirebaseFirestore firestore = FirebaseFirestore.instance;
-//
-//   static Future<void> backupDataToFirestore(String? email) async {
-//     try {
-//       var transactionList = await getAllTransactions();
-//       await _backupTransactionsToFirestore(transactionList, email);
-//       print('Data backed up successfully to Firestore');
-//     } catch (e) {
-//       print('Error backing up data to Firestore: $e');
-//     }
-//   }
-//
-//   static Future<List<TransactionModel>> getAllTransactions() async {
-//     final transactionDB =
-//         await Hive.openBox<TransactionModel>(TRANSACTION_DB_NAME);
-//     return transactionDB.values.toList();
-//   }
-//
-//   static Future<void> _backupTransactionsToFirestore(
-//       List<TransactionModel> transactionList, String? email) async {
-//     try {
-//       if (email != null) {
-//         for (var transaction in transactionList) {
-//           var firestoreData = {
-//             'id': transaction.id,
-//             'date': transaction.date,
-//             'amount': transaction.amount,
-//             'category': transaction.category.name,
-//             'note': transaction.note,
-//           };
-//
-//           await firestore
-//               .collection('transactions')
-//               .doc(email)
-//               .collection('user_transactions')
-//               .doc(transaction.id.toString())
-//               .set(firestoreData);
-//         }
-//       } else {
-//         print('Email is null. Cannot backup transactions.');
-//       }
-//     } catch (e) {
-//       print('Error backing up transactions: $e');
-//     }
-//   }
-//
-// }
 
-// class FirebaseBackupDataRetrieval {
-//   static FirebaseFirestore firestore = FirebaseFirestore.instance;
-//
-//   static Future<List<Map<String, dynamic>>> getUserTransactions(String email) async {
-//     try {
-//       QuerySnapshot querySnapshot = await firestore
-//           .collection('transactions')
-//           .doc(email)
-//           .collection('user_transactions')
-//           .get();
-//
-//       List<Map<String, dynamic>> transactions = [];
-//
-//       querySnapshot.docs.forEach((doc) {
-//
-//       });
-//
-//       return transactions;
-//     } catch (e) {
-//       print('Error getting user transactions: $e');
-//       return [];
-//     }
-//   }
-// }
 
 class FirebaseBackupDataRetrieval1 {
   static FirebaseFirestore firestore = FirebaseFirestore.instance;
