@@ -152,7 +152,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
 
    @override
    Widget build(BuildContext context) {
-print(Get.width);
+   print(Get.width);
 
     double initialScrollOffset = ((19/1.75) * 85) - (MediaQuery.of(context).size.width/ 2) + (85/ 2);
 
