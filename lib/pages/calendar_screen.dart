@@ -355,6 +355,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
             SizedBox(
               height: 400,
               child: SfCalendar(
+                viewHeaderHeight: 0,
+                headerHeight: 0,
                 controller: _calendarController,
                 appointmentBuilder: (context, calendarAppointmentDetails) {
                   print(

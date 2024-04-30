@@ -421,12 +421,6 @@ class _AppSettingsScreenState extends State<AppSettingsScreen> {
                         ),
                       ),
                     ),
-                    InkWell(
-                      onTap: () {
-                        Get.to(BackUpScreen());
-                      },
-                      child: Icon(Icons.abc_outlined),
-                    )
 
                     /*   // ElevatedButton(onPressed: () async {
                       //       await  GoogleSignIn().signOut();

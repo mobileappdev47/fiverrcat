@@ -393,16 +393,14 @@ class TransactionDB implements TransactionDBFunctions {
 CollectionReference transactions =
 FirebaseFirestore.instance.collection('transactions');
 
-Future<String> getTransactionFilePath(int transactionId) async {
+Future<String> getTransactionFilePath(String transactionId) async {
   try {
-
     Directory appDocDir = await getApplicationDocumentsDirectory();
     String fileName = 'transaction_$transactionId.txt';
     String filePath = '${appDocDir.path}/$fileName';
 
     return filePath;
   } catch (e) {
-
     print('Error getting transaction file path: $e');
     return '';
   }
@@ -443,7 +441,7 @@ class HiveFirestoreBackupData {
         String? filePath;
 
         if (transaction.id != null) {
-          filePath = await getTransactionFilePath(transaction.id!);
+          filePath = await getTransactionFilePath(transaction.id.toString());
           await _saveTransactionToFile(transaction, filePath); // Save transaction to file
         } else {
           print('Transaction ID is null.');
@@ -477,6 +475,27 @@ class HiveFirestoreBackupData {
     } catch (e) {
       Get.snackbar('Error', 'Sorry, Something went wrong!',backgroundColor: Colors.red,colorText: AppTheme.white);
       print('Error backing up transactions: $e');
+    }
+    Future<List<String>> fetchFilePaths() async {
+      List<String> filePaths = [];
+
+      try {
+        QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+            .collection('transactions')
+            .doc(email)
+            .collection('user_transactions')
+            .get();
+
+        querySnapshot.docs.forEach((doc) {
+          Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+          String filePath = data['file'];
+          filePaths.add(filePath);
+        });
+      } catch (e) {
+        print('Error fetching file paths: $e');
+      }
+
+      return filePaths;
     }
   }
 
@@ -560,7 +579,8 @@ class FirebaseBackupDataRetrieval1 {
             as Map<String, dynamic>?;
 
             if (data != null) {
-
+              String filePath = await getTransactionFilePath(transactionId);
+              print('File path for transaction $transactionId: $filePath');
               CategoryType getCategoryTypeFromString(String categoryTypeString) {
                 switch (categoryTypeString.toLowerCase()) {
                   case 'income':

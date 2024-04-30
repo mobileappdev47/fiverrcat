@@ -1,9 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:pokercat/addexpense/db/functions/transaction_function.dart';
 import 'package:pokercat/imports.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class BackUpScreen extends StatefulWidget {
   BackUpScreen({super.key});
@@ -15,8 +15,28 @@ class BackUpScreen extends StatefulWidget {
 class _BackUpScreenState extends State<BackUpScreen> {
   bool autoBackupEnabled = true;
   String dropdownValue = '1';
+  late String userEmail;
 
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    fetchFilePaths();
+   // loadBackupFrequency();
+    //  fetchFilePaths();
+  }
+  // void loadBackupFrequency() async {
+  //   SharedPreferences prefs = await SharedPreferences.getInstance();
+  //   setState(() {
+  //     dropdownValue = (prefs.getInt('backupFrequency') ?? 1) as String; // Default to 1 day
+  //   });
+  // }
+  // void saveBackupFrequency(int frequency) async {
+  //   SharedPreferences prefs = await SharedPreferences.getInstance();
+  //   prefs.setInt('backupFrequency', frequency);
+  // }
   void bottomSheet(BuildContext context) {
+    GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     showModalBottomSheet(
       context: context,
       builder: (context) {
@@ -42,10 +62,10 @@ class _BackUpScreenState extends State<BackUpScreen> {
                         fontSize: 18,
                         fontWeight: FontWeight.bold),
                   ),
-                  SizedBox(
+                  const SizedBox(
                     height: 20,
                   ),
-                  Divider(
+                  const Divider(
                     height: 2,
                     color: Colors.blueGrey,
                   ),
@@ -124,25 +144,119 @@ class _BackUpScreenState extends State<BackUpScreen> {
                         ),
                       )),
                   Expanded(
-                    child: ListView.builder(
-                      itemCount: 4,
-                      itemBuilder: (BuildContext context, int index) {
-                        return ListTile(
-                          leading: Icon(Icons.file_copy),
-                          title: Text('data'),
-                          trailing: Icon(Icons.download_rounded),
-                        );
+                    child: FutureBuilder(
+                      future: fetchFilePaths(), // Function to fetch file paths
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        } else if (snapshot.hasError) {
+                          return Center(
+                            child: Text('Error: ${snapshot.error}'),
+                          );
+                        } else {
+                          // Display file paths using ListView.builder
+                          return ListView.builder(
+                            itemCount: snapshot.data!.length,
+                            itemBuilder: (BuildContext context, int index) {
+                              String filePath = snapshot.data![index];
+                              return Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Card(
+                                  color: Colors.black54,
+                                  elevation: 2,
+                                  child: ListTile(
+                                    leading: const Icon(
+                                      Icons.file_copy,
+                                      color: Colors.white,
+                                    ),
+                                    title: const Text(
+                                      'File Path',
+                                      style: TextStyle(color: Colors.white),
+                                    ),
+                                    subtitle: Text(
+                                      filePath,
+                                      style:
+                                          const TextStyle(color: Colors.white),
+                                    ),
+                                    trailing: const Icon(
+                                      Icons.download_rounded,
+                                      color: Colors.white,
+                                    ),
+                                    onTap: () {
+                                      // Handle file download or any other action here
+                                    },
+                                  ),
+                                ),
+                              );
+                            },
+                          );
+                        }
                       },
                     ),
-                  )
+                  ),
                 ],
               ),
             );
           },
         );
       },
-    );
+    ).then((value) {
+      return Get.snackbar('Backup', 'Complete',
+          icon: Icon(
+            Icons.backup,
+            color: Colors.white,
+          ),
+        colorText: Colors.white
+      );
+    });
   }
+  List<String> filePaths = [];
+
+  Future<List<String>> fetchFilePaths() async {
+    List<String> filePaths = [];
+    FirebaseAuth auth = FirebaseAuth.instance;
+    var user = auth.currentUser;
+    userEmail = user!.email!;
+
+    try {
+      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+          .collection('transactions')
+          .doc(user.email)
+          .collection('user_transactions')
+          .get();
+
+      querySnapshot.docs.forEach((doc) {
+        Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+        String filePath = data['file'];
+        filePaths.add(filePath);
+      });
+    } catch (e) {
+      print('Error fetching file paths: $e');
+    }
+
+    return filePaths;
+  }
+  Map<String, List<String>> groupFilesByBackupDate() {
+    Map<String, List<String>> groupedFiles = {};
+
+    for (String filePath in filePaths) {
+      // Extract backup date from file path (assuming file path contains date information)
+      // Modify this logic based on your actual file path structure
+      String backupDate = '2024-04-30'; // Example backup date
+      // Add file path to corresponding backup date group
+      if (groupedFiles.containsKey(backupDate)) {
+        groupedFiles[backupDate]!.add(filePath);
+      } else {
+        groupedFiles[backupDate] = [filePath];
+      }
+    }
+
+    return groupedFiles;
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -175,6 +289,7 @@ class _BackUpScreenState extends State<BackUpScreen> {
               size: 30,
             ),
           ),
+
           const SizedBox(
             height: 10,
           ),
@@ -187,7 +302,7 @@ class _BackUpScreenState extends State<BackUpScreen> {
             height: 5,
           ),
           const Text(
-            'data',
+           'userEmail',
             style: TextStyle(color: Colors.grey),
           ),
           const SizedBox(
