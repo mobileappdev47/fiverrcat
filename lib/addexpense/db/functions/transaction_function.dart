@@ -1,6 +1,7 @@
-// ignore_for_file: invalid_use_of_visible_for_testing_member, invalid_use_of_protected_member, non_constant_identifier_names
 
+import 'dart:convert';
 import 'dart:core';
+import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -13,6 +14,7 @@ import 'package:pokercat/addexpense/db/functions/account_group_function.dart';
 import 'package:pokercat/addexpense/db/models/account_group/account_group_model_db.dart';
 import 'package:pokercat/constant.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:path_provider/path_provider.dart';
 
 import '../models/category/category_model_db.dart';
 import '../models/transactions/transaction_model_db.dart';
@@ -38,15 +40,15 @@ class TransactionDB implements TransactionDBFunctions {
   }
 
   ValueNotifier<List<TransactionModel>> transactionListNotifier =
-      ValueNotifier([]);
+  ValueNotifier([]);
   ValueNotifier<List<TransactionModel>> transactionMonthListNotifier =
-      ValueNotifier([]);
+  ValueNotifier([]);
   String? selectedCatogory;
 
   @override
   Future<void> addTransaction(TransactionModel value) async {
     final transactionDB =
-        await Hive.openBox<TransactionModel>(TRANSACTION_DB_NAME);
+    await Hive.openBox<TransactionModel>(TRANSACTION_DB_NAME);
     await transactionDB.put(value.id, value);
     await updateAccountGroup(value);
     refresh();
@@ -71,8 +73,8 @@ class TransactionDB implements TransactionDBFunctions {
     final endOfMonth = DateTime(now.year, now.month + 1, 0);
     final box = Hive.box<TransactionModel>(TRANSACTION_DB_NAME);
     final results = box.values.where((trxn) =>
-        DateTime.parse(trxn.date)
-            .isAfter(startOfMonth.subtract(const Duration(days: 1))) &&
+    DateTime.parse(trxn.date)
+        .isAfter(startOfMonth.subtract(const Duration(days: 1))) &&
         DateTime.parse(trxn.date)
             .isBefore(endOfMonth.add(const Duration(days: 1))));
     return results.toList();
@@ -84,8 +86,8 @@ class TransactionDB implements TransactionDBFunctions {
     final endOfMonth = DateTime(now.year, month, 31);
     final box = Hive.box<TransactionModel>(TRANSACTION_DB_NAME);
     final results = box.values.where((trxn) =>
-        DateTime.parse(trxn.date)
-            .isAfter(startOfMonth.subtract(const Duration(days: 1))) &&
+    DateTime.parse(trxn.date)
+        .isAfter(startOfMonth.subtract(const Duration(days: 1))) &&
         DateTime.parse(trxn.date)
             .isBefore(endOfMonth.add(const Duration(days: 1))));
     return results.toList();
@@ -94,7 +96,7 @@ class TransactionDB implements TransactionDBFunctions {
   @override
   Future<List<TransactionModel>> getAllTransactions() async {
     final transactionDB =
-        await Hive.openBox<TransactionModel>(TRANSACTION_DB_NAME);
+    await Hive.openBox<TransactionModel>(TRANSACTION_DB_NAME);
     return transactionDB.values.toList();
   }
 
@@ -122,37 +124,37 @@ class TransactionDB implements TransactionDBFunctions {
     if (selectedCatogory == 'Income') {
       filteredList = db.values
           .where((element) =>
-              element.categoryType == CategoryType.income &&
-              element.category.name
-                  .toLowerCase()
-                  .trim()
-                  .contains(text.toLowerCase()))
+      element.categoryType == CategoryType.income &&
+          element.category.name
+              .toLowerCase()
+              .trim()
+              .contains(text.toLowerCase()))
           .toList()
         ..sort((first, second) => second.date.compareTo(first.date));
     } else if (selectedCatogory == 'Expense') {
       filteredList = db.values
           .where((element) =>
-              element.categoryType == CategoryType.expense &&
-              element.category.name
-                  .toLowerCase()
-                  .trim()
-                  .contains(text.toLowerCase()))
+      element.categoryType == CategoryType.expense &&
+          element.category.name
+              .toLowerCase()
+              .trim()
+              .contains(text.toLowerCase()))
           .toList()
         ..sort((first, second) => second.date.compareTo(first.date));
     } else if (selectedCatogory == "All") {
       filteredList = db.values
           .where((element) => element.category.name
-              .toLowerCase()
-              .trim()
-              .contains(text.toLowerCase()))
+          .toLowerCase()
+          .trim()
+          .contains(text.toLowerCase()))
           .toList()
         ..sort((first, second) => second.date.compareTo(first.date));
     } else {
       filteredList = db.values
           .where((element) => element.category.name
-              .toLowerCase()
-              .trim()
-              .contains(text.toLowerCase()))
+          .toLowerCase()
+          .trim()
+          .contains(text.toLowerCase()))
           .toList()
         ..sort((first, second) => second.date.compareTo(first.date));
     }
@@ -164,7 +166,7 @@ class TransactionDB implements TransactionDBFunctions {
   Future<void> filter(String text) async {
     if (text == 'Income') {
       final transactionDB =
-          await Hive.openBox<TransactionModel>(TRANSACTION_DB_NAME);
+      await Hive.openBox<TransactionModel>(TRANSACTION_DB_NAME);
       transactionListNotifier.value.clear();
       transactionListNotifier.value.addAll(transactionDB.values
           .where((element) => element.categoryType == CategoryType.income)
@@ -174,7 +176,7 @@ class TransactionDB implements TransactionDBFunctions {
       transactionListNotifier.notifyListeners();
     } else if (text == 'Expense') {
       final transactionDB =
-          await Hive.openBox<TransactionModel>(TRANSACTION_DB_NAME);
+      await Hive.openBox<TransactionModel>(TRANSACTION_DB_NAME);
       transactionListNotifier.value.clear();
       transactionListNotifier.value.addAll(transactionDB.values
           .where((element) => element.categoryType == CategoryType.expense)
@@ -191,33 +193,33 @@ class TransactionDB implements TransactionDBFunctions {
 
   Future<void> filterDataByDate(String dateRange) async {
     final TransactionDb =
-        await Hive.openBox<TransactionModel>(TRANSACTION_DB_NAME);
+    await Hive.openBox<TransactionModel>(TRANSACTION_DB_NAME);
     List<TransactionModel> dateFilterList = [];
     if (dateRange == 'today') {
       if (selectedCatogory == "Income") {
         dateFilterList = TransactionDb.values
             .where((element) =>
-                element.categoryType == CategoryType.income &&
-                DateTime.parse(element.date).day == DateTime.now().day &&
-                DateTime.parse(element.date).month == DateTime.now().month &&
-                DateTime.parse(element.date).year == DateTime.now().year)
+        element.categoryType == CategoryType.income &&
+            DateTime.parse(element.date).day == DateTime.now().day &&
+            DateTime.parse(element.date).month == DateTime.now().month &&
+            DateTime.parse(element.date).year == DateTime.now().year)
             .toList()
           ..sort((first, second) => second.date.compareTo(first.date));
       } else if (selectedCatogory == "Expense") {
         dateFilterList = TransactionDb.values
             .where((element) =>
-                element.categoryType == CategoryType.expense &&
-                DateTime.parse(element.date).day == DateTime.now().day &&
-                DateTime.parse(element.date).month == DateTime.now().month &&
-                DateTime.parse(element.date).year == DateTime.now().year)
+        element.categoryType == CategoryType.expense &&
+            DateTime.parse(element.date).day == DateTime.now().day &&
+            DateTime.parse(element.date).month == DateTime.now().month &&
+            DateTime.parse(element.date).year == DateTime.now().year)
             .toList()
           ..sort((first, second) => second.date.compareTo(first.date));
       } else {
         dateFilterList = TransactionDb.values
             .where((element) =>
-                DateTime.parse(element.date).day == DateTime.now().day &&
-                DateTime.parse(element.date).month == DateTime.now().month &&
-                DateTime.parse(element.date).year == DateTime.now().year)
+        DateTime.parse(element.date).day == DateTime.now().day &&
+            DateTime.parse(element.date).month == DateTime.now().month &&
+            DateTime.parse(element.date).year == DateTime.now().year)
             .toList()
           ..sort((first, second) => second.date.compareTo(first.date));
         transactionListNotifier.notifyListeners();
@@ -226,27 +228,27 @@ class TransactionDB implements TransactionDBFunctions {
       if (selectedCatogory == "Income") {
         dateFilterList = TransactionDb.values
             .where((element) =>
-                element.categoryType == CategoryType.income &&
-                DateTime.parse(element.date).day == DateTime.now().day - 1 &&
-                DateTime.parse(element.date).month == DateTime.now().month &&
-                DateTime.parse(element.date).year == DateTime.now().year)
+        element.categoryType == CategoryType.income &&
+            DateTime.parse(element.date).day == DateTime.now().day - 1 &&
+            DateTime.parse(element.date).month == DateTime.now().month &&
+            DateTime.parse(element.date).year == DateTime.now().year)
             .toList()
           ..sort((first, second) => second.date.compareTo(first.date));
       } else if (selectedCatogory == "Expense") {
         dateFilterList = TransactionDb.values
             .where((element) =>
-                element.categoryType == CategoryType.expense &&
-                DateTime.parse(element.date).day == DateTime.now().day - 1 &&
-                DateTime.parse(element.date).month == DateTime.now().month &&
-                DateTime.parse(element.date).year == DateTime.now().year)
+        element.categoryType == CategoryType.expense &&
+            DateTime.parse(element.date).day == DateTime.now().day - 1 &&
+            DateTime.parse(element.date).month == DateTime.now().month &&
+            DateTime.parse(element.date).year == DateTime.now().year)
             .toList()
           ..sort((first, second) => second.date.compareTo(first.date));
       } else {
         dateFilterList = TransactionDb.values
             .where((element) =>
-                DateTime.parse(element.date).day == DateTime.now().day - 1 &&
-                DateTime.parse(element.date).month == DateTime.now().month &&
-                DateTime.parse(element.date).year == DateTime.now().year)
+        DateTime.parse(element.date).day == DateTime.now().day - 1 &&
+            DateTime.parse(element.date).month == DateTime.now().month &&
+            DateTime.parse(element.date).year == DateTime.now().year)
             .toList()
           ..sort((first, second) => second.date.compareTo(first.date));
         transactionListNotifier.notifyListeners();
@@ -258,24 +260,24 @@ class TransactionDB implements TransactionDBFunctions {
       if (selectedCatogory == "Income") {
         dateFilterList = TransactionDb.values
             .where((element) =>
-                element.categoryType == CategoryType.income &&
-                DateTime.parse(element.date).isAfter(weekAgo) &&
-                DateTime.parse(element.date).isBefore(today))
+        element.categoryType == CategoryType.income &&
+            DateTime.parse(element.date).isAfter(weekAgo) &&
+            DateTime.parse(element.date).isBefore(today))
             .toList()
           ..sort((first, second) => second.date.compareTo(first.date));
       } else if (selectedCatogory == "Expense") {
         dateFilterList = TransactionDb.values
             .where((element) =>
-                element.categoryType == CategoryType.expense &&
-                DateTime.parse(element.date).isAfter(weekAgo) &&
-                DateTime.parse(element.date).isBefore(today))
+        element.categoryType == CategoryType.expense &&
+            DateTime.parse(element.date).isAfter(weekAgo) &&
+            DateTime.parse(element.date).isBefore(today))
             .toList()
           ..sort((first, second) => second.date.compareTo(first.date));
       } else {
         dateFilterList = TransactionDb.values
             .where((element) =>
-                DateTime.parse(element.date).isAfter(weekAgo) &&
-                DateTime.parse(element.date).isBefore(today))
+        DateTime.parse(element.date).isAfter(weekAgo) &&
+            DateTime.parse(element.date).isBefore(today))
             .toList()
           ..sort((first, second) => second.date.compareTo(first.date));
       }
@@ -291,45 +293,45 @@ class TransactionDB implements TransactionDBFunctions {
 
   Future<void> filterByDate(DateTime start, DateTime end) async {
     final TransactionDb =
-        await Hive.openBox<TransactionModel>(TRANSACTION_DB_NAME);
+    await Hive.openBox<TransactionModel>(TRANSACTION_DB_NAME);
     List<TransactionModel> dateFilterList = [];
 
     if (selectedCatogory == "Income") {
       dateFilterList = TransactionDb.values
           .where((element) =>
-              element.categoryType == CategoryType.income &&
-              DateTime.parse(element.date)
-                  .isAfter(start.subtract(const Duration(days: 1))) &&
-              DateTime.parse(element.date).isBefore(
-                end.add(
-                  const Duration(days: 1),
-                ),
-              ))
+      element.categoryType == CategoryType.income &&
+          DateTime.parse(element.date)
+              .isAfter(start.subtract(const Duration(days: 1))) &&
+          DateTime.parse(element.date).isBefore(
+            end.add(
+              const Duration(days: 1),
+            ),
+          ))
           .toList()
         ..sort((first, second) => second.date.compareTo(first.date));
     } else if (selectedCatogory == "Expense") {
       dateFilterList = TransactionDb.values
           .where((element) =>
-              element.categoryType == CategoryType.expense &&
-              DateTime.parse(element.date)
-                  .isAfter(start.subtract(const Duration(days: 1))) &&
-              DateTime.parse(element.date).isBefore(
-                end.add(
-                  const Duration(days: 1),
-                ),
-              ))
+      element.categoryType == CategoryType.expense &&
+          DateTime.parse(element.date)
+              .isAfter(start.subtract(const Duration(days: 1))) &&
+          DateTime.parse(element.date).isBefore(
+            end.add(
+              const Duration(days: 1),
+            ),
+          ))
           .toList()
         ..sort((first, second) => second.date.compareTo(first.date));
     } else {
       dateFilterList = TransactionDb.values
           .where((element) =>
-              DateTime.parse(element.date)
-                  .isAfter(start.subtract(const Duration(days: 1))) &&
-              DateTime.parse(element.date).isBefore(
-                end.add(
-                  const Duration(days: 1),
-                ),
-              ))
+      DateTime.parse(element.date)
+          .isAfter(start.subtract(const Duration(days: 1))) &&
+          DateTime.parse(element.date).isBefore(
+            end.add(
+              const Duration(days: 1),
+            ),
+          ))
           .toList()
         ..sort((first, second) => second.date.compareTo(first.date));
     }
@@ -340,45 +342,45 @@ class TransactionDB implements TransactionDBFunctions {
 
   Future<void> filterForHome(DateTime start, DateTime end) async {
     final TransactionDb =
-        await Hive.openBox<TransactionModel>(TRANSACTION_DB_NAME);
+    await Hive.openBox<TransactionModel>(TRANSACTION_DB_NAME);
     List<TransactionModel> dateFilterList = [];
 
     if (selectedCatogory == "Income") {
       dateFilterList = TransactionDb.values
           .where((element) =>
-              element.categoryType == CategoryType.income &&
-              DateTime.parse(element.date)
-                  .isAfter(start.subtract(const Duration(days: 1))) &&
-              DateTime.parse(element.date).isBefore(
-                end.add(
-                  const Duration(days: 1),
-                ),
-              ))
+      element.categoryType == CategoryType.income &&
+          DateTime.parse(element.date)
+              .isAfter(start.subtract(const Duration(days: 1))) &&
+          DateTime.parse(element.date).isBefore(
+            end.add(
+              const Duration(days: 1),
+            ),
+          ))
           .toList()
         ..sort((first, second) => second.date.compareTo(first.date));
     } else if (selectedCatogory == "Expense") {
       dateFilterList = TransactionDb.values
           .where((element) =>
-              element.categoryType == CategoryType.expense &&
-              DateTime.parse(element.date)
-                  .isAfter(start.subtract(const Duration(days: 1))) &&
-              DateTime.parse(element.date).isBefore(
-                end.add(
-                  const Duration(days: 1),
-                ),
-              ))
+      element.categoryType == CategoryType.expense &&
+          DateTime.parse(element.date)
+              .isAfter(start.subtract(const Duration(days: 1))) &&
+          DateTime.parse(element.date).isBefore(
+            end.add(
+              const Duration(days: 1),
+            ),
+          ))
           .toList()
         ..sort((first, second) => second.date.compareTo(first.date));
     } else {
       dateFilterList = TransactionDb.values
           .where((element) =>
-              DateTime.parse(element.date)
-                  .isAfter(start.subtract(const Duration(days: 1))) &&
-              DateTime.parse(element.date).isBefore(
-                end.add(
-                  const Duration(days: 1),
-                ),
-              ))
+      DateTime.parse(element.date)
+          .isAfter(start.subtract(const Duration(days: 1))) &&
+          DateTime.parse(element.date).isBefore(
+            end.add(
+              const Duration(days: 1),
+            ),
+          ))
           .toList()
         ..sort((first, second) => second.date.compareTo(first.date));
     }
@@ -389,8 +391,22 @@ class TransactionDB implements TransactionDBFunctions {
 }
 
 CollectionReference transactions =
-    FirebaseFirestore.instance.collection('transactions');
+FirebaseFirestore.instance.collection('transactions');
 
+Future<String> getTransactionFilePath(int transactionId) async {
+  try {
+
+    Directory appDocDir = await getApplicationDocumentsDirectory();
+    String fileName = 'transaction_$transactionId.txt';
+    String filePath = '${appDocDir.path}/$fileName';
+
+    return filePath;
+  } catch (e) {
+
+    print('Error getting transaction file path: $e');
+    return '';
+  }
+}
 
 
 class HiveFirestoreBackupData {
@@ -415,16 +431,24 @@ class HiveFirestoreBackupData {
 
   static Future<List<TransactionModel>> getAllTransactions() async {
     final transactionDB =
-        await Hive.openBox<TransactionModel>(TRANSACTION_DB_NAME);
+    await Hive.openBox<TransactionModel>(TRANSACTION_DB_NAME);
     return transactionDB.values.toList();
   }
 
   static Future<void> _backupTransactionsToFirestore(
       List<TransactionModel> transactionList, String email) async {
     try {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
       for (var transaction in transactionList) {
         CategoryModel category = transaction.category;
+        String? filePath;
+
+        if (transaction.id != null) {
+          filePath = await getTransactionFilePath(transaction.id!);
+          await _saveTransactionToFile(transaction, filePath); // Save transaction to file
+        } else {
+          print('Transaction ID is null.');
+        }
+
         var firestoreData = {
           'email': email,
           'id': transaction.id,
@@ -438,13 +462,9 @@ class HiveFirestoreBackupData {
             'isDeleted': category.isDeleted,
             'categoryType': category.categoryType.name,
           },
-          // 'category': transaction.category.name,
           'note': transaction.note,
+          'file': filePath, // Include file path in firestoreData
         };
-        Set<String> savedIds =
-            prefs.getStringList('saved_transaction_ids')?.toSet() ?? {};
-        savedIds.add(transaction.id.toString());
-        await prefs.setStringList('saved_transaction_ids', savedIds.toList());
 
         await firestore
             .collection('transactions')
@@ -453,14 +473,44 @@ class HiveFirestoreBackupData {
             .doc(transaction.id.toString())
             .set(firestoreData);
       }
-      Get.snackbar('Success', 'Data Stored successFully!',backgroundColor: Colors.green,colorText: AppTheme.white);
-
+      Get.snackbar('Success', 'Data Stored successfully!',backgroundColor: Colors.green,colorText: AppTheme.white);
     } catch (e) {
-      Get.snackbar('Success', 'Sorry, Something went wrong!',backgroundColor: Colors.red,colorText: AppTheme.white);
-
+      Get.snackbar('Error', 'Sorry, Something went wrong!',backgroundColor: Colors.red,colorText: AppTheme.white);
       print('Error backing up transactions: $e');
     }
   }
+
+static Future<void> _saveTransactionToFile(TransactionModel transaction, String filePath) async {
+  try {
+    // Convert transaction object to a Map
+    final transactionData = {
+      'id': transaction.id,
+      'date': transaction.date,
+      'amount': transaction.amount,
+      'account': transaction.account.name,
+      'categoryType': transaction.categoryType.name,
+      'category': {
+        'id': transaction.category.id,
+        'name': transaction.category.name,
+        'isDeleted': transaction.category.isDeleted,
+        'categoryType': transaction.category.categoryType.name,
+      },
+      'note': transaction.note,
+      'image': transaction.image,
+    };
+
+    // Convert the Map to a JSON string
+    final jsonString = jsonEncode(transactionData);
+
+    // Write the JSON string to the file
+    final file = File(filePath);
+    await file.writeAsString(jsonString);
+  } catch (e) {
+    print('Error saving transaction to file: $e');
+  }
+}
+
+
 }
 
 Future<dynamic> signInWithGoogle() async {
@@ -468,7 +518,7 @@ Future<dynamic> signInWithGoogle() async {
     final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
 
     final GoogleSignInAuthentication? googleAuth =
-        await googleUser?.authentication;
+    await googleUser?.authentication;
 
     final credential = GoogleAuthProvider.credential(
       accessToken: googleAuth?.accessToken,

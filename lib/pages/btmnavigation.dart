@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:pokercat/addexpense/db/functions/transaction_function.dart';
+import 'package:pokercat/imports.dart';
 import 'package:pokercat/pages/app_settings_screen/app_settings_screen.dart';
 
 
@@ -61,7 +62,7 @@ class _BtmNaviState extends State<BtmNavi> {
                     final UserCredential userCredential = await signInWithGoogle();
                     final String userEmail = userCredential.user!.email.toString();
                     await FirebaseBackupDataRetrieval1.getUserTransactionsAndStore();
-                    Navigator.of(context).pop();
+                   Get.back();
                   },
                   child: const Text('Yes'),
                 ),

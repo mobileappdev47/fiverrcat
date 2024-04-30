@@ -255,133 +255,135 @@ class _AppSettingsScreenState extends State<AppSettingsScreen> {
                           if (user != null) {
                             loader = false;
                             setState(() {});
+                            Get.to(BackUpScreen());
 
-                            showDialog(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return StatefulBuilder(
-                                  builder: (context, update) {
-                                    return AlertDialog(
-                                      title: const Text('Backup Data'),
-                                      content: const Text(
-                                          'Are you sure you want to back up your data?'),
-                                      actions: <Widget>[
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            TextButton(
-                                              onPressed: () async {
-                                                Navigator.of(context).pop();
-                                                try {
-                                                  loader = true;
-                                                  setState(() {});
-                                                  update.call(
-                                                    () {},
-                                                  );
-                                                  await HiveFirestoreBackupData
-                                                      .backupDataToFirestore(
-                                                          user!.email);
-                                                  loader = false;
-                                                  setState(() {});
-                                                  update.call(
-                                                    () {},
-                                                  );
-                                                } catch (e) {
-                                                  loader = false;
-                                                  setState(() {});
-                                                  update.call(
-                                                    () {},
-                                                  );
-                                                  print(e.toString());
-                                                }
-                                              },
-                                              child: const Text('Yes'),
-                                            ),
-                                            TextButton(
-                                              onPressed: () {
-                                                loader = false;
-                                                setState(() {});
-                                                update.call(
-                                                  () {},
-                                                );
-                                                Navigator.of(context).pop();
-                                              },
-                                              child: const Text('No'),
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                    );
-                                  },
-                                );
-                              },
-                            );
+                            // showDialog(
+                            //   context: context,
+                            //   builder: (BuildContext context) {
+                            //     return StatefulBuilder(
+                            //       builder: (context, update) {
+                            //         return AlertDialog(
+                            //           title: const Text('Backup Data'),
+                            //           content: const Text(
+                            //               'Are you sure you want to back up your data?'),
+                            //           actions: <Widget>[
+                            //             Row(
+                            //               mainAxisAlignment:
+                            //                   MainAxisAlignment.spaceBetween,
+                            //               children: [
+                            //                 TextButton(
+                            //                   onPressed: () async {
+                            //                     Navigator.of(context).pop();
+                            //                     try {
+                            //                       loader = true;
+                            //                       setState(() {});
+                            //                       update.call(
+                            //                         () {},
+                            //                       );
+                            //                       await HiveFirestoreBackupData
+                            //                           .backupDataToFirestore(
+                            //                               user!.email);
+                            //                       loader = false;
+                            //                       setState(() {});
+                            //                       update.call(
+                            //                         () {},
+                            //                       );
+                            //                     } catch (e) {
+                            //                       loader = false;
+                            //                       setState(() {});
+                            //                       update.call(
+                            //                         () {},
+                            //                       );
+                            //                       print(e.toString());
+                            //                     }
+                            //                   },
+                            //                   child: const Text('Yes'),
+                            //                 ),
+                            //                 TextButton(
+                            //                   onPressed: () {
+                            //                     loader = false;
+                            //                     setState(() {});
+                            //                     update.call(
+                            //                       () {},
+                            //                     );
+                            //                     Navigator.of(context).pop();
+                            //                   },
+                            //                   child: const Text('No'),
+                            //                 ),
+                            //               ],
+                            //             ),
+                            //           ],
+                            //         );
+                            //       },
+                            //     );
+                            //   },
+                            // );
                           } else {
                             await signInWithGoogle().then((value) {
-                              var user1 = FirebaseAuth.instance.currentUser;
-                              showDialog(
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return StatefulBuilder(
-                                    builder: (context, update) {
-                                      return AlertDialog(
-                                        title: const Text('Backup Data'),
-                                        content: const Text(
-                                            'Are you sure you want to back up your data?'),
-                                        actions: <Widget>[
-                                          Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              TextButton(
-                                                onPressed: () async {
-                                                  Navigator.of(context).pop();
-                                                  try {
-                                                    loader = true;
-                                                    setState(() {});
-                                                    update.call(
-                                                      () {},
-                                                    );
-                                                    await HiveFirestoreBackupData
-                                                        .backupDataToFirestore(
-                                                            user1!.email);
-                                                    loader = false;
-                                                    setState(() {});
-                                                    update.call(
-                                                      () {},
-                                                    );
-                                                  } catch (e) {
-                                                    loader = false;
-                                                    setState(() {});
-                                                    update.call(
-                                                      () {},
-                                                    );
-                                                    print(e.toString());
-                                                  }
-                                                },
-                                                child: const Text('Yes'),
-                                              ),
-                                              TextButton(
-                                                onPressed: () {
-                                                  loader = false;
-                                                  setState(() {});
-                                                  update.call(
-                                                    () {},
-                                                  );
-
-                                                  Navigator.of(context).pop();
-                                                },
-                                                child: const Text('No'),
-                                              ),
-                                            ],
-                                          ),
-                                        ],
-                                      );
-                                    },
-                                  );
-                                },
-                              );
+                              Get.to(BackUpScreen());
+                             // var user1 = FirebaseAuth.instance.currentUser;
+                              // showDialog(
+                              //   context: context,
+                              //   builder: (BuildContext context) {
+                              //     return StatefulBuilder(
+                              //       builder: (context, update) {
+                              //         return AlertDialog(
+                              //           title: const Text('Backup Data'),
+                              //           content: const Text(
+                              //               'Are you sure you want to back up your data?'),
+                              //           actions: <Widget>[
+                              //             Row(
+                              //               mainAxisAlignment:
+                              //                   MainAxisAlignment.spaceBetween,
+                              //               children: [
+                              //                 TextButton(
+                              //                   onPressed: () async {
+                              //                     Navigator.of(context).pop();
+                              //                     try {
+                              //                       loader = true;
+                              //                       setState(() {});
+                              //                       update.call(
+                              //                         () {},
+                              //                       );
+                              //                       await HiveFirestoreBackupData
+                              //                           .backupDataToFirestore(
+                              //                               user1!.email);
+                              //                       loader = false;
+                              //                       setState(() {});
+                              //                       update.call(
+                              //                         () {},
+                              //                       );
+                              //                     } catch (e) {
+                              //                       loader = false;
+                              //                       setState(() {});
+                              //                       update.call(
+                              //                         () {},
+                              //                       );
+                              //                       print(e.toString());
+                              //                     }
+                              //                   },
+                              //                   child: const Text('Yes'),
+                              //                 ),
+                              //                 TextButton(
+                              //                   onPressed: () {
+                              //                     loader = false;
+                              //                     setState(() {});
+                              //                     update.call(
+                              //                       () {},
+                              //                     );
+                              //
+                              //                     Navigator.of(context).pop();
+                              //                   },
+                              //                   child: const Text('No'),
+                              //                 ),
+                              //               ],
+                              //             ),
+                              //           ],
+                              //         );
+                              //       },
+                              //     );
+                              //   },
+                              // );
                             });
                           }
                         } catch (e) {
