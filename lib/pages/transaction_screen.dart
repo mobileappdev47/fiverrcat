@@ -233,7 +233,6 @@ class _TransactionScreenState extends State<TransactionScreen> {
                                 //   });
                                 // }
 
-
                               },
                               child: SizedBox(
                                 width : 85,
