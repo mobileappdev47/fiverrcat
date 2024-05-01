@@ -356,10 +356,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
               height: 400,
               child: SfCalendar(
                 viewHeaderStyle: const ViewHeaderStyle(
-                  dayTextStyle: TextStyle(
-                    color: Colors.white
-                  )
-                ),
+                    dayTextStyle: TextStyle(color: Colors.white)),
                 headerHeight: 0,
                 controller: _calendarController,
                 appointmentBuilder: (context, calendarAppointmentDetails) {
@@ -368,20 +365,22 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   final Meeting meeting =
                       calendarAppointmentDetails.appointments.last;
 
-                  return SizedBox(
-                    width: 10,
-                    child: Center(
+                  return Center(
                       child: Text(
-                        meeting.eventName,
-                        style: TextStyle(
-                          color: meeting.background,
-                          fontSize: meeting.eventName.length <= 16 ? 7 : 5,
-                        ),
-                        overflow: TextOverflow.visible,
-                        maxLines: 1,
-                      ),
+                    meeting.eventName,
+                    style: TextStyle(
+                      color: meeting.background,
+                      fontSize: meeting.eventName.length <= 11
+                          ? 8
+                          : meeting.eventName.length <= 12
+                              ? 7
+                              : meeting.eventName.length <= 13
+                                  ? 6
+                                  : 4.2,
                     ),
-                  );
+                    overflow: TextOverflow.visible,
+                    maxLines: 1,
+                  ));
                 },
                 todayTextStyle: const TextStyle(color: Colors.black),
                 monthViewSettings: const MonthViewSettings(
@@ -395,7 +394,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
                       fontSize: 14,
                     ),
                   ),
-
                 ),
 
                 onViewChanged: (viewChangedDetails) async {

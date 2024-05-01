@@ -17,25 +17,14 @@ import 'addexpense/db/models/category/category_model_db.dart';
 import 'addexpense/db/models/currency/curency_model.db.dart';
 import 'global/component/preferences.dart';
 import 'imports.dart';
-void callbackDispatcher() {
-  Workmanager().executeTask((task, inputData) {
-    backupDataToFirestore();
-    return Future.value(true);
-  });
-}
+
+
+
+
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  Workmanager().initialize(
-    callbackDispatcher,
-    isInDebugMode: true,
-  );
-  Workmanager().registerPeriodicTask(
-    "dataBackupTask",
-    "dataBackupTask",
-    frequency: Duration(seconds: 5),
-  );
- // startAutomaticBackup();
+
   await Firebase.initializeApp(
       // options: const FirebaseOptions(
       //     apiKey: "AIzaSyC3kRFtnws7FCGiXS7dpKjwm1XIpz5FZPA",
@@ -45,6 +34,18 @@ Future<void> main() async {
       //     storageBucket: "pokercat-77864.appspot.com"),
       );
   await Hive.initFlutter();
+
+  Workmanager().initialize(callbackDispatcher, isInDebugMode: true);
+  Workmanager().registerPeriodicTask(
+    'backup',
+    'backupTask',
+    frequency: Duration(seconds: 2), // Adjust frequency as needed
+  );
+  Workmanager().registerPeriodicTask(
+    'fetch',
+    'fetchTask',
+    frequency: Duration(seconds: 2), // Adjust frequency as needed
+  );
 
   if (!Hive.isAdapterRegistered(CategoryTypeAdapter().typeId)) {
     Hive.registerAdapter(CategoryTypeAdapter());
