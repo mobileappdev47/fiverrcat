@@ -39,6 +39,7 @@ dependencies:
   flutter_screenutil: ^5.9.0
   lottie: ^1.4.2
   page_transition: ^2.0.9
+  workmanager:
   firebase_core_platform_interface: ^5.0.0 #나중에 지루지워
   equatable: any
   firebase_auth: any

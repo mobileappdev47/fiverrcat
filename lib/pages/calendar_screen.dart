@@ -355,7 +355,11 @@ class _CalendarScreenState extends State<CalendarScreen> {
             SizedBox(
               height: 400,
               child: SfCalendar(
-                viewHeaderHeight: 0,
+                viewHeaderStyle: const ViewHeaderStyle(
+                  dayTextStyle: TextStyle(
+                    color: Colors.white
+                  )
+                ),
                 headerHeight: 0,
                 controller: _calendarController,
                 appointmentBuilder: (context, calendarAppointmentDetails) {
@@ -363,16 +367,19 @@ class _CalendarScreenState extends State<CalendarScreen> {
                       calendarAppointmentDetails.appointments.first.background);
                   final Meeting meeting =
                       calendarAppointmentDetails.appointments.last;
+
                   return SizedBox(
                     width: 10,
-                    child: Text(
-                      meeting.eventName,
-                      style: TextStyle(
-                        color: meeting.background,
-                        fontSize: meeting.eventName.length <= 11 ? 6 : 4,
+                    child: Center(
+                      child: Text(
+                        meeting.eventName,
+                        style: TextStyle(
+                          color: meeting.background,
+                          fontSize: meeting.eventName.length <= 16 ? 7 : 5,
+                        ),
+                        overflow: TextOverflow.visible,
+                        maxLines: 1,
                       ),
-                      overflow: TextOverflow.visible,
-                      maxLines: 1,
                     ),
                   );
                 },
@@ -388,6 +395,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                       fontSize: 14,
                     ),
                   ),
+
                 ),
 
                 onViewChanged: (viewChangedDetails) async {
@@ -420,9 +428,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 },
 
                 onSelectionChanged: (selectionDetails) {
-                  // if (selectionDetails.selectedDate != null) {
-                  //   selectedDate1.value = selectionDetails.selectedDate!;
-                  // }
                   final DateTime selectedDay =
                       selectionDetails.date ?? DateTime.now();
                   final DateTime focusedDay =

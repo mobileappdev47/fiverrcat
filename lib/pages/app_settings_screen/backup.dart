@@ -1,9 +1,14 @@
+import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:pokercat/addexpense/db/functions/transaction_function.dart';
+import 'package:pokercat/addexpense/db/models/transactions/transaction_model_db.dart';
 import 'package:pokercat/imports.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+
 
 class BackUpScreen extends StatefulWidget {
   BackUpScreen({super.key});
@@ -22,21 +27,10 @@ class _BackUpScreenState extends State<BackUpScreen> {
     // TODO: implement initState
     super.initState();
     fetchFilePaths();
-   // loadBackupFrequency();
-    //  fetchFilePaths();
   }
-  // void loadBackupFrequency() async {
-  //   SharedPreferences prefs = await SharedPreferences.getInstance();
-  //   setState(() {
-  //     dropdownValue = (prefs.getInt('backupFrequency') ?? 1) as String; // Default to 1 day
-  //   });
-  // }
-  // void saveBackupFrequency(int frequency) async {
-  //   SharedPreferences prefs = await SharedPreferences.getInstance();
-  //   prefs.setInt('backupFrequency', frequency);
-  // }
+
+
   void bottomSheet(BuildContext context) {
-    GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     showModalBottomSheet(
       context: context,
       builder: (context) {
@@ -145,7 +139,7 @@ class _BackUpScreenState extends State<BackUpScreen> {
                       )),
                   Expanded(
                     child: FutureBuilder(
-                      future: fetchFilePaths(), // Function to fetch file paths
+                      future: fetchFilePaths(),
                       builder: (context, snapshot) {
                         if (snapshot.connectionState ==
                             ConnectionState.waiting) {
@@ -209,10 +203,10 @@ class _BackUpScreenState extends State<BackUpScreen> {
             Icons.backup,
             color: Colors.white,
           ),
-        colorText: Colors.white
-      );
+          colorText: Colors.white);
     });
   }
+
   List<String> filePaths = [];
 
   Future<List<String>> fetchFilePaths() async {
@@ -239,14 +233,13 @@ class _BackUpScreenState extends State<BackUpScreen> {
 
     return filePaths;
   }
+
   Map<String, List<String>> groupFilesByBackupDate() {
     Map<String, List<String>> groupedFiles = {};
 
     for (String filePath in filePaths) {
-      // Extract backup date from file path (assuming file path contains date information)
-      // Modify this logic based on your actual file path structure
-      String backupDate = '2024-04-30'; // Example backup date
-      // Add file path to corresponding backup date group
+      String backupDate = '2024-04-30';
+
       if (groupedFiles.containsKey(backupDate)) {
         groupedFiles[backupDate]!.add(filePath);
       } else {
@@ -256,7 +249,6 @@ class _BackUpScreenState extends State<BackUpScreen> {
 
     return groupedFiles;
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -289,7 +281,6 @@ class _BackUpScreenState extends State<BackUpScreen> {
               size: 30,
             ),
           ),
-
           const SizedBox(
             height: 10,
           ),
@@ -302,7 +293,7 @@ class _BackUpScreenState extends State<BackUpScreen> {
             height: 5,
           ),
           const Text(
-           'userEmail',
+            'userEmail',
             style: TextStyle(color: Colors.grey),
           ),
           const SizedBox(
@@ -386,5 +377,90 @@ class _BackUpScreenState extends State<BackUpScreen> {
         ],
       ),
     );
+  }
+}
+void startAutomaticBackup() {
+  const Duration backupInterval = const Duration(minutes: 2); // Backup every 24 hours
+  Timer.periodic(backupInterval, (Timer timer) async {
+    // Call the backup function
+    await backupAllTransactionsToFirestore();
+  });
+}
+
+
+Future<void> backupAllTransactionsToFirestore() async {
+  try {
+    // Retrieve all transactions from local storage or wherever they are stored
+    List<TransactionModel> transactionList = [];
+    // Fetch your transaction list
+
+    // Iterate over each transaction and backup to Firestore
+    for (var transaction in transactionList) {
+      String? filePath;
+
+      if (transaction.id != null) {
+        filePath = await getTransactionFilePath(transaction.id.toString());
+        await saveTransactionToFile(transaction, filePath);
+      } else {
+        print('Transaction ID is null.');
+      }
+      var firestoreData = {
+        'id': transaction.id,
+        'amount': transaction.amount,
+        'date': transaction.date,
+        'account': transaction.account.name,
+        'categoryType': transaction.categoryType.name,
+        'category': {
+          'id': transaction.category.id,
+          'name': transaction.category.name,
+          'isDeleted': transaction.category.isDeleted,
+          'categoryType': transaction.category.categoryType.name,
+        },
+        'note': transaction.note,
+        'file': filePath,
+        // Add other transaction properties as needed
+      };
+
+      // Store transaction data in Firestore
+      await FirebaseFirestore.instance
+          .collection('backup')
+          .doc(transaction.id.toString()) // Use transaction ID as document ID
+          .set(firestoreData);
+    }
+
+    print('All transactions backed up to Firestore successfully!');
+  } catch (e) {
+    print('Error backing up transactions to Firestore: $e');
+  }
+}
+
+Future<void> saveTransactionToFile(
+    TransactionModel transaction, String filePath) async {
+  try {
+// Convert transaction object to a Map
+    final transactionData = {
+      'id': transaction.id,
+      'date': transaction.date,
+      'amount': transaction.amount,
+      'account': transaction.account.name,
+      'categoryType': transaction.categoryType.name,
+      'category': {
+        'id': transaction.category.id,
+        'name': transaction.category.name,
+        'isDeleted': transaction.category.isDeleted,
+        'categoryType': transaction.category.categoryType.name,
+      },
+      'note': transaction.note,
+      'image': transaction.image,
+    };
+
+// Convert the Map to a JSON string
+    final jsonString = jsonEncode(transactionData);
+
+// Write the JSON string to the file
+    final file = File(filePath);
+    await file.writeAsString(jsonString);
+  } catch (e) {
+    print('Error saving transaction to file: $e');
   }
 }
