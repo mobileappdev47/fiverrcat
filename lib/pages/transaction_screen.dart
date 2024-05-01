@@ -216,13 +216,13 @@ class _TransactionScreenState extends State<TransactionScreen> {
 
                                 print("$firstDateOfMonth" + '$lastDateOfMonth');
 
-                                if (selectedYear <= DateTime.now().year) {
+                              //  if (selectedYear <= DateTime.now().year) {
                                   setState(() {
                                     indexAll = index;
                                     TransactionDB.instance.filterForHome(firstDateOfMonth, lastDateOfMonth);
                                     TransactionDB.instance.getTransactionsForCurrentMonth();
                                   });
-                                }
+                               // }
 
                                 // if (year != 2025) {
                                 //   setState(() {

@@ -1,6 +1,7 @@
 import 'package:flutter/scheduler.dart';
 import 'package:pokercat/calander.dart';
 import 'package:pokercat/imports.dart';
+import 'package:pokercat/pages/bankroll.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
@@ -54,17 +55,14 @@ class _CalendarScreenState extends State<CalendarScreen> {
     final Map<DateTime, double> totalAmountMap = {};
 
     var data = TransactionDB.instance.transactionListNotifier.value;
-
     // Calculate total amount for each date
     for (int i = 0; i < data.length; i++) {
       DateTime dateTime = DateTime.parse(data[i].date);
       double totalAmount = totalAmountMap[dateTime] ?? 0;
 
-      if(data[i].categoryType==CategoryType.income){
+      if (data[i].categoryType == CategoryType.income) {
         totalAmount += data[i].amount;
-
-      }
-      else {
+      } else {
         totalAmount -= data[i].amount;
       }
 
@@ -83,16 +81,12 @@ class _CalendarScreenState extends State<CalendarScreen> {
         amountText =
             '- ${currencySymboleUpdate.value} ${formatter.format(totalAmount.abs())}';
         colorM = Colors.red;
-        setState(() {
-        });
-
+        setState(() {});
       } else {
         amountText =
             '+ ${currencySymboleUpdate.value} ${formatter.format(totalAmount.abs())}';
         colorM = Colors.green;
-        setState(() {
-
-        });
+        setState(() {});
       }
 
       meetings.add(
@@ -111,21 +105,18 @@ class _CalendarScreenState extends State<CalendarScreen> {
     // Get.forceAppUpdate();
     return meetings;
   }
+
   _AppointmentDataSource _getCalendarDataSource() {
     List<Appointment> appointments = <Appointment>[];
     appointments.add(Appointment(
-
       startTime: DateTime.now(),
       endTime: DateTime.now().add(Duration(hours: 1)),
       subject: 'hy',
       color: Colors.pink,
-
-
     ));
 
     return _AppointmentDataSource(appointments);
   }
-
 
   // List<Meeting> _getDataSource() {
   //   final List<Meeting> meetings = <Meeting>[];
@@ -187,7 +178,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
       SelectDate().currentDateForCalenderSelection();
 
   DateTime myChosenDate = DateTime.now();
-  Color colorM=  Colors.green;
+  Color colorM = Colors.green;
 
   @override
   void initState() {
@@ -299,7 +290,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
   @override
   build(BuildContext context) {
-
     double incomeData = 0;
     double expenseData = 0;
 
@@ -312,6 +302,48 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
     getCurrency();
 
+    int getMonthIndex(String monthName) {
+      switch (monthName.toLowerCase()) {
+        case 'january':
+          return 1;
+        case 'february':
+          return 2;
+        case 'march':
+          return 3;
+        case 'april':
+          return 4;
+        case 'may':
+          return 5;
+        case 'june':
+          return 6;
+        case 'july':
+          return 7;
+        case 'august':
+          return 8;
+        case 'september':
+          return 9;
+        case 'october':
+          return 10;
+        case 'november':
+          return 11;
+        case 'december':
+          return 12;
+        default:
+          return -1; // Return -1 for invalid month names
+      }
+    }
+
+    List<String> months = [];
+    Future<void> filterDataForCurrentMonth(List<DateTime> visibleDates) async {
+      // Extract the start and end dates of the current month
+      DateTime startOfMonth =
+          DateTime(visibleDates[0].year, visibleDates[0].month, 1);
+      DateTime endOfMonth = DateTime(visibleDates[visibleDates.length - 1].year,
+          visibleDates[visibleDates.length - 1].month + 1, 0);
+
+      // Call your filter method with start and end dates
+      TransactionDB.instance.filterForHome(startOfMonth, endOfMonth);
+    }
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
@@ -321,51 +353,68 @@ class _CalendarScreenState extends State<CalendarScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             SizedBox(
-              height: 550,
+              height: 400,
               child: SfCalendar(
-                headerStyle: const CalendarHeaderStyle(
-                  textStyle: TextStyle(color: Colors.black),
+                viewHeaderStyle: const ViewHeaderStyle(
+                  dayTextStyle: TextStyle(
+                    color: Colors.white
+                  )
                 ),
+                headerHeight: 0,
                 controller: _calendarController,
                 appointmentBuilder: (context, calendarAppointmentDetails) {
                   print(
                       calendarAppointmentDetails.appointments.first.background);
                   final Meeting meeting =
                       calendarAppointmentDetails.appointments.last;
+
                   return SizedBox(
                     width: 10,
-                    child: Text(
-                      meeting.eventName,
-                      style: TextStyle(
-                        color: meeting.background,
-                        fontSize: meeting.eventName.length <= 9 ? 9 : 9,
+                    child: Center(
+                      child: Text(
+                        meeting.eventName,
+                        style: TextStyle(
+                          color: meeting.background,
+                          fontSize: meeting.eventName.length <= 16 ? 7 : 5,
+                        ),
+                        overflow: TextOverflow.visible,
+                        maxLines: 1,
                       ),
-                      overflow: TextOverflow.visible,
-                      maxLines: 3,
                     ),
-
                   );
                 },
                 todayTextStyle: const TextStyle(color: Colors.black),
                 monthViewSettings: const MonthViewSettings(
-                  showTrailingAndLeadingDates: false ,
+                  dayFormat: 'EEE',
+                  showTrailingAndLeadingDates: false,
                   appointmentDisplayMode:
                       MonthAppointmentDisplayMode.appointment,
                   monthCellStyle: MonthCellStyle(
                     textStyle: TextStyle(
                       color: Colors.white,
-                      fontSize: 10,
+                      fontSize: 14,
                     ),
                   ),
+
                 ),
 
-                onViewChanged: (viewChangedDetails) {
-
+                onViewChanged: (viewChangedDetails) async {
+                  selectedDate1.value = viewChangedDetails.visibleDates[0];
                   SchedulerBinding.instance!
                       .addPostFrameCallback((Duration duration) {
                     _calendarController.selectedDate =
                         viewChangedDetails.visibleDates[0];
                   });
+                  if (viewChangedDetails.visibleDates.isNotEmpty) {
+                    DateTime currentVisibleMonth =
+                        viewChangedDetails.visibleDates[0];
+                    int previousVisibleMonth = DateTime.now().month;
+                    await filterDataForCurrentMonth(
+                        viewChangedDetails.visibleDates);
+                    setState(() {
+                      previousVisibleMonth = currentVisibleMonth.month;
+                    });
+                  }
                   if (click) {
                     final DateTime firstVisibleDate =
                         viewChangedDetails.visibleDates.first;
@@ -377,6 +426,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     click = true;
                   }
                 },
+
                 onSelectionChanged: (selectionDetails) {
                   final DateTime selectedDay =
                       selectionDetails.date ?? DateTime.now();
@@ -469,6 +519,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
               ),
             ),
             //---------------------
+
             ValueListenableBuilder(
               valueListenable:
                   TransactionDB.instance.transactionMonthListNotifier,
@@ -542,6 +593,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 );
               },
             ),
+
             //  ---------------table calendar event 날짜클릭시 보이는 event 부분 패키지 예시부분임 ---------------
             // Expanded(
             //   child: ValueListenableBuilder<List<Event>>(
@@ -697,12 +749,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                                           .removeAt(index)
                                                           .length;
                                                     });
-                                                    await   TransactionDB.instance.refresh();
-                                                    setState(() {
-
-                                                    });
+                                                    await TransactionDB.instance
+                                                        .refresh();
+                                                    setState(() {});
                                                     Get.forceAppUpdate();
-
                                                   },
                                                   icon: const Icon(
                                                       Icons.delete_forever,
@@ -796,7 +846,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
         ),
       ),
     );
-
   }
 
   // resetTransactionsOnly(value, id) {
@@ -887,24 +936,18 @@ class _CalendarScreenState extends State<CalendarScreen> {
             actions: [
               TextButton(
                 onPressed: () async {
-
-                    final transactionDB = await Hive.openBox<TransactionModel>(
-                        TRANSACTION_DB_NAME);
-                    for (var transaction in transactions) {
-                      transactionDB.delete(transaction.id);
-                    }
-                    update.call(
-                      () {},
-                    );
-                  await  TransactionDB.instance
-                        .refresh();
-                  setState(() {
-
-
-                  });
+                  final transactionDB =
+                      await Hive.openBox<TransactionModel>(TRANSACTION_DB_NAME);
+                  for (var transaction in transactions) {
+                    transactionDB.delete(transaction.id);
+                  }
+                  update.call(
+                    () {},
+                  );
+                  await TransactionDB.instance.refresh();
+                  setState(() {});
                   // Refresh the transaction list
-                    Navigator.of(context).pop();
-
+                  Navigator.of(context).pop();
                 },
                 child: const Text(
                   'Yes',
@@ -926,7 +969,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   ),
                 ),
               ),
-
             ],
           ),
         );

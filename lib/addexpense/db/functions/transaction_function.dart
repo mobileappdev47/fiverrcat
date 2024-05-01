@@ -1,6 +1,7 @@
-// ignore_for_file: invalid_use_of_visible_for_testing_member, invalid_use_of_protected_member, non_constant_identifier_names
-
+import 'dart:async';
+import 'dart:convert';
 import 'dart:core';
+import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -13,6 +14,8 @@ import 'package:pokercat/addexpense/db/functions/account_group_function.dart';
 import 'package:pokercat/addexpense/db/models/account_group/account_group_model_db.dart';
 import 'package:pokercat/constant.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:workmanager/workmanager.dart';
 
 import '../models/category/category_model_db.dart';
 import '../models/transactions/transaction_model_db.dart';
@@ -391,7 +394,18 @@ class TransactionDB implements TransactionDBFunctions {
 CollectionReference transactions =
     FirebaseFirestore.instance.collection('transactions');
 
+Future<String> getTransactionFilePath(String transactionId) async {
+  try {
+    Directory appDocDir = await getApplicationDocumentsDirectory();
+    String fileName = 'transaction_$transactionId.txt';
+    String filePath = '${appDocDir.path}/$fileName';
 
+    return filePath;
+  } catch (e) {
+    print('Error getting transaction file path: $e');
+    return '';
+  }
+}
 
 class HiveFirestoreBackupData {
   static const String TRANSACTION_DB_NAME = 'transaction-db';
@@ -404,7 +418,6 @@ class HiveFirestoreBackupData {
       if (user != null) {
         var transactionList = await getAllTransactions();
         await _backupTransactionsToFirestore(transactionList, user.email!);
-
       } else {
         print('User is not authenticated. Cannot backup transactions.');
       }
@@ -422,9 +435,18 @@ class HiveFirestoreBackupData {
   static Future<void> _backupTransactionsToFirestore(
       List<TransactionModel> transactionList, String email) async {
     try {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
       for (var transaction in transactionList) {
         CategoryModel category = transaction.category;
+        String? filePath;
+
+        if (transaction.id != null) {
+          filePath = await getTransactionFilePath(transaction.id.toString());
+          await _saveTransactionToFile(
+              transaction, filePath); // Save transaction to file
+        } else {
+          print('Transaction ID is null.');
+        }
+
         var firestoreData = {
           'email': email,
           'id': transaction.id,
@@ -438,13 +460,9 @@ class HiveFirestoreBackupData {
             'isDeleted': category.isDeleted,
             'categoryType': category.categoryType.name,
           },
-          // 'category': transaction.category.name,
           'note': transaction.note,
+          'file': filePath, // Include file path in firestoreData
         };
-        Set<String> savedIds =
-            prefs.getStringList('saved_transaction_ids')?.toSet() ?? {};
-        savedIds.add(transaction.id.toString());
-        await prefs.setStringList('saved_transaction_ids', savedIds.toList());
 
         await firestore
             .collection('transactions')
@@ -453,12 +471,64 @@ class HiveFirestoreBackupData {
             .doc(transaction.id.toString())
             .set(firestoreData);
       }
-      Get.snackbar('Success', 'Data Stored successFully!',backgroundColor: Colors.green,colorText: AppTheme.white);
-
+      Get.snackbar('Success', 'Data Stored successfully!',
+          backgroundColor: Colors.green, colorText: AppTheme.white);
     } catch (e) {
-      Get.snackbar('Success', 'Sorry, Something went wrong!',backgroundColor: Colors.red,colorText: AppTheme.white);
-
+      Get.snackbar('Error', 'Sorry, Something went wrong!',
+          backgroundColor: Colors.red, colorText: AppTheme.white);
       print('Error backing up transactions: $e');
+    }
+    Future<List<String>> fetchFilePaths() async {
+      List<String> filePaths = [];
+
+      try {
+        QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+            .collection('transactions')
+            .doc(email)
+            .collection('user_transactions')
+            .get();
+
+        querySnapshot.docs.forEach((doc) {
+          Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+          String filePath = data['file'];
+          filePaths.add(filePath);
+        });
+      } catch (e) {
+        print('Error fetching file paths: $e');
+      }
+
+      return filePaths;
+    }
+  }
+
+  static Future<void> _saveTransactionToFile(
+      TransactionModel transaction, String filePath) async {
+    try {
+      // Convert transaction object to a Map
+      final transactionData = {
+        'id': transaction.id,
+        'date': transaction.date,
+        'amount': transaction.amount,
+        'account': transaction.account.name,
+        'categoryType': transaction.categoryType.name,
+        'category': {
+          'id': transaction.category.id,
+          'name': transaction.category.name,
+          'isDeleted': transaction.category.isDeleted,
+          'categoryType': transaction.category.categoryType.name,
+        },
+        'note': transaction.note,
+        'image': transaction.image,
+      };
+
+      // Convert the Map to a JSON string
+      final jsonString = jsonEncode(transactionData);
+
+      // Write the JSON string to the file
+      final file = File(filePath);
+      await file.writeAsString(jsonString);
+    } catch (e) {
+      print('Error saving transaction to file: $e');
     }
   }
 }
@@ -482,7 +552,6 @@ Future<dynamic> signInWithGoogle() async {
   }
 }
 
-
 class FirebaseBackupDataRetrieval1 {
   static FirebaseFirestore firestore = FirebaseFirestore.instance;
   static FirebaseAuth auth = FirebaseAuth.instance;
@@ -498,20 +567,22 @@ class FirebaseBackupDataRetrieval1 {
             .doc(authEmail)
             .collection('user_transactions');
 
-        QuerySnapshot transactionSnapshots = await userTransactionsCollection.get();
+        QuerySnapshot transactionSnapshots =
+            await userTransactionsCollection.get();
 
-
-        for (DocumentSnapshot transactionSnapshot in transactionSnapshots.docs) {
+        for (DocumentSnapshot transactionSnapshot
+            in transactionSnapshots.docs) {
           String transactionId = transactionSnapshot.id;
 
-
           if (transactionSnapshot.exists) {
-            Map<String, dynamic>? data = transactionSnapshot.data()
-            as Map<String, dynamic>?;
+            Map<String, dynamic>? data =
+                transactionSnapshot.data() as Map<String, dynamic>?;
 
             if (data != null) {
-
-              CategoryType getCategoryTypeFromString(String categoryTypeString) {
+              String filePath = await getTransactionFilePath(transactionId);
+              print('File path for transaction $transactionId: $filePath');
+              CategoryType getCategoryTypeFromString(
+                  String categoryTypeString) {
                 switch (categoryTypeString.toLowerCase()) {
                   case 'income':
                     return CategoryType.income;
@@ -525,8 +596,7 @@ class FirebaseBackupDataRetrieval1 {
               dynamic categoryTypeData = data['categoryType'];
               if (categoryTypeData is String) {
                 CategoryType categoryType =
-                getCategoryTypeFromString(categoryTypeData);
-
+                    getCategoryTypeFromString(categoryTypeData);
 
                 Map<String, dynamic> categoryData = data['category'];
                 CategoryModel category = CategoryModel(
@@ -534,7 +604,7 @@ class FirebaseBackupDataRetrieval1 {
                   name: categoryData['name'],
                   isDeleted: categoryData['isDeleted'],
                   categoryType:
-                  getCategoryTypeFromString(categoryData['categoryType']),
+                      getCategoryTypeFromString(categoryData['categoryType']),
                 );
 
                 TransactionModel transaction = TransactionModel(
@@ -562,5 +632,29 @@ class FirebaseBackupDataRetrieval1 {
       print('Error getting user transactions and storing: $e');
     }
   }
+}
 
+
+
+
+/// backup auto---------------------------------------
+
+void backupDataToFirestore() async {
+  FirebaseAuth auth = FirebaseAuth.instance;
+  try {
+    User? user = auth.currentUser;
+    if (user != null) {
+      // Fetch data from Hive
+      List<TransactionModel> transactionList = await HiveFirestoreBackupData.getAllTransactions();
+
+      // Upload data to Firestore
+      await HiveFirestoreBackupData.backupDataToFirestore(user.email!);
+
+      print('Data backed up to Firestore successfully!');
+    } else {
+      print('User is not authenticated. Cannot backup data to Firestore.');
+    }
+  } catch (e) {
+    print('Error backing up data to Firestore: $e');
+  }
 }

@@ -6,18 +6,36 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:pokercat/addexpense/db/functions/category_functions.dart';
+import 'package:pokercat/addexpense/db/functions/transaction_function.dart';
 import 'package:pokercat/addexpense/db/models/account_group/account_group_model_db.dart';
 import 'package:pokercat/addexpense/db/models/transactions/transaction_model_db.dart';
 import 'package:pokercat/pages/app_settings_screen/income_category_settings/app_default.dart';
 import 'package:pokercat/pages/app_settings_screen/income_category_settings/income_category_provider.dart';
 import 'package:pokercat/pages/btmnavigation.dart';
+import 'package:workmanager/workmanager.dart';
 import 'addexpense/db/models/category/category_model_db.dart';
 import 'addexpense/db/models/currency/curency_model.db.dart';
 import 'global/component/preferences.dart';
 import 'imports.dart';
+void callbackDispatcher() {
+  Workmanager().executeTask((task, inputData) {
+    backupDataToFirestore();
+    return Future.value(true);
+  });
+}
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  Workmanager().initialize(
+    callbackDispatcher,
+    isInDebugMode: true,
+  );
+  Workmanager().registerPeriodicTask(
+    "dataBackupTask",
+    "dataBackupTask",
+    frequency: Duration(seconds: 5),
+  );
+ // startAutomaticBackup();
   await Firebase.initializeApp(
       // options: const FirebaseOptions(
       //     apiKey: "AIzaSyC3kRFtnws7FCGiXS7dpKjwm1XIpz5FZPA",

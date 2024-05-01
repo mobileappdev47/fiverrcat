@@ -24,6 +24,9 @@ import '../global/component/appbar.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:pokercat/addexpense/db/functions/currency_function.dart';
 
+
+final ValueNotifier<DateTime> selectedDate1 = ValueNotifier(DateTime.now());
+
 class Bankroll extends StatefulWidget {
   const Bankroll({super.key, this.modelFromTransation});
 
@@ -215,9 +218,28 @@ class _BankrollState extends State<Bankroll> {
     getAllAccountGroup();
     accountGroupBalanceAmount();
 
+
+
     return Scaffold(
-      appBar: Appbar(
-        titleStr: 'Bankroll',
+      appBar: AppBar(
+        backgroundColor: Colors.black,
+        foregroundColor: Colors.white,
+       title: ValueListenableBuilder<DateTime>(
+         valueListenable: selectedDate1,
+         builder: (context, selectedDate, _) {
+           String monthName = DateFormat('MMMM').format(selectedDate);
+           int year = selectedDate.year;
+           return Text(
+               '$monthName $year',
+             style: TextStyle(
+               fontSize: 20, // Adjust the font size as needed
+               fontWeight: FontWeight.bold, // Optionally, adjust the font weight
+             ),
+           );
+         },
+       ),
+       // title: Text(_getAppBarTitle()),
+       // titleStr: 'Bankroll',
         actions: <Widget>[
           Row(
             children: [
