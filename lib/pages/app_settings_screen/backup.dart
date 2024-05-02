@@ -138,73 +138,87 @@ class _BackUpScreenState extends State<BackUpScreen> {
                         ),
                       )),
                   Expanded(
-                    child: FutureBuilder(
-                      future: fetchFilePaths(),
+                    child:/*StreamBuilder<DocumentSnapshot>(
+                      stream: FirebaseFirestore.instance.collection('transactions').doc('janki.brainbinary@gmail.com').snapshots(),
                       builder: (context, snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return const Center(
-                            child: CircularProgressIndicator(),
-                          );
-                        } else if (snapshot.hasError) {
-                          return Center(
-                            child: Text('Error: ${snapshot.error}'),
-                          );
-                        } else {
-                          // Display file paths using ListView.builder
+                        if (snapshot.hasData) {
                           return ListView.builder(
-                            itemCount: snapshot.data!.length,
-                            itemBuilder: (BuildContext context, int index) {
-                              String filePath = snapshot.data![index];
-                              return Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Card(
-                                  color: Colors.black54,
-                                  elevation: 2,
-                                  child: ListTile(
-                                    leading: const Icon(
-                                      Icons.file_copy,
-                                      color: Colors.white,
-                                    ),
-                                    title: const Text(
-                                      'File Path',
-                                      style: TextStyle(color: Colors.white),
-                                    ),
-                                    subtitle: Text(
-                                      filePath,
-                                      style:
-                                          const TextStyle(color: Colors.white),
-                                    ),
-                                    trailing: const Icon(
-                                      Icons.download_rounded,
-                                      color: Colors.white,
-                                    ),
-                                    onTap: () {
-                                      // Handle file download or any other action here
-                                    },
-                                  ),
-                                ),
-                              );
-                            },
-                          );
+                              itemCount: snapshot.data!.id.length,
+                              itemBuilder: (context, index) {
+                                return Text(snapshot.data!.id[index]);
+                              });
+                        } else {
+                          return Text("No data");
                         }
                       },
                     ),
+*/
+
+                      StreamBuilder(
+                        stream: FirebaseFirestore.instance.collection('transactions').doc('janki.brainbinary@gmail.com').snapshots(),
+                        builder: (context, snapshot) {
+                          Map<String, dynamic> data = snapshot.data!.data() as Map<String, dynamic>;
+
+
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 20),
+                            child:ListView.separated(
+                              separatorBuilder: (context, index) => SizedBox(height: 10,),
+                                itemCount: data.keys.length,
+                                itemBuilder: (context, index) {
+                                  return Container(height: 10,color: Colors.pink,);
+                                }),
+                          );
+                        },
+                      ),
+
+
+
                   ),
+
+            //      ListView.builder(
+            // itemCount: snapshot.data!.length,
+            // itemBuilder: (BuildContext context, int index) {
+            //   String filePath = snapshot.data![index];
+            //   return Padding(
+            //     padding: const EdgeInsets.all(8.0),
+            //     child: Card(
+            //       color: Colors.black54,
+            //       elevation: 2,
+            //       child: ListTile(
+            //         leading: const Icon(
+            //           Icons.file_copy,
+            //           color: Colors.white,
+            //         ),
+            //         title: const Text(
+            //           'File Path',
+            //           style: TextStyle(color: Colors.white),
+            //         ),
+            //         subtitle: Text(
+            //           filePath,
+            //           style:
+            //           const TextStyle(color: Colors.white),
+            //         ),
+            //         trailing: const Icon(
+            //           Icons.download_rounded,
+            //           color: Colors.white,
+            //         ),
+            //         onTap: () {
+            //           // Handle file download or any other action here
+            //         },
+            //       ),
+            //     ),
+            //   );
+            // },
+            // )
                 ],
               ),
             );
           },
         );
       },
-    ).then((value) {
-      return Get.snackbar('Backup', 'Complete',
-          icon: Icon(
-            Icons.backup,
-            color: Colors.white,
-          ),
-          colorText: Colors.white);
-    });
+    );
   }
 
   List<String> filePaths = [];
@@ -227,7 +241,8 @@ class _BackUpScreenState extends State<BackUpScreen> {
         String filePath = data['file'];
         filePaths.add(filePath);
       });
-    } catch (e) {
+    }
+    catch (e) {
       print('Error fetching file paths: $e');
     }
 
@@ -322,7 +337,7 @@ class _BackUpScreenState extends State<BackUpScreen> {
                 onTap: () async {
                   var user = FirebaseAuth.instance.currentUser;
                   await HiveFirestoreBackupData.backupDataToFirestore(
-                      user!.email);
+                      user!.email,2);
                 },
                 child: Container(
                   decoration: BoxDecoration(

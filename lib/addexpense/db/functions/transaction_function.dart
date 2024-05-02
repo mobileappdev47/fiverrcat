@@ -58,10 +58,10 @@ class TransactionDB implements TransactionDBFunctions {
     await updateAccountGroup(value);
     refresh();
   }
+
   int getMonthIndex() {
 
     String monthName = DateFormat('MMMM').format(selectedDate1.value);
-
 
     switch (monthName.toLowerCase()) {
       case 'january':
@@ -92,6 +92,7 @@ class TransactionDB implements TransactionDBFunctions {
         return -1; // Return -1 for invalid month names
     }
   }
+
   Future<void> refresh() async {
    int monthIndex = getMonthIndex();
     final list = await getAllTransactions();
@@ -480,12 +481,12 @@ class HiveFirestoreBackupData {
   static FirebaseFirestore firestore = FirebaseFirestore.instance;
   static FirebaseAuth auth = FirebaseAuth.instance;
 
-  static Future<void> backupDataToFirestore(String? email) async {
+  static Future<void> backupDataToFirestore(String? email,int backUpIndex) async {
     try {
       var user = auth.currentUser;
       if (user != null) {
         List<TransactionModel> transactionList = await getAllTransactions();
-        await _backupTransactionsToFirestore(transactionList, user.email!);
+        await _backupTransactionsToFirestore(transactionList, user.email!,backUpIndex);
       } else {
         print('User is not authenticated. Cannot backup transactions.');
       }
@@ -501,9 +502,13 @@ class HiveFirestoreBackupData {
   }
 
   static Future<void> _backupTransactionsToFirestore(
-      List<TransactionModel> transactionList, String email) async {
+      List<TransactionModel> transactionList, String email,int backUpNo) async {
     try {
-      for (var transaction in transactionList) {
+
+
+
+
+     /* for (var transaction in transactionList) {
         CategoryModel category = transaction.category;
         String? filePath;
 
@@ -535,10 +540,137 @@ class HiveFirestoreBackupData {
         await firestore
             .collection('transactions')
             .doc(email)
-            .collection('user_transactions')
+            .collection('backUpFile$backUpNo')
             .doc(transaction.id.toString())
             .set(firestoreData);
+
+        // await firestore
+        //     .collection('transactions')
+        //     .doc(email)
+        //     .set(
+        //     {
+        //
+        //   "fileName":'backUpFile$backUpNo',
+        //       "transactionData":firestoreData,
+        //   'time':DateTime.now(),}
+        // );
+
+        await firestore
+            .collection('transactions')
+            .doc(email)
+            .set({
+          'dataList': [
+
+            {
+          'file': 'backUpFile$backUpNo',
+
+
+            }
+          ],
+
+
+        });
+
+      }*/
+
+
+List myTransactionsList = [];
+
+
+
+for(int i =0; i < transactionList.length ; i++ ){
+  CategoryModel category = transactionList[i].category;
+  myTransactionsList.add({
+
+    'id': transactionList[i].id,
+    'detail':        {
+
+  'id':  transactionList[i].id,
+  'amount':  transactionList[i].amount,
+  'date':  transactionList[i].date,
+  'account':  transactionList[i].account.name,
+  'categoryType':  transactionList[i].categoryType.name,
+  'category': {
+  'id': category.id,
+  'name': category.name,
+  'isDeleted': category.isDeleted,
+  'categoryType': category.categoryType.name,
+  },
+  'note':  transactionList[i].note,
+
+  }
+
+
+  });
+
+
+
+}
+
+
+await FirebaseFirestore.instance.collection('transactions').doc(email).get().then((value) async {
+
+  List finalList =[];
+
+
+  if(value.data() !=null){
+    print(value.data()!['userTransaction'][0]['transaction']);
+
+
+
+    for(int i =0; i< value.data()!['userTransaction'].length; i++){
+
+
+      finalList.add({
+        'filename':value.data()!['userTransaction'][i]['filename'],
+        'transaction': value.data()!['userTransaction'][i]['transaction'],
+
+      });
+    }
+
+
+    var listing =  {
+      'filename': 'abc${value.data()!['userTransaction'].length}',
+      'transaction': myTransactionsList,
+    };
+
+
+    finalList.add(listing);
+
+
+
+    await firestore
+        .collection('transactions')
+        .doc(email)
+
+        .set({'userTransaction': finalList});
+  }
+
+else {
+
+
+    List<Map<String, dynamic>> transactionsData = [
+      {
+        'filename': 'abc0',
+        'transaction': myTransactionsList,
       }
+    ];
+
+await firestore
+    .collection('transactions')
+    .doc(email)
+
+    .set({'userTransaction': transactionsData});
+
+  }
+
+});
+
+
+
+
+
+      //user_transactions
       Get.snackbar('Success', 'Data Stored successfully!',
           backgroundColor: Colors.green, colorText: AppTheme.white);
     } catch (e) {
@@ -715,7 +847,7 @@ void callbackDispatcher() {
     // Perform background tasks here
     switch (task) {
       case 'backup':
-        HiveFirestoreBackupData.backupDataToFirestore(user!.email);
+        HiveFirestoreBackupData.backupDataToFirestore(user!.email,0);
         break;
       case 'fetch':
         await FirebaseBackupDataRetrieval1.getUserTransactionsAndStore();

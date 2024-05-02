@@ -31,6 +31,8 @@ String selectedDate = DateFormat('dd-MM-yyyy').format(DateTime.now());
 String dropdownvalue = '1 Day';
 String selected = 'All';
 String cycleOrAllTime = 'All Time';
+String selectedCategory = 'All';
+int selectedCategoryIndex = 0;
 
 initialize() {
   chartData = [
@@ -827,7 +829,7 @@ heInit() {
 
 List<CategoryModel> categoryList = [];
 List categoryNameList = [];
-int selectedCategoryIndex = 0;
+
 
 GlobalKey<SfCartesianChartState> chartKey = GlobalKey<SfCartesianChartState>();
 
@@ -839,7 +841,6 @@ class GraphScreen extends StatefulWidget {
 }
 
 class _GraphScreenState extends State<GraphScreen> {
-  String selectedCategory = 'All';
 
   var items = [
     '1 Day',
@@ -6562,8 +6563,8 @@ class _GraphScreenState extends State<GraphScreen> {
                                               return GestureDetector(
                                                 onTap: () {
                                                   selectedCategoryIndex = index;
-                                                  selectedCategory =
-                                                      categoryNameList[index];
+                                                  // selectedCategory =
+                                                  //     categoryNameList[index];
                                                   setState(() {});
                                                   update.call(
                                                     () {},
@@ -6648,6 +6649,8 @@ class _GraphScreenState extends State<GraphScreen> {
                                             GestureDetector(
                                               onTap: () {
                                                 selected = 'All';
+                                                selectedCategory =
+                                                categoryNameList[selectedCategoryIndex];
                                                 if (selectedCategory == 'All') {
                                                   filterList = transactionData;
                                                   var data = filterList;
@@ -8085,9 +8088,16 @@ class _GraphScreenState extends State<GraphScreen> {
                                                     }
                                                   }
 
+
+
+
+
+
                                                   setState(() {});
                                                   Navigator.pop(context);
                                                 }
+
+
                                               },
                                               child: Container(
                                                 width: 170,
