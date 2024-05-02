@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:convert';
 import 'dart:core';
 import 'dart:io';
@@ -485,7 +484,7 @@ class HiveFirestoreBackupData {
     try {
       var user = auth.currentUser;
       if (user != null) {
-        var transactionList = await getAllTransactions();
+        List<TransactionModel> transactionList = await getAllTransactions();
         await _backupTransactionsToFirestore(transactionList, user.email!);
       } else {
         print('User is not authenticated. Cannot backup transactions.');
@@ -708,22 +707,20 @@ class FirebaseBackupDataRetrieval1 {
 
 /// backup auto---------------------------------------
 
-void backupDataToFirestore() async {
-  FirebaseAuth auth = FirebaseAuth.instance;
-  try {
-    User? user = auth.currentUser;
-    if (user != null) {
-      // Fetch data from Hive
-      List<TransactionModel> transactionList = await HiveFirestoreBackupData.getAllTransactions();
 
-      // Upload data to Firestore
-      await HiveFirestoreBackupData.backupDataToFirestore(user.email!);
-
-      print('Data backed up to Firestore successfully!');
-    } else {
-      print('User is not authenticated. Cannot backup data to Firestore.');
+void callbackDispatcher() {
+   FirebaseAuth auth = FirebaseAuth.instance;
+  Workmanager().executeTask((task, inputData) async {
+    var user = auth.currentUser;
+    // Perform background tasks here
+    switch (task) {
+      case 'backup':
+        HiveFirestoreBackupData.backupDataToFirestore(user!.email);
+        break;
+      case 'fetch':
+        await FirebaseBackupDataRetrieval1.getUserTransactionsAndStore();
+        break;
     }
-  } catch (e) {
-    print('Error backing up data to Firestore: $e');
-  }
+    return Future.value(true);
+  });
 }
