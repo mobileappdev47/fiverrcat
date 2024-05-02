@@ -208,8 +208,8 @@ class _TransactionScreenState extends State<TransactionScreen> {
                                 String  selectedMonth = months[index].toString().split(' ').first;
 
                                 int monthIndex = getMonthIndex(selectedMonth);
-                                 print(selectedYear );
-                                 print(monthIndex );
+                                 print(selectedYear);
+                                 print(monthIndex);
                                 DateTime firstDateOfMonth = DateTime(selectedYear, monthIndex, 1);
 
                                 DateTime lastDateOfMonth = DateTime(selectedYear, monthIndex + 1, 0);

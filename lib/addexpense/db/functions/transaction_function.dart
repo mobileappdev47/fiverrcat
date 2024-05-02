@@ -10,9 +10,11 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:intl/intl.dart';
 import 'package:pokercat/addexpense/db/functions/account_group_function.dart';
 import 'package:pokercat/addexpense/db/models/account_group/account_group_model_db.dart';
 import 'package:pokercat/constant.dart';
+import 'package:pokercat/pages/bankroll.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:workmanager/workmanager.dart';
@@ -44,6 +46,9 @@ class TransactionDB implements TransactionDBFunctions {
       ValueNotifier([]);
   ValueNotifier<List<TransactionModel>> transactionMonthListNotifier =
       ValueNotifier([]);
+  ValueNotifier<List<TransactionModel>> transactionMyMonthListNotifier =
+  ValueNotifier([]);
+
   String? selectedCatogory;
 
   @override
@@ -54,19 +59,68 @@ class TransactionDB implements TransactionDBFunctions {
     await updateAccountGroup(value);
     refresh();
   }
+  int getMonthIndex() {
 
+    String monthName = DateFormat('MMMM').format(selectedDate1.value);
+
+
+    switch (monthName.toLowerCase()) {
+      case 'january':
+        return 1;
+      case 'february':
+        return 2;
+      case 'march':
+        return 3;
+      case 'april':
+        return 4;
+      case 'may':
+        return 5;
+      case 'june':
+        return 6;
+      case 'july':
+        return 7;
+      case 'august':
+        return 8;
+      case 'september':
+        return 9;
+      case 'october':
+        return 10;
+      case 'november':
+        return 11;
+      case 'december':
+        return 12;
+      default:
+        return -1; // Return -1 for invalid month names
+    }
+  }
   Future<void> refresh() async {
+   int monthIndex = getMonthIndex();
     final list = await getAllTransactions();
     list.sort((first, second) => second.date.compareTo(first.date));
     final listForMonth = await getTransactionsForCurrentMonth();
+    final listForMyMonth = await getTransactionsForMonth(monthIndex);
+
     listForMonth.sort((first, second) => second.date.compareTo(first.date));
+
+
     transactionListNotifier.value.clear();
     transactionMonthListNotifier.value.clear();
+    transactionMyMonthListNotifier.value.clear();
+
+
+
     transactionListNotifier.value.addAll(list);
     transactionMonthListNotifier.value.addAll(listForMonth);
+    transactionMyMonthListNotifier.value.addAll(listForMyMonth);
+
+
+
     transactionListNotifier.notifyListeners();
     transactionMonthListNotifier.notifyListeners();
+    transactionMyMonthListNotifier.notifyListeners();
+
   }
+
 
   Future<List<TransactionModel>> getTransactionsForCurrentMonth() async {
     final now = DateTime.now();
@@ -83,8 +137,12 @@ class TransactionDB implements TransactionDBFunctions {
 
   Future<List<TransactionModel>> getTransactionsForMonth(month) async {
     final now = DateTime.now();
-    final startOfMonth = DateTime(now.year, month, 1);
-    final endOfMonth = DateTime(now.year, month, 31);
+
+
+    final startOfMonth = DateTime(selectedDate1.value.year, month, 1);
+    final endOfMonth = DateTime(selectedDate1.value.year, month, 31);
+    // final startOfMonth = DateTime(now.year, month, 1);
+    // final endOfMonth = DateTime(now.year, month, 31);
     final box = Hive.box<TransactionModel>(TRANSACTION_DB_NAME);
     final results = box.values.where((trxn) =>
         DateTime.parse(trxn.date)
@@ -359,7 +417,8 @@ class TransactionDB implements TransactionDBFunctions {
               ))
           .toList()
         ..sort((first, second) => second.date.compareTo(first.date));
-    } else if (selectedCatogory == "Expense") {
+    }
+    else if (selectedCatogory == "Expense") {
       dateFilterList = TransactionDb.values
           .where((element) =>
               element.categoryType == CategoryType.expense &&
@@ -372,7 +431,9 @@ class TransactionDB implements TransactionDBFunctions {
               ))
           .toList()
         ..sort((first, second) => second.date.compareTo(first.date));
-    } else {
+    }
+    else {
+      print('getting null');
       dateFilterList = TransactionDb.values
           .where((element) =>
               DateTime.parse(element.date)
@@ -388,6 +449,14 @@ class TransactionDB implements TransactionDBFunctions {
     transactionMonthListNotifier.value.clear();
     transactionMonthListNotifier.value = dateFilterList;
     transactionMonthListNotifier.notifyListeners();
+
+    int monthIndex = getMonthIndex();
+
+    final listForMyMonth = await getTransactionsForMonth(monthIndex);
+    transactionMyMonthListNotifier.value.clear();
+    transactionMyMonthListNotifier.value.addAll(listForMyMonth);
+    transactionMyMonthListNotifier.notifyListeners();
+
   }
 }
 

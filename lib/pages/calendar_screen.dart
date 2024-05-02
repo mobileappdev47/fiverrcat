@@ -447,66 +447,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 ),
               ),
             ),
-            //---------------------------------------------------calendar-------------------------------------------------------------
-            // TableCalendar<Event>(
-            //   firstDay: kFirstDay,
-            //   lastDay: kLastDay,
-            //   focusedDay: _focusedDay,
-            //   selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
-            //   rangeStartDay: _rangeStart,
-            //   rangeEndDay: _rangeEnd,
-            //   calendarFormat: _calendarFormat,
-            //   rangeSelectionMode: _rangeSelectionMode,
-            //   eventLoader: _getEventsForDay,
-            //   startingDayOfWeek: StartingDayOfWeek.monday,
-            //   daysOfWeekStyle: const DaysOfWeekStyle(
-            //     weekdayStyle: TextStyle(color: AppTheme.calendarTextColor),
-            //     weekendStyle: TextStyle(color: AppTheme.calendarWeekendColor),
-            //   ),
-            //   headerStyle: const HeaderStyle(
-            //     leftChevronIcon: Icon(
-            //       color: AppTheme.calendarHeaderColor,
-            //       Icons.arrow_left,
-            //       size: 20.0,
-            //     ),
-            //     rightChevronIcon: Icon(
-            //       color: AppTheme.calendarHeaderColor,
-            //       Icons.arrow_right,
-            //       size: 20.0,
-            //     ),
-            //     formatButtonVisible: false,
-            //     titleTextStyle: TextStyle(
-            //       fontSize: 18.0,
-            //       color: AppTheme.calendarHeaderColor,
-            //     ),
-            //   ),
-            //   calendarStyle: const CalendarStyle(
-            //     markerDecoration: BoxDecoration(
-            //         color: AppTheme.calendarMarkerColor,
-            //         shape: BoxShape.circle),
-            //     //---------주말텍스트스타일
-            //     weekendTextStyle: TextStyle(color: AppTheme.calendarTextColor),
-            //     //---------평일텍스트스타일
-            //     defaultTextStyle: TextStyle(color: AppTheme.calendarTextColor),
-            //
-            //     outsideTextStyle:
-            //         TextStyle(color: AppTheme.calendarOutsideTextColor),
-            //     outsideDaysVisible: true,
-            //   ),
-            //   onDaySelected: onDaySelected,
-            //   onRangeSelected: _onRangeSelected,
-            //   onFormatChanged: (format) {
-            //     if (_calendarFormat != format) {
-            //       setState(() {
-            //         _calendarFormat = format;
-            //       });
-            //     }
-            //   },
-            //   onPageChanged: (focusedDay) {
-            //     _focusedDay = focusedDay;
-            //   },
-            // ),
-            //---------------------------------------------------divider-------------------------------------------------------------
+
             const Padding(
               padding: EdgeInsets.all(8.0),
               child: SizedBox(
@@ -522,7 +463,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
             ValueListenableBuilder(
               valueListenable:
-                  TransactionDB.instance.transactionMonthListNotifier,
+                  TransactionDB.instance.transactionMyMonthListNotifier,
               builder: (context, value, child) {
                 Map<String, List<TransactionModel>> mapList =
                     SelectDate().sortByDate(value);
@@ -982,3 +923,63 @@ class _AppointmentDataSource extends CalendarDataSource {
     appointments = source;
   }
 }
+//---------------------------------------------------calendar-------------------------------------------------------------
+// TableCalendar<Event>(
+//   firstDay: kFirstDay,
+//   lastDay: kLastDay,
+//   focusedDay: _focusedDay,
+//   selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
+//   rangeStartDay: _rangeStart,
+//   rangeEndDay: _rangeEnd,
+//   calendarFormat: _calendarFormat,
+//   rangeSelectionMode: _rangeSelectionMode,
+//   eventLoader: _getEventsForDay,
+//   startingDayOfWeek: StartingDayOfWeek.monday,
+//   daysOfWeekStyle: const DaysOfWeekStyle(
+//     weekdayStyle: TextStyle(color: AppTheme.calendarTextColor),
+//     weekendStyle: TextStyle(color: AppTheme.calendarWeekendColor),
+//   ),
+//   headerStyle: const HeaderStyle(
+//     leftChevronIcon: Icon(
+//       color: AppTheme.calendarHeaderColor,
+//       Icons.arrow_left,
+//       size: 20.0,
+//     ),
+//     rightChevronIcon: Icon(
+//       color: AppTheme.calendarHeaderColor,
+//       Icons.arrow_right,
+//       size: 20.0,
+//     ),
+//     formatButtonVisible: false,
+//     titleTextStyle: TextStyle(
+//       fontSize: 18.0,
+//       color: AppTheme.calendarHeaderColor,
+//     ),
+//   ),
+//   calendarStyle: const CalendarStyle(
+//     markerDecoration: BoxDecoration(
+//         color: AppTheme.calendarMarkerColor,
+//         shape: BoxShape.circle),
+//     //---------주말텍스트스타일
+//     weekendTextStyle: TextStyle(color: AppTheme.calendarTextColor),
+//     //---------평일텍스트스타일
+//     defaultTextStyle: TextStyle(color: AppTheme.calendarTextColor),
+//
+//     outsideTextStyle:
+//         TextStyle(color: AppTheme.calendarOutsideTextColor),
+//     outsideDaysVisible: true,
+//   ),
+//   onDaySelected: onDaySelected,
+//   onRangeSelected: _onRangeSelected,
+//   onFormatChanged: (format) {
+//     if (_calendarFormat != format) {
+//       setState(() {
+//         _calendarFormat = format;
+//       });
+//     }
+//   },
+//   onPageChanged: (focusedDay) {
+//     _focusedDay = focusedDay;
+//   },
+// ),
+//---------------------------------------------------divider-------------------------------------------------------------
