@@ -636,8 +636,10 @@ class _BankrollState extends State<Bankroll> {
               filterList =  TransactionDB.instance.transactionListNotifier.value;
               selectedCategoryIndex= 0;
               initialize1DayData();
-            });
-          });
+            })
+            ;
+          }
+          );
 
         },
       ),

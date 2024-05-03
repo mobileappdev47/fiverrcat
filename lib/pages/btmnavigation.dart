@@ -33,18 +33,16 @@ class _BtmNaviState extends State<BtmNavi> {
     const Center(child: Bankroll(),),
      Center(child: AppSettingsScreen(),),
 
-
-
   ];
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    WidgetsBinding.instance?.addPostFrameCallback((_) {
-
-      showDialogOnInit(context);
-
-    });
+    // WidgetsBinding.instance?.addPostFrameCallback((_) {
+    //
+    //   showDialogOnInit(context);
+    //
+    // });
   }
   void showDialogOnInit(BuildContext context) {
     showDialog(

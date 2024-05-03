@@ -588,7 +588,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 print('myChosenDateString = ${myChosenDateString}');
 
                 return mapList['${myChosenDateString}'] != null
-                    ? Padding(
+                    ?
+                Padding(
                         padding: const EdgeInsets.only(top: 9),
                         child: ListView.builder(
                           shrinkWrap: true,
@@ -758,7 +759,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
                           },
                         ),
                       )
-                    : Center(
+                    :
+                Center(
                         child: Padding(
                           padding:
                               const EdgeInsets.fromLTRB(0.0, 50.0, 0.0, 0.0),
@@ -788,71 +790,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
     );
   }
 
-  // resetTransactionsOnly(value, id) {
-  //   showDialog(
-  //     context: value,
-  //     builder: (context) {
-  //       return StatefulBuilder(
-  //         builder: (context, update) => AlertDialog(
-  //           shape: RoundedRectangleBorder(
-  //             borderRadius: BorderRadius.circular(15),
-  //           ),
-  //           backgroundColor: AppTheme.pcWaveColor,
-  //           content: const Text(
-  //               'Reseting transaction will erase all your transaction data.'),
-  //           title: const Text(
-  //             'Do you want to delete all transactions?',
-  //             style: TextStyle(
-  //               color: AppTheme.pcTextQuaternaryColor,
-  //               fontWeight: FontWeight.bold,
-  //             ),
-  //           ),
-  //           actions: [
-  //             TextButton(
-  //               onPressed: () async {
-  //                 setState(() {
-  //                   myNumber = myNumber + 1;
-  //                 });
-  //                 print(myNumber);
-  //                 final transactionDB =
-  //                     await Hive.openBox<TransactionModel>(TRANSACTION_DB_NAME);
-  //
-  //                 // final keys = transactionDB.values.toList();
-  //                 transactionDB.delete(id);
-  //
-  //                 setState(() {});
-  //                 update.call(
-  //                   () {},
-  //                 );
-  //                 TransactionDB.instance.refresh();
-  //                 Navigator.of(context).pop();
-  //               },
-  //               child: const Text(
-  //                 'Yes',
-  //                 style: TextStyle(
-  //                   color: AppTheme.pcTextQuaternaryColor,
-  //                   fontWeight: FontWeight.bold,
-  //                 ),
-  //               ),
-  //             ),
-  //             TextButton(
-  //               onPressed: () {
-  //                 Navigator.of(context).pop();
-  //               },
-  //               child: const Text(
-  //                 'No',
-  //                 style: TextStyle(
-  //                   color: AppTheme.pcTextQuaternaryColor,
-  //                   fontWeight: FontWeight.bold,
-  //                 ),
-  //               ),
-  //             ),
-  //           ],
-  //         ),
-  //       );
-  //     },
-  //   );
-  // }
   resetTransactionsOnly(
       BuildContext context, List<TransactionModel> transactions) {
     showDialog(
@@ -982,3 +919,73 @@ class _AppointmentDataSource extends CalendarDataSource {
 //   },
 // ),
 //---------------------------------------------------divider-------------------------------------------------------------
+
+
+
+//--reset transaction only
+
+// resetTransactionsOnly(value, id) {
+//   showDialog(
+//     context: value,
+//     builder: (context) {
+//       return StatefulBuilder(
+//         builder: (context, update) => AlertDialog(
+//           shape: RoundedRectangleBorder(
+//             borderRadius: BorderRadius.circular(15),
+//           ),
+//           backgroundColor: AppTheme.pcWaveColor,
+//           content: const Text(
+//               'Reseting transaction will erase all your transaction data.'),
+//           title: const Text(
+//             'Do you want to delete all transactions?',
+//             style: TextStyle(
+//               color: AppTheme.pcTextQuaternaryColor,
+//               fontWeight: FontWeight.bold,
+//             ),
+//           ),
+//           actions: [
+//             TextButton(
+//               onPressed: () async {
+//                 setState(() {
+//                   myNumber = myNumber + 1;
+//                 });
+//                 print(myNumber);
+//                 final transactionDB =
+//                     await Hive.openBox<TransactionModel>(TRANSACTION_DB_NAME);
+//
+//                 // final keys = transactionDB.values.toList();
+//                 transactionDB.delete(id);
+//
+//                 setState(() {});
+//                 update.call(
+//                   () {},
+//                 );
+//                 TransactionDB.instance.refresh();
+//                 Navigator.of(context).pop();
+//               },
+//               child: const Text(
+//                 'Yes',
+//                 style: TextStyle(
+//                   color: AppTheme.pcTextQuaternaryColor,
+//                   fontWeight: FontWeight.bold,
+//                 ),
+//               ),
+//             ),
+//             TextButton(
+//               onPressed: () {
+//                 Navigator.of(context).pop();
+//               },
+//               child: const Text(
+//                 'No',
+//                 style: TextStyle(
+//                   color: AppTheme.pcTextQuaternaryColor,
+//                   fontWeight: FontWeight.bold,
+//                 ),
+//               ),
+//             ),
+//           ],
+//         ),
+//       );
+//     },
+//   );
+// }

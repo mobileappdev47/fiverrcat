@@ -145,10 +145,12 @@ class TransactionDB implements TransactionDBFunctions {
     // final endOfMonth = DateTime(now.year, month, 31);
     final box = Hive.box<TransactionModel>(TRANSACTION_DB_NAME);
     final results = box.values.where((trxn) =>
+
         DateTime.parse(trxn.date)
             .isAfter(startOfMonth.subtract(const Duration(days: 1))) &&
         DateTime.parse(trxn.date)
             .isBefore(endOfMonth.add(const Duration(days: 1))));
+
     return results.toList();
   }
 
@@ -607,14 +609,14 @@ for(int i =0; i < transactionList.length ; i++ ){
 
 }
 
-
+var fileName ='';
 await FirebaseFirestore.instance.collection('transactions').doc(email).get().then((value) async {
 
   List finalList =[];
 
 
   if(value.data() !=null){
-    print(value.data()!['userTransaction'][0]['transaction']);
+    // print(value.data()!['userTransaction'][0]['transaction']);
 
 
 
@@ -624,20 +626,20 @@ await FirebaseFirestore.instance.collection('transactions').doc(email).get().the
       finalList.add({
         'filename':value.data()!['userTransaction'][i]['filename'],
         'transaction': value.data()!['userTransaction'][i]['transaction'],
-
+        'time': value.data()!['userTransaction'][i]['time'],
       });
     }
 
-
     var listing =  {
-      'filename': 'abc${value.data()!['userTransaction'].length}',
+      'filename': 'backupFile${value.data()!['userTransaction'].length}.Hive',
       'transaction': myTransactionsList,
+      'time': DateTime.now(),
     };
 
 
     finalList.add(listing);
 
-
+    fileName= "backupFile${value.data()!['userTransaction'].length}.Hive";
 
     await firestore
         .collection('transactions')
@@ -648,11 +650,13 @@ await FirebaseFirestore.instance.collection('transactions').doc(email).get().the
 
 else {
 
-
+fileName ='backupFile0.Hive';
     List<Map<String, dynamic>> transactionsData = [
       {
-        'filename': 'abc0',
+        'filename': 'backupFile0.Hive',
         'transaction': myTransactionsList,
+        'time': DateTime.now(),
+
       }
     ];
 
@@ -663,16 +667,28 @@ await firestore
     .set({'userTransaction': transactionsData});
 
   }
-
 });
 
 
 
 
 
-      //user_transactions
-      Get.snackbar('Success', 'Data Stored successfully!',
-          backgroundColor: Colors.green, colorText: AppTheme.white);
+Get.snackbar(
+  "",
+  "",
+  messageText: Text(fileName,style: TextStyle(color: Colors.white),),
+  titleText: Text('Backup Created',style: TextStyle(color: Colors.white),),
+  icon: Padding(
+
+    padding: const EdgeInsets.only(left: 8.0),
+    child: Icon(Icons.backup, color: Colors.white,size: 30,),
+  ),
+  snackPosition: SnackPosition.TOP,
+maxWidth: 200,
+
+
+margin: EdgeInsets.symmetric(horizontal: 50,vertical: 20,),
+);
     } catch (e) {
       Get.snackbar('Error', 'Sorry, Something went wrong!',
           backgroundColor: Colors.red, colorText: AppTheme.white);
