@@ -98,6 +98,47 @@ initialize1DayData() {
   }
 }
 
+
+
+initialize1DayDataOnlyOneTime() {
+  color.add(
+    AppTheme.chartColor.withOpacity(0.1),
+  );
+  color.add(
+    AppTheme.chartColor.withOpacity(0.3),
+  );
+  color.add(
+    AppTheme.chartColor.withOpacity(0.6),
+  );
+  stops.add(0.0);
+  stops.add(0.5);
+  stops.add(1.0);
+
+
+
+
+
+  if (cycleOrAllTime == 'All Time') {
+
+    allTimeButton();
+
+  } else {
+    if (dropdownvalue == '1 Day') {
+      dayWiseDay();
+    } else if (dropdownvalue == '1 Week') {
+      weekWiseChart();
+    } else if (dropdownvalue == '1 Month') {
+      monthWiseChart();
+    } else if (dropdownvalue == '1 Year') {
+      yearWiseChart();
+    }
+  }
+}
+
+
+
+
+
 allTimeButton() {
   var data = TransactionDB.instance.transactionListNotifier.value;
 
@@ -835,7 +876,8 @@ heInit() {
 
 List<CategoryModel> categoryList = [];
 List categoryNameList = [];
-
+List<TransactionModel> filterList =
+    TransactionDB.instance.transactionListNotifier.value;
 
 GlobalKey<SfCartesianChartState> chartKey = GlobalKey<SfCartesianChartState>();
 
@@ -848,6 +890,7 @@ class GraphScreen extends StatefulWidget {
 
 class _GraphScreenState extends State<GraphScreen> {
 
+
   var items = [
     '1 Day',
     '1 Week',
@@ -855,17 +898,18 @@ class _GraphScreenState extends State<GraphScreen> {
     '1 Year',
   ];
 
-  List<TransactionModel> filterList =
-      TransactionDB.instance.transactionListNotifier.value;
 
   @override
   void initState() {
+
     // initialize();
+    // initialize1DayData();
 
-    initialize1DayData();
+    if(selectedCategoryIndex==0&& selectedCategory=='All'&& selected=='All'&& cycleOrAllTime=='All Time' ){
+      initialize1DayDataOnlyOneTime();
+    }
+
     getCategoryList();
-
-    // heInit();
 
     super.initState();
   }
@@ -8692,95 +8736,95 @@ class _GraphScreenState extends State<GraphScreen> {
                 height: 10,
               ),
 
-              // ListView.separated(
-              //     itemCount: filterList.length,
-              //     shrinkWrap: true,
-              //     physics: NeverScrollableScrollPhysics(),
-              //     separatorBuilder: (context, index) => SizedBox(
-              //           height: 10,
-              //         ),
-              //     itemBuilder: (context, index) {
-              //       return Container(
-              //         padding: EdgeInsets.all(10),
-              //         decoration: BoxDecoration(
-              //           color: Colors.white10,
-              //           borderRadius: BorderRadius.circular(
-              //             10,
-              //           ),
-              //         ),
-              //         child: Column(
-              //           children: [
-              //             Row(
-              //               children: [
-              //                 Text(
-              //                   'Amount : ',
-              //                   style: TextStyle(color: Colors.white),
-              //                 ),
-              //                 Text(
-              //                   '${currencySymboleUpdate.value}${filterList[index].amount}',
-              //                   style: TextStyle(
-              //                       color: filterList[index].categoryType ==
-              //                               CategoryType.income
-              //                           ? Colors.green
-              //                           : Colors.red),
-              //                 ),
-              //               ],
-              //             ),
-              //             SizedBox(
-              //               height: 5,
-              //             ),
-              //             Row(
-              //               children: [
-              //                 Text(
-              //                   'Transaction Type : ',
-              //                   style: TextStyle(color: Colors.white),
-              //                 ),
-              //                 Text(
-              //                   '${filterList[index].category.name}',
-              //                   style: TextStyle(color: Colors.white),
-              //                 ),
-              //               ],
-              //             ),
-              //             SizedBox(
-              //               height: 5,
-              //             ),
-              //             Row(
-              //               children: [
-              //                 Text(
-              //                   'Date : ',
-              //                   style: TextStyle(color: Colors.white),
-              //                 ),
-              //                 Text(
-              //                   '${filterList[index].date}',
-              //                   style: TextStyle(color: Colors.white),
-              //                 ),
-              //               ],
-              //             ),
-              //             SizedBox(
-              //               height: 5,
-              //             ),
-              //             Row(
-              //               children: [
-              //                 Text(
-              //                   'Category : ',
-              //                   style: TextStyle(color: Colors.white),
-              //                 ),
-              //                 filterList[index].categoryType ==
-              //                         CategoryType.income
-              //                     ? Text(
-              //                         'Income',
-              //                         style: TextStyle(color: Colors.white),
-              //                       )
-              //                     : Text(
-              //                         'Expense',
-              //                         style: TextStyle(color: Colors.white),
-              //                       ),
-              //               ],
-              //             ),
-              //           ],
-              //         ),
-              //       );
-              //     }),
+              ListView.separated(
+                  itemCount: filterList.length,
+                  shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
+                  separatorBuilder: (context, index) => SizedBox(
+                        height: 10,
+                      ),
+                  itemBuilder: (context, index) {
+                    return Container(
+                      padding: EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: Colors.white10,
+                        borderRadius: BorderRadius.circular(
+                          10,
+                        ),
+                      ),
+                      child: Column(
+                        children: [
+                          Row(
+                            children: [
+                              Text(
+                                'Amount : ',
+                                style: TextStyle(color: Colors.white),
+                              ),
+                              Text(
+                                '${currencySymboleUpdate.value}${filterList[index].amount}',
+                                style: TextStyle(
+                                    color: filterList[index].categoryType ==
+                                            CategoryType.income
+                                        ? Colors.green
+                                        : Colors.red),
+                              ),
+                            ],
+                          ),
+                          SizedBox(
+                            height: 5,
+                          ),
+                          Row(
+                            children: [
+                              Text(
+                                'Transaction Type : ',
+                                style: TextStyle(color: Colors.white),
+                              ),
+                              Text(
+                                '${filterList[index].category.name}',
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            ],
+                          ),
+                          SizedBox(
+                            height: 5,
+                          ),
+                          Row(
+                            children: [
+                              Text(
+                                'Date : ',
+                                style: TextStyle(color: Colors.white),
+                              ),
+                              Text(
+                                '${filterList[index].date}',
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            ],
+                          ),
+                          SizedBox(
+                            height: 5,
+                          ),
+                          Row(
+                            children: [
+                              Text(
+                                'Category : ',
+                                style: TextStyle(color: Colors.white),
+                              ),
+                              filterList[index].categoryType ==
+                                      CategoryType.income
+                                  ? Text(
+                                      'Income',
+                                      style: TextStyle(color: Colors.white),
+                                    )
+                                  : Text(
+                                      'Expense',
+                                      style: TextStyle(color: Colors.white),
+                                    ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    );
+                  }),
             ],
           ),
         ));

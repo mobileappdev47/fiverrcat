@@ -562,6 +562,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
             // ),
 
             // ----------------------------------- Transaction History ----------------------------------------
+
             ValueListenableBuilder(
               valueListenable: TransactionDB.instance.transactionListNotifier,
               builder: (context, newList, child) {

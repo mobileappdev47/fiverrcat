@@ -279,6 +279,8 @@ class _BankrollState extends State<Bankroll> {
                         iconOff: Icons.calendar_month,
                         animationDuration: const Duration(milliseconds: 200),
                         onChanged: (bool state) {
+
+
                           setState(() {
 
 
@@ -630,6 +632,9 @@ class _BankrollState extends State<Bankroll> {
             setState(() {
               // initialize();
               selected ='All';
+              selectedCategory= 'All';
+              filterList =  TransactionDB.instance.transactionListNotifier.value;
+              selectedCategoryIndex= 0;
               initialize1DayData();
             });
           });
