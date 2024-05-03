@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -14,7 +15,7 @@ import 'package:pokercat/addexpense/db/models/account_group/account_group_model_
 import 'package:pokercat/constant.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:workmanager/workmanager.dart';
+
 
 import '../models/category/category_model_db.dart';
 import '../models/transactions/transaction_model_db.dart';
@@ -389,9 +390,29 @@ class TransactionDB implements TransactionDBFunctions {
     transactionMonthListNotifier.notifyListeners();
   }
 }
+Future<dynamic> signInWithGoogle() async {
+  try {
+    final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+
+    final GoogleSignInAuthentication? googleAuth =
+    await googleUser?.authentication;
+
+    final credential = GoogleAuthProvider.credential(
+      accessToken: googleAuth?.accessToken,
+      idToken: googleAuth?.idToken,
+    );
+
+    return await FirebaseAuth.instance.signInWithCredential(credential);
+  } on Exception catch (e) {
+    // TODO
+    print('exception->$e');
+  }
+}
 
 CollectionReference transactions =
     FirebaseFirestore.instance.collection('transactions');
+
+
 
 Future<String> getTransactionFilePath(String transactionId) async {
   try {
@@ -436,15 +457,15 @@ class HiveFirestoreBackupData {
     try {
       for (var transaction in transactionList) {
         CategoryModel category = transaction.category;
-        String? filePath;
+       // String? filePath;
 
-        if (transaction.id != null) {
-          filePath = await getTransactionFilePath(transaction.id.toString());
-          await _saveTransactionToFile(
-              transaction, filePath); // Save transaction to file
-        } else {
-          print('Transaction ID is null.');
-        }
+        // if (transaction.id != null) {
+        //   filePath = await getTransactionFilePath(transaction.id.toString());
+        //   await _saveTransactionToFile(
+        //       transaction, filePath); // Save transaction to file
+        // } else {
+        //   print('Transaction ID is null.');
+        // }
 
         var firestoreData = {
           'email': email,
@@ -460,7 +481,7 @@ class HiveFirestoreBackupData {
             'categoryType': category.categoryType.name,
           },
           'note': transaction.note,
-          'file': filePath, // Include file path in firestoreData
+         // 'file': filePath, // Include file path in firestoreData
         };
 
         await firestore
@@ -521,35 +542,18 @@ class HiveFirestoreBackupData {
       };
 
       // Convert the Map to a JSON string
-      final jsonString = jsonEncode(transactionData);
+     final jsonString = jsonEncode(transactionData);
 
       // Write the JSON string to the file
-      final file = File(filePath);
-      await file.writeAsString(jsonString);
+      // final file = File(filePath);
+      // await file.writeAsString(jsonString);
     } catch (e) {
       print('Error saving transaction to file: $e');
     }
   }
 }
 
-Future<dynamic> signInWithGoogle() async {
-  try {
-    final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
 
-    final GoogleSignInAuthentication? googleAuth =
-        await googleUser?.authentication;
-
-    final credential = GoogleAuthProvider.credential(
-      accessToken: googleAuth?.accessToken,
-      idToken: googleAuth?.idToken,
-    );
-
-    return await FirebaseAuth.instance.signInWithCredential(credential);
-  } on Exception catch (e) {
-    // TODO
-    print('exception->$e');
-  }
-}
 
 class FirebaseBackupDataRetrieval1 {
   static FirebaseFirestore firestore = FirebaseFirestore.instance;
@@ -578,8 +582,8 @@ class FirebaseBackupDataRetrieval1 {
                 transactionSnapshot.data() as Map<String, dynamic>?;
 
             if (data != null) {
-              String filePath = await getTransactionFilePath(transactionId);
-              print('File path for transaction $transactionId: $filePath');
+            //  String filePath = await getTransactionFilePath(transactionId);
+            //  print('File path for transaction $transactionId: $filePath');
               CategoryType getCategoryTypeFromString(
                   String categoryTypeString) {
                 switch (categoryTypeString.toLowerCase()) {
@@ -636,22 +640,4 @@ class FirebaseBackupDataRetrieval1 {
 
 
 
-/// backup auto---------------------------------------
 
-
-void callbackDispatcher() {
-   FirebaseAuth auth = FirebaseAuth.instance;
-  Workmanager().executeTask((task, inputData) async {
-    var user = auth.currentUser;
-    // Perform background tasks here
-    switch (task) {
-      case 'backup':
-        HiveFirestoreBackupData.backupDataToFirestore(user!.email);
-        break;
-      case 'fetch':
-        await FirebaseBackupDataRetrieval1.getUserTransactionsAndStore();
-        break;
-    }
-    return Future.value(true);
-  });
-}

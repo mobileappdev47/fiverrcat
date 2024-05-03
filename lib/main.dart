@@ -12,15 +12,10 @@ import 'package:pokercat/addexpense/db/models/transactions/transaction_model_db.
 import 'package:pokercat/pages/app_settings_screen/income_category_settings/app_default.dart';
 import 'package:pokercat/pages/app_settings_screen/income_category_settings/income_category_provider.dart';
 import 'package:pokercat/pages/btmnavigation.dart';
-import 'package:workmanager/workmanager.dart';
 import 'addexpense/db/models/category/category_model_db.dart';
 import 'addexpense/db/models/currency/curency_model.db.dart';
 import 'global/component/preferences.dart';
 import 'imports.dart';
-
-
-
-
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -35,17 +30,6 @@ Future<void> main() async {
       );
   await Hive.initFlutter();
 
-  Workmanager().initialize(callbackDispatcher, isInDebugMode: true);
-  Workmanager().registerPeriodicTask(
-    'backup',
-    'backupTask',
-    frequency: Duration(seconds: 2), // Adjust frequency as needed
-  );
-  Workmanager().registerPeriodicTask(
-    'fetch',
-    'fetchTask',
-    frequency: Duration(seconds: 2), // Adjust frequency as needed
-  );
 
   if (!Hive.isAdapterRegistered(CategoryTypeAdapter().typeId)) {
     Hive.registerAdapter(CategoryTypeAdapter());
@@ -78,9 +62,7 @@ Future<void> main() async {
   unawaited(MobileAds.instance.initialize());
 
   runApp(const App());
-
 }
-
 class App extends StatefulWidget {
   const App({super.key});
 
@@ -99,7 +81,6 @@ class _AppState extends State<App> {
   //   });
   // }
 
-
   @override
   void dispose() {
     super.dispose();
@@ -112,11 +93,8 @@ class _AppState extends State<App> {
     CategoryDB().getAllCategory();
     // TODO: implement initState
     super.initState();
-
     // getLoggedInState();
   }
-
-
 
   // This widget is the root of your application.
 
