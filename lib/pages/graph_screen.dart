@@ -77,8 +77,14 @@ initialize1DayData() {
   stops.add(0.5);
   stops.add(1.0);
 
+
+
+
+
   if (cycleOrAllTime == 'All Time') {
+
     allTimeButton();
+
   } else {
     if (dropdownvalue == '1 Day') {
       dayWiseDay();
