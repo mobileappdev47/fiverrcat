@@ -320,7 +320,10 @@ class _AppSettingsScreenState extends State<AppSettingsScreen> {
                             // );
                           } else {
                             await signInWithGoogle().then((value) {
+                              loader = false;
+                              setState(() {});
                               Get.to(BackUpScreen());
+
                              // var user1 = FirebaseAuth.instance.currentUser;
                               // showDialog(
                               //   context: context,

@@ -79,12 +79,12 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
       if (totalAmount < 0) {
         amountText =
-            '- ${currencySymboleUpdate.value} ${formatter.format(totalAmount.abs())}';
+        '- ${currencySymboleUpdate.value} ${formatter.format(totalAmount.abs())}';
         colorM = Colors.red;
         setState(() {});
       } else {
         amountText =
-            '+ ${currencySymboleUpdate.value} ${formatter.format(totalAmount.abs())}';
+        '+ ${currencySymboleUpdate.value} ${formatter.format(totalAmount.abs())}';
         colorM = Colors.green;
         setState(() {});
       }
@@ -175,7 +175,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
   NumberFormat formatter = NumberFormat('#,##0');
   DateTimeRange selectedDateRange =
-      SelectDate().currentDateForCalenderSelection();
+  SelectDate().currentDateForCalenderSelection();
 
   DateTime myChosenDate = DateTime.now();
   Color colorM = Colors.green;
@@ -337,7 +337,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
     Future<void> filterDataForCurrentMonth(List<DateTime> visibleDates) async {
       // Extract the start and end dates of the current month
       DateTime startOfMonth =
-          DateTime(visibleDates[0].year, visibleDates[0].month, 1);
+      DateTime(visibleDates[0].year, visibleDates[0].month, 1);
       DateTime endOfMonth = DateTime(visibleDates[visibleDates.length - 1].year,
           visibleDates[visibleDates.length - 1].month + 1, 0);
 
@@ -367,27 +367,27 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
                   return Center(
                       child: Text(
-                    meeting.eventName,
-                    style: TextStyle(
-                      color: meeting.background,
-                      fontSize: meeting.eventName.length <= 11
-                          ? 8
-                          : meeting.eventName.length <= 12
+                        meeting.eventName,
+                        style: TextStyle(
+                          color: meeting.background,
+                          fontSize: meeting.eventName.length <= 11
+                              ? 8
+                              : meeting.eventName.length <= 12
                               ? 7
                               : meeting.eventName.length <= 13
-                                  ? 6
-                                  : 4.2,
-                    ),
-                    overflow: TextOverflow.visible,
-                    maxLines: 1,
-                  ));
+                              ? 6
+                              : 4.2,
+                        ),
+                        overflow: TextOverflow.visible,
+                        maxLines: 1,
+                      ));
                 },
                 todayTextStyle: const TextStyle(color: Colors.black),
                 monthViewSettings: const MonthViewSettings(
                   dayFormat: 'EEE',
                   showTrailingAndLeadingDates: false,
                   appointmentDisplayMode:
-                      MonthAppointmentDisplayMode.appointment,
+                  MonthAppointmentDisplayMode.appointment,
                   monthCellStyle: MonthCellStyle(
                     textStyle: TextStyle(
                       color: Colors.white,
@@ -401,11 +401,11 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   SchedulerBinding.instance!
                       .addPostFrameCallback((Duration duration) {
                     _calendarController.selectedDate =
-                        viewChangedDetails.visibleDates[0];
+                    viewChangedDetails.visibleDates[0];
                   });
                   if (viewChangedDetails.visibleDates.isNotEmpty) {
                     DateTime currentVisibleMonth =
-                        viewChangedDetails.visibleDates[0];
+                    viewChangedDetails.visibleDates[0];
                     int previousVisibleMonth = DateTime.now().month;
                     await filterDataForCurrentMonth(
                         viewChangedDetails.visibleDates);
@@ -445,66 +445,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 ),
               ),
             ),
-            //---------------------------------------------------calendar-------------------------------------------------------------
-            // TableCalendar<Event>(
-            //   firstDay: kFirstDay,
-            //   lastDay: kLastDay,
-            //   focusedDay: _focusedDay,
-            //   selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
-            //   rangeStartDay: _rangeStart,
-            //   rangeEndDay: _rangeEnd,
-            //   calendarFormat: _calendarFormat,
-            //   rangeSelectionMode: _rangeSelectionMode,
-            //   eventLoader: _getEventsForDay,
-            //   startingDayOfWeek: StartingDayOfWeek.monday,
-            //   daysOfWeekStyle: const DaysOfWeekStyle(
-            //     weekdayStyle: TextStyle(color: AppTheme.calendarTextColor),
-            //     weekendStyle: TextStyle(color: AppTheme.calendarWeekendColor),
-            //   ),
-            //   headerStyle: const HeaderStyle(
-            //     leftChevronIcon: Icon(
-            //       color: AppTheme.calendarHeaderColor,
-            //       Icons.arrow_left,
-            //       size: 20.0,
-            //     ),
-            //     rightChevronIcon: Icon(
-            //       color: AppTheme.calendarHeaderColor,
-            //       Icons.arrow_right,
-            //       size: 20.0,
-            //     ),
-            //     formatButtonVisible: false,
-            //     titleTextStyle: TextStyle(
-            //       fontSize: 18.0,
-            //       color: AppTheme.calendarHeaderColor,
-            //     ),
-            //   ),
-            //   calendarStyle: const CalendarStyle(
-            //     markerDecoration: BoxDecoration(
-            //         color: AppTheme.calendarMarkerColor,
-            //         shape: BoxShape.circle),
-            //     //---------주말텍스트스타일
-            //     weekendTextStyle: TextStyle(color: AppTheme.calendarTextColor),
-            //     //---------평일텍스트스타일
-            //     defaultTextStyle: TextStyle(color: AppTheme.calendarTextColor),
-            //
-            //     outsideTextStyle:
-            //         TextStyle(color: AppTheme.calendarOutsideTextColor),
-            //     outsideDaysVisible: true,
-            //   ),
-            //   onDaySelected: onDaySelected,
-            //   onRangeSelected: _onRangeSelected,
-            //   onFormatChanged: (format) {
-            //     if (_calendarFormat != format) {
-            //       setState(() {
-            //         _calendarFormat = format;
-            //       });
-            //     }
-            //   },
-            //   onPageChanged: (focusedDay) {
-            //     _focusedDay = focusedDay;
-            //   },
-            // ),
-            //---------------------------------------------------divider-------------------------------------------------------------
+
             const Padding(
               padding: EdgeInsets.all(8.0),
               child: SizedBox(
@@ -520,10 +461,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
             ValueListenableBuilder(
               valueListenable:
-                  TransactionDB.instance.transactionMonthListNotifier,
+              TransactionDB.instance.transactionMyMonthListNotifier,
               builder: (context, value, child) {
                 Map<String, List<TransactionModel>> mapList =
-                    SelectDate().sortByDate(value);
+                SelectDate().sortByDate(value);
                 incomeData = mapList.values.fold(0, (previousValue, element) {
                   for (var transaction in element) {
                     if (transaction.categoryType == CategoryType.income) {
@@ -621,16 +562,17 @@ class _CalendarScreenState extends State<CalendarScreen> {
             // ),
 
             // ----------------------------------- Transaction History ----------------------------------------
+
             ValueListenableBuilder(
               valueListenable: TransactionDB.instance.transactionListNotifier,
               builder: (context, newList, child) {
                 /////maplist 는 2024-03-24: [Instance of 'TransactionModel', Instance of 'TransactionModel']같은  [날짜:TransactionModel]의 나열
                 //newList는 [Instance of 'TransactionModel', Instance of 'TransactionModel'] 같은 TransactionModel 객채의 나열
                 String myChosenDateString =
-                    DateFormat('yyyy-MM-dd').format(myChosenDate).toString();
+                DateFormat('yyyy-MM-dd').format(myChosenDate).toString();
 
                 Map<String, List<TransactionModel>> mapList =
-                    SelectDate().sortByDate(newList);
+                SelectDate().sortByDate(newList);
                 newListData = mapList;
 
                 //keys는 2024-03-24, 2024-03-21, 2024-03-12, 2024-03-01 같은 날짜의 나열.
@@ -646,197 +588,199 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 print('myChosenDateString = ${myChosenDateString}');
 
                 return mapList['${myChosenDateString}'] != null
-                    ? Padding(
-                        padding: const EdgeInsets.only(top: 9),
-                        child: ListView.builder(
-                          shrinkWrap: true,
-                          physics: const BouncingScrollPhysics(),
-                          itemCount: keys.length,
-                          itemBuilder: (context, index) {
-                            List<TransactionModel> calculationList =
-                                mapList[keys[index]]!;
-                            double incomeData = calculationList.fold(0,
-                                (previousValue, transaction) {
-                              if (transaction.categoryType ==
-                                  CategoryType.income) {
-                                return previousValue + transaction.amount;
-                              }
-                              return previousValue;
-                            });
+                    ?
+                Padding(
+                  padding: const EdgeInsets.only(top: 9),
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    physics: const BouncingScrollPhysics(),
+                    itemCount: keys.length,
+                    itemBuilder: (context, index) {
+                      List<TransactionModel> calculationList =
+                      mapList[keys[index]]!;
+                      double incomeData = calculationList.fold(0,
+                              (previousValue, transaction) {
+                            if (transaction.categoryType ==
+                                CategoryType.income) {
+                              return previousValue + transaction.amount;
+                            }
+                            return previousValue;
+                          });
 
-                            double expenseData = calculationList.fold(0,
-                                (previousValue, transaction) {
-                              if (transaction.categoryType ==
-                                  CategoryType.expense) {
-                                previousValue += transaction.amount;
-                              }
-                              return previousValue;
-                            });
-                            return Padding(
-                              padding: EdgeInsets.symmetric(
-                                horizontal:
-                                    MediaQuery.of(context).size.width * 0.04,
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.only(bottom: 8.8),
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(10),
-                                    color: AppTheme.pcTransactionColor,
-                                    boxShadow: const [
-                                      BoxShadow(
-                                        color: AppTheme.pcShadowColor,
-                                        spreadRadius: 0,
-                                        blurRadius: 5,
-                                        offset: Offset(0, 3),
-                                      ),
-                                    ],
-                                  ),
+                      double expenseData = calculationList.fold(0,
+                              (previousValue, transaction) {
+                            if (transaction.categoryType ==
+                                CategoryType.expense) {
+                              previousValue += transaction.amount;
+                            }
+                            return previousValue;
+                          });
+                      return Padding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal:
+                          MediaQuery.of(context).size.width * 0.04,
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.only(bottom: 8.8),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(10),
+                              color: AppTheme.pcTransactionColor,
+                              boxShadow: const [
+                                BoxShadow(
+                                  color: AppTheme.pcShadowColor,
+                                  spreadRadius: 0,
+                                  blurRadius: 5,
+                                  offset: Offset(0, 3),
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                      left: 10, right: 10, top: 10),
                                   child: Column(
                                     children: [
-                                      Padding(
-                                        padding: const EdgeInsets.only(
-                                            left: 10, right: 10, top: 10),
-                                        child: Column(
-                                          children: [
-                                            Row(
-                                              children: [
-                                                Container(
-                                                  width: 105,
-                                                  //width: 65,
-                                                  decoration:
-                                                      const BoxDecoration(
-                                                    color: AppTheme
-                                                        .pcTextLinkColor2,
-                                                    borderRadius:
-                                                        BorderRadius.all(
-                                                            Radius.circular(5)),
-                                                  ),
-                                                  child: Padding(
-                                                    padding:
-                                                        const EdgeInsets.all(
-                                                            8.0),
-                                                    child: Text(
-                                                      DateFormat('yyyy.MM.dd ')
-                                                              .format(DateTime
-                                                                  .parse(keys[
-                                                                      index]))
-                                                              .toString() +
-                                                          DateFormat('EEE')
-                                                              .format(DateTime
-                                                                  .parse(keys[
-                                                                      index]))
-                                                              .toString(),
-                                                      style: const TextStyle(
-                                                          color: AppTheme
-                                                              .pcTextSecondayColor,
-                                                          fontWeight:
-                                                              FontWeight.bold),
-                                                    ),
-                                                  ),
-                                                ),
-                                                IconButton(
-                                                  onPressed: () async {
-                                                    resetTransactionsOnly(
-                                                        context,
-                                                        mapList[keys[index]]!);
-                                                    setState(() {
-                                                      mapList.remove(
-                                                          keys[index].length);
-                                                      keys
-                                                          .removeAt(index)
-                                                          .length;
-                                                    });
-                                                    await TransactionDB.instance
-                                                        .refresh();
-                                                    setState(() {});
-                                                    Get.forceAppUpdate();
-                                                  },
-                                                  icon: const Icon(
-                                                      Icons.delete_forever,
-                                                      color: AppTheme
-                                                          .pcTextTertiaryColor),
-                                                ),
-                                                const Spacer(),
-                                                Column(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.end,
-                                                  children: [
-                                                    Text(
-                                                      '+ ${currencySymboleUpdate.value} ${formatter.format(incomeData)}',
-                                                      style: const TextStyle(
-                                                        color: AppTheme
-                                                            .pcTextIncomeColor,
-                                                        fontSize: 13,
-                                                      ),
-                                                    ),
-                                                    const SizedBox(
-                                                      height: 5,
-                                                    ),
-                                                    Text(
-                                                      '- ${currencySymboleUpdate.value} ${formatter.format(expenseData)}',
-                                                      style: const TextStyle(
-                                                        color: AppTheme
-                                                            .pcTextExpenseColor,
-                                                        fontSize: 13,
-                                                      ),
-                                                    ),
-                                                    Text(
-                                                      '= ${currencySymboleUpdate.value} ${formatter.format(incomeData - expenseData)}',
-                                                      style: const TextStyle(
-                                                        color: AppTheme
-                                                            .pcTextExpenseColor,
-                                                        fontSize: 13,
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ],
-                                            ),
-                                            const Divider(
+                                      Row(
+                                        children: [
+                                          Container(
+                                            width: 105,
+                                            //width: 65,
+                                            decoration:
+                                            const BoxDecoration(
                                               color: AppTheme
-                                                  .pcSecondaryDividerColor,
-                                              thickness: 2,
+                                                  .pcTextLinkColor2,
+                                              borderRadius:
+                                              BorderRadius.all(
+                                                  Radius.circular(5)),
                                             ),
-                                          ],
-                                        ),
+                                            child: Padding(
+                                              padding:
+                                              const EdgeInsets.all(
+                                                  8.0),
+                                              child: Text(
+                                                DateFormat('yyyy.MM.dd ')
+                                                    .format(DateTime
+                                                    .parse(keys[
+                                                index]))
+                                                    .toString() +
+                                                    DateFormat('EEE')
+                                                        .format(DateTime
+                                                        .parse(keys[
+                                                    index]))
+                                                        .toString(),
+                                                style: const TextStyle(
+                                                    color: AppTheme
+                                                        .pcTextSecondayColor,
+                                                    fontWeight:
+                                                    FontWeight.bold),
+                                              ),
+                                            ),
+                                          ),
+                                          IconButton(
+                                            onPressed: () async {
+                                              resetTransactionsOnly(
+                                                  context,
+                                                  mapList[keys[index]]!);
+                                              setState(() {
+                                                mapList.remove(
+                                                    keys[index].length);
+                                                keys
+                                                    .removeAt(index)
+                                                    .length;
+                                              });
+                                              await TransactionDB.instance
+                                                  .refresh();
+                                              setState(() {});
+                                              Get.forceAppUpdate();
+                                            },
+                                            icon: const Icon(
+                                                Icons.delete_forever,
+                                                color: AppTheme
+                                                    .pcTextTertiaryColor),
+                                          ),
+                                          const Spacer(),
+                                          Column(
+                                            crossAxisAlignment:
+                                            CrossAxisAlignment.end,
+                                            children: [
+                                              Text(
+                                                '+ ${currencySymboleUpdate.value} ${formatter.format(incomeData)}',
+                                                style: const TextStyle(
+                                                  color: AppTheme
+                                                      .pcTextIncomeColor,
+                                                  fontSize: 13,
+                                                ),
+                                              ),
+                                              const SizedBox(
+                                                height: 5,
+                                              ),
+                                              Text(
+                                                '- ${currencySymboleUpdate.value} ${formatter.format(expenseData)}',
+                                                style: const TextStyle(
+                                                  color: AppTheme
+                                                      .pcTextExpenseColor,
+                                                  fontSize: 13,
+                                                ),
+                                              ),
+                                              Text(
+                                                '= ${currencySymboleUpdate.value} ${formatter.format(incomeData - expenseData)}',
+                                                style: const TextStyle(
+                                                  color: AppTheme
+                                                      .pcTextExpenseColor,
+                                                  fontSize: 13,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
                                       ),
-                                      Padding(
-                                        padding: const EdgeInsets.only(
-                                            left: 10, right: 10),
-                                        child: TransactionsCategory(
-                                          newList: mapList[keys[index]]!,
-                                        ),
+                                      const Divider(
+                                        color: AppTheme
+                                            .pcSecondaryDividerColor,
+                                        thickness: 2,
                                       ),
                                     ],
                                   ),
                                 ),
-                              ),
-                            );
-                          },
-                        ),
-                      )
-                    : Center(
-                        child: Padding(
-                          padding:
-                              const EdgeInsets.fromLTRB(0.0, 50.0, 0.0, 0.0),
-                          child: Column(
-                            children: [
-                              SizedBox(
-                                width: 150,
-                                child:
-                                    Lottie.asset('assets/searchNotFound.json'),
-                              ),
-                              const Text(
-                                "No data available..!",
-                                style: TextStyle(
-                                    fontSize: 15,
-                                    color: AppTheme.pcTextTertiaryColor),
-                              ),
-                            ],
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                      left: 10, right: 10),
+                                  child: TransactionsCategory(
+                                    newList: mapList[keys[index]]!,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       );
+                    },
+                  ),
+                )
+                    :
+                Center(
+                  child: Padding(
+                    padding:
+                    const EdgeInsets.fromLTRB(0.0, 50.0, 0.0, 0.0),
+                    child: Column(
+                      children: [
+                        SizedBox(
+                          width: 150,
+                          child:
+                          Lottie.asset('assets/searchNotFound.json'),
+                        ),
+                        const Text(
+                          "No data available..!",
+                          style: TextStyle(
+                              fontSize: 15,
+                              color: AppTheme.pcTextTertiaryColor),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
               },
             ),
             // ----------------------------------- Transaction History End----------------------------------------
@@ -846,71 +790,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
     );
   }
 
-  // resetTransactionsOnly(value, id) {
-  //   showDialog(
-  //     context: value,
-  //     builder: (context) {
-  //       return StatefulBuilder(
-  //         builder: (context, update) => AlertDialog(
-  //           shape: RoundedRectangleBorder(
-  //             borderRadius: BorderRadius.circular(15),
-  //           ),
-  //           backgroundColor: AppTheme.pcWaveColor,
-  //           content: const Text(
-  //               'Reseting transaction will erase all your transaction data.'),
-  //           title: const Text(
-  //             'Do you want to delete all transactions?',
-  //             style: TextStyle(
-  //               color: AppTheme.pcTextQuaternaryColor,
-  //               fontWeight: FontWeight.bold,
-  //             ),
-  //           ),
-  //           actions: [
-  //             TextButton(
-  //               onPressed: () async {
-  //                 setState(() {
-  //                   myNumber = myNumber + 1;
-  //                 });
-  //                 print(myNumber);
-  //                 final transactionDB =
-  //                     await Hive.openBox<TransactionModel>(TRANSACTION_DB_NAME);
-  //
-  //                 // final keys = transactionDB.values.toList();
-  //                 transactionDB.delete(id);
-  //
-  //                 setState(() {});
-  //                 update.call(
-  //                   () {},
-  //                 );
-  //                 TransactionDB.instance.refresh();
-  //                 Navigator.of(context).pop();
-  //               },
-  //               child: const Text(
-  //                 'Yes',
-  //                 style: TextStyle(
-  //                   color: AppTheme.pcTextQuaternaryColor,
-  //                   fontWeight: FontWeight.bold,
-  //                 ),
-  //               ),
-  //             ),
-  //             TextButton(
-  //               onPressed: () {
-  //                 Navigator.of(context).pop();
-  //               },
-  //               child: const Text(
-  //                 'No',
-  //                 style: TextStyle(
-  //                   color: AppTheme.pcTextQuaternaryColor,
-  //                   fontWeight: FontWeight.bold,
-  //                 ),
-  //               ),
-  //             ),
-  //           ],
-  //         ),
-  //       );
-  //     },
-  //   );
-  // }
   resetTransactionsOnly(
       BuildContext context, List<TransactionModel> transactions) {
     showDialog(
@@ -935,12 +814,12 @@ class _CalendarScreenState extends State<CalendarScreen> {
               TextButton(
                 onPressed: () async {
                   final transactionDB =
-                      await Hive.openBox<TransactionModel>(TRANSACTION_DB_NAME);
+                  await Hive.openBox<TransactionModel>(TRANSACTION_DB_NAME);
                   for (var transaction in transactions) {
                     transactionDB.delete(transaction.id);
                   }
                   update.call(
-                    () {},
+                        () {},
                   );
                   await TransactionDB.instance.refresh();
                   setState(() {});
@@ -980,3 +859,133 @@ class _AppointmentDataSource extends CalendarDataSource {
     appointments = source;
   }
 }
+//---------------------------------------------------calendar-------------------------------------------------------------
+// TableCalendar<Event>(
+//   firstDay: kFirstDay,
+//   lastDay: kLastDay,
+//   focusedDay: _focusedDay,
+//   selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
+//   rangeStartDay: _rangeStart,
+//   rangeEndDay: _rangeEnd,
+//   calendarFormat: _calendarFormat,
+//   rangeSelectionMode: _rangeSelectionMode,
+//   eventLoader: _getEventsForDay,
+//   startingDayOfWeek: StartingDayOfWeek.monday,
+//   daysOfWeekStyle: const DaysOfWeekStyle(
+//     weekdayStyle: TextStyle(color: AppTheme.calendarTextColor),
+//     weekendStyle: TextStyle(color: AppTheme.calendarWeekendColor),
+//   ),
+//   headerStyle: const HeaderStyle(
+//     leftChevronIcon: Icon(
+//       color: AppTheme.calendarHeaderColor,
+//       Icons.arrow_left,
+//       size: 20.0,
+//     ),
+//     rightChevronIcon: Icon(
+//       color: AppTheme.calendarHeaderColor,
+//       Icons.arrow_right,
+//       size: 20.0,
+//     ),
+//     formatButtonVisible: false,
+//     titleTextStyle: TextStyle(
+//       fontSize: 18.0,
+//       color: AppTheme.calendarHeaderColor,
+//     ),
+//   ),
+//   calendarStyle: const CalendarStyle(
+//     markerDecoration: BoxDecoration(
+//         color: AppTheme.calendarMarkerColor,
+//         shape: BoxShape.circle),
+//     //---------주말텍스트스타일
+//     weekendTextStyle: TextStyle(color: AppTheme.calendarTextColor),
+//     //---------평일텍스트스타일
+//     defaultTextStyle: TextStyle(color: AppTheme.calendarTextColor),
+//
+//     outsideTextStyle:
+//         TextStyle(color: AppTheme.calendarOutsideTextColor),
+//     outsideDaysVisible: true,
+//   ),
+//   onDaySelected: onDaySelected,
+//   onRangeSelected: _onRangeSelected,
+//   onFormatChanged: (format) {
+//     if (_calendarFormat != format) {
+//       setState(() {
+//         _calendarFormat = format;
+//       });
+//     }
+//   },
+//   onPageChanged: (focusedDay) {
+//     _focusedDay = focusedDay;
+//   },
+// ),
+//---------------------------------------------------divider-------------------------------------------------------------
+
+
+
+//--reset transaction only
+
+// resetTransactionsOnly(value, id) {
+//   showDialog(
+//     context: value,
+//     builder: (context) {
+//       return StatefulBuilder(
+//         builder: (context, update) => AlertDialog(
+//           shape: RoundedRectangleBorder(
+//             borderRadius: BorderRadius.circular(15),
+//           ),
+//           backgroundColor: AppTheme.pcWaveColor,
+//           content: const Text(
+//               'Reseting transaction will erase all your transaction data.'),
+//           title: const Text(
+//             'Do you want to delete all transactions?',
+//             style: TextStyle(
+//               color: AppTheme.pcTextQuaternaryColor,
+//               fontWeight: FontWeight.bold,
+//             ),
+//           ),
+//           actions: [
+//             TextButton(
+//               onPressed: () async {
+//                 setState(() {
+//                   myNumber = myNumber + 1;
+//                 });
+//                 print(myNumber);
+//                 final transactionDB =
+//                     await Hive.openBox<TransactionModel>(TRANSACTION_DB_NAME);
+//
+//                 // final keys = transactionDB.values.toList();
+//                 transactionDB.delete(id);
+//
+//                 setState(() {});
+//                 update.call(
+//                   () {},
+//                 );
+//                 TransactionDB.instance.refresh();
+//                 Navigator.of(context).pop();
+//               },
+//               child: const Text(
+//                 'Yes',
+//                 style: TextStyle(
+//                   color: AppTheme.pcTextQuaternaryColor,
+//                   fontWeight: FontWeight.bold,
+//                 ),
+//               ),
+//             ),
+//             TextButton(
+//               onPressed: () {
+//                 Navigator.of(context).pop();
+//               },
+//               child: const Text(
+//                 'No',
+//                 style: TextStyle(
+//                   color: AppTheme.pcTextQuaternaryColor,
+//                   fontWeight: FontWeight.bold,
+//                 ),
+//               ),
+//             ),
+//           ],
+//         ),
+//       );
+//     },
+//   );
+// }
