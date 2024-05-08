@@ -89,4 +89,5 @@ class Meeting {
 
   /// IsAllDay which is equivalent to isAllDay property of [Appointment].
   bool isAllDay;
+
 }

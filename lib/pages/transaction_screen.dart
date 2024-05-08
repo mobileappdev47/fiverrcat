@@ -9,6 +9,7 @@ import 'package:pokercat/addexpense/db/models/transactions/transaction_model_db.
 import 'package:pokercat/addexpense/widget/transaction_helper.dart';
 import 'package:pokercat/constant.dart';
 import 'package:pokercat/imports.dart';
+import 'package:pokercat/pages/bankroll.dart';
 import '../global/component/appbar.dart';
 
 // ignore: must_be_immutable
@@ -107,6 +108,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
         selectedDate.start, selectedDate.end);
     TransactionDB.instance.refresh();
     TransactionDB.instance.getTransactionsForCurrentMonth();
+
     CategoryDB.instance.getAllCategory();
     super.initState();
   }

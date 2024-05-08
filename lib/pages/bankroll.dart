@@ -1,7 +1,6 @@
 import 'dart:ffi';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:lite_rolling_switch/lite_rolling_switch.dart';
 import 'package:pokercat/addexpense/add_task_screen.dart';
@@ -9,6 +8,7 @@ import 'package:pokercat/addexpense/db/functions/transaction_function.dart';
 import 'package:pokercat/addexpense/db/models/account_group/account_group_model_db.dart';
 import 'package:pokercat/addexpense/db/models/category/category_model_db.dart';
 import 'package:pokercat/constant.dart';
+import 'package:pokercat/packages/expense_repository/lib/expense_repository.dart';
 import 'package:pokercat/pages/calendar_screen.dart';
 import 'package:pokercat/pages/graph_screen.dart';
 import 'dart:io';
@@ -19,13 +19,9 @@ import 'package:pokercat/addexpense/db/functions/category_functions.dart';
 import 'package:pokercat/addexpense/db/models/transactions/transaction_model_db.dart';
 import 'package:pokercat/pages/transaction_screen.dart';
 import '../addexpense/widget/transaction_helper.dart';
-import '../packages/expense_repository/lib/src/models/expense.dart';
-import '../global/component/appbar.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:pokercat/addexpense/db/functions/currency_function.dart';
-
 
 final ValueNotifier<DateTime> selectedDate1 = ValueNotifier(DateTime.now());
+DateTime? selectedMonth;
 
 class Bankroll extends StatefulWidget {
   const Bankroll({super.key, this.modelFromTransation});
@@ -37,13 +33,13 @@ class Bankroll extends StatefulWidget {
 
 class _BankrollState extends State<Bankroll> {
   DateTime selectedDate = DateTime.now();
-  TextEditingController _amountController = TextEditingController();
+  final TextEditingController _amountController = TextEditingController();
   String? _categoryID;
 
   String? accountType;
   CategoryModel selectedcategoryModel = CategoryModel(
       id: '', name: '', isDeleted: true, categoryType: CategoryType.income);
-  TextEditingController _noteController = TextEditingController();
+  final TextEditingController _noteController = TextEditingController();
 
   TextEditingController dateController = TextEditingController();
 
@@ -116,70 +112,71 @@ class _BankrollState extends State<Bankroll> {
       'total': '0.0',
     }
   };
-  initMonthData (){
- monthDataForGraph = {
-    'jan': {
-      'income': '0.0',
-      'expense': '0.0',
-      'total': '0.0',
-    },
-    'feb': {
-      'income': '0.0',
-      'expense': '0.0',
-      'total': '0.0',
-    },
-    'mar': {
-      'income': '0.0',
-      'expense': '0.0',
-      'total': '0.0',
-    },
-    'apr': {
-      'income': '0.0',
-      'expense': '0.0',
-      'total': '0.0',
-    },
-    'may': {
-      'income': '0.0',
-      'expense': '0.0',
-      'total': '0.0',
-    },
-    'jun': {
-      'income': '0.0',
-      'expense': '0.0',
-      'total': '0.0',
-    },
-    'july': {
-      'income': '0.0',
-      'expense': '0.0',
-      'total': '0.0',
-    },
-    'aug': {
-      'income': '0.0',
-      'expense': '0.0',
-      'total': '0.0',
-    },
-    'sep': {
-      'income': '0.0',
-      'expense': '0.0',
-      'total': '0.0',
-    },
-    'oct': {
-      'income': '0.0',
-      'expense': '0.0',
-      'total': '0.0',
-    },
-    'nov': {
-      'income': '0.0',
-      'expense': '0.0',
-      'total': '0.0',
-    },
-    'dec': {
-      'income': '0.0',
-      'expense': '0.0',
-      'total': '0.0',
-    }
-  };
-}
+
+  initMonthData() {
+    monthDataForGraph = {
+      'jan': {
+        'income': '0.0',
+        'expense': '0.0',
+        'total': '0.0',
+      },
+      'feb': {
+        'income': '0.0',
+        'expense': '0.0',
+        'total': '0.0',
+      },
+      'mar': {
+        'income': '0.0',
+        'expense': '0.0',
+        'total': '0.0',
+      },
+      'apr': {
+        'income': '0.0',
+        'expense': '0.0',
+        'total': '0.0',
+      },
+      'may': {
+        'income': '0.0',
+        'expense': '0.0',
+        'total': '0.0',
+      },
+      'jun': {
+        'income': '0.0',
+        'expense': '0.0',
+        'total': '0.0',
+      },
+      'july': {
+        'income': '0.0',
+        'expense': '0.0',
+        'total': '0.0',
+      },
+      'aug': {
+        'income': '0.0',
+        'expense': '0.0',
+        'total': '0.0',
+      },
+      'sep': {
+        'income': '0.0',
+        'expense': '0.0',
+        'total': '0.0',
+      },
+      'oct': {
+        'income': '0.0',
+        'expense': '0.0',
+        'total': '0.0',
+      },
+      'nov': {
+        'income': '0.0',
+        'expense': '0.0',
+        'total': '0.0',
+      },
+      'dec': {
+        'income': '0.0',
+        'expense': '0.0',
+        'total': '0.0',
+      }
+    };
+  }
 
   @override
   void initState() {
@@ -218,28 +215,27 @@ class _BankrollState extends State<Bankroll> {
     getAllAccountGroup();
     accountGroupBalanceAmount();
 
-
-
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
-       title: ValueListenableBuilder<DateTime>(
-         valueListenable: selectedDate1,
-         builder: (context, selectedDate, _) {
-           String monthName = DateFormat('MMMM').format(selectedDate);
-           int year = selectedDate.year;
-           return Text(
-               '$monthName $year',
-             style: TextStyle(
-               fontSize: 20, // Adjust the font size as needed
-               fontWeight: FontWeight.bold, // Optionally, adjust the font weight
-             ),
-           );
-         },
-       ),
-       // title: Text(_getAppBarTitle()),
-       // titleStr: 'Bankroll',
+        title: ValueListenableBuilder<DateTime>(
+          valueListenable: selectedDate1,
+          builder: (context, selectedDate, _) {
+            String monthName = DateFormat('MMMM').format(selectedDate);
+            int year = selectedDate.year;
+            return Text(
+              '$monthName $year',
+              style: const TextStyle(
+                fontSize: 20, // Adjust the font size as needed
+                fontWeight:
+                    FontWeight.bold, // Optionally, adjust the font weight
+              ),
+            );
+          },
+        ),
+        // title: Text(_getAppBarTitle()),
+        // titleStr: 'Bankroll',
         actions: <Widget>[
           Row(
             children: [
@@ -279,11 +275,7 @@ class _BankrollState extends State<Bankroll> {
                         iconOff: Icons.calendar_month,
                         animationDuration: const Duration(milliseconds: 200),
                         onChanged: (bool state) {
-
-
                           setState(() {
-
-
                             screenIsGraph = state;
                             // initMonthData();
                             // //january
@@ -631,16 +623,13 @@ class _BankrollState extends State<Bankroll> {
               builder: (context) => AddTaskScreen()).then((value) {
             setState(() {
               // initialize();
-              selected ='All';
-              selectedCategory= 'All';
-              filterList =  TransactionDB.instance.transactionListNotifier.value;
-              selectedCategoryIndex= 0;
+              selected = 'All';
+              selectedCategory = 'All';
+              filterList = TransactionDB.instance.transactionListNotifier.value;
+              selectedCategoryIndex = 0;
               initialize1DayData();
-            })
-            ;
-          }
-          );
-
+            });
+          });
         },
       ),
     );

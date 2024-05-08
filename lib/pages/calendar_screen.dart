@@ -15,13 +15,11 @@ import '../addexpense/db/functions/transaction_function.dart';
 import '../addexpense/db/models/category/category_model_db.dart';
 import '../addexpense/db/models/transactions/transaction_model_db.dart';
 import '../addexpense/widget/transaction_helper.dart';
-import '../constant.dart';
 
 ValueNotifier<double> incomeCurrentMonthNotifier = ValueNotifier(0);
 ValueNotifier<double> expenseCurrentMonthNotifier = ValueNotifier(0);
 ValueNotifier<double> totalCurrentMonthNotifier = ValueNotifier(0);
 
-// ignore: must_be_immutable
 class CalendarScreen extends StatefulWidget {
   const CalendarScreen({super.key});
 
@@ -117,44 +115,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
     return _AppointmentDataSource(appointments);
   }
-
-  // List<Meeting> _getDataSource() {
-  //   final List<Meeting> meetings = <Meeting>[];
-  //
-  //   setState(() {});
-  //   for (int i = 0; i < transactionList.length; i++) {
-  //     setState(() {
-  //       DateTime dateTime = DateTime.parse(transactionList[i]);
-  //
-  //       final DateTime startTime =
-  //           DateTime(dateTime.year, dateTime.month, dateTime.day, 9);
-  //       final DateTime endTime = startTime.add(const Duration(hours: 2));
-  //
-  //
-  //       print(newListData);
-  //       // if (newListData.containsKey(formatDate(selectDate))) {
-  //       //   double totalAmount = 0;
-  //       //
-  //       //   for (var transaction in newListData[formatDate(selectDate)]!) {
-  //       //     totalAmount += transaction.amount;
-  //       //   }
-  //       meetings.add(
-  //         Meeting(
-  //             '${currencySymboleUpdate.value} ${formatter.format(selectData - selectExpenseData)}',
-  //             startTime,
-  //             endTime,
-  //             Colors.transparent,
-  //             false),
-  //       );
-  //       // }
-  //       setState(() {
-  //
-  //       });
-  //     });
-  //   }
-  //   setState(() {});
-  //   return meetings;
-  // }
 
   int myNumber = 0;
   final CalendarController _calendarController = CalendarController();
@@ -588,8 +548,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 print('myChosenDateString = ${myChosenDateString}');
 
                 return mapList['${myChosenDateString}'] != null
-                    ?
-                Padding(
+                    ? Padding(
                   padding: const EdgeInsets.only(top: 9),
                   child: ListView.builder(
                     shrinkWrap: true,
@@ -759,8 +718,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     },
                   ),
                 )
-                    :
-                Center(
+                    : Center(
                   child: Padding(
                     padding:
                     const EdgeInsets.fromLTRB(0.0, 50.0, 0.0, 0.0),
@@ -919,8 +877,6 @@ class _AppointmentDataSource extends CalendarDataSource {
 //   },
 // ),
 //---------------------------------------------------divider-------------------------------------------------------------
-
-
 
 //--reset transaction only
 

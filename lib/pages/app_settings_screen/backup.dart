@@ -6,14 +6,15 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:hive/hive.dart';
+import 'package:intl/intl.dart';
 import 'package:pokercat/addexpense/db/functions/transaction_function.dart';
 import 'package:pokercat/addexpense/db/models/account_group/account_group_model_db.dart';
 import 'package:pokercat/addexpense/db/models/category/category_model_db.dart';
 import 'package:pokercat/addexpense/db/models/transactions/transaction_model_db.dart';
 import 'package:pokercat/imports.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class BackUpScreen extends StatefulWidget {
   BackUpScreen({super.key});
@@ -24,14 +25,67 @@ class BackUpScreen extends StatefulWidget {
 
 class _BackUpScreenState extends State<BackUpScreen> {
   bool autoBackupEnabled = true;
-  String dropdownValue = '1';
+  int selectedDay = 1;
+  late Timer timer;
   late String userEmail;
+
+  Future<void> saveSelectedMinute(int day) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('selectedMinute', day);
+  }
+
+  Future<void> loadSelectedMinute() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    int? day = prefs.getInt('selectedMinute');
+    if (day != null) {
+      setState(() {
+        selectedDay = day;
+      });
+    }
+  }
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     fetchFilePaths();
+    loadSelectedMinute();
+    startAutomaticBackup();
+  }
+
+  void startAutomaticBackup() {
+    // Start a timer to trigger backup retrieval at a set duration
+    timer = Timer.periodic(Duration(days: selectedDay), (timer) async {
+      print(selectedDay);
+      // Call function to get particular backup file
+      var user = FirebaseAuth.instance.currentUser;
+      await HiveFirestoreBackupData1.backupDataToFirestore(user!.email, 1);
+    });
+  }
+
+  Future<void> getParticularAutoBackupFile(int day) async {
+    var user = FirebaseAuth.instance.currentUser;
+
+    await FirebaseFirestore.instance
+        .collection('transactions')
+        .doc(user!.email)
+        .get()
+        .then((value) async {
+      List transactionGetFromFirebase = [];
+
+      if (value.data() != null) {
+        print(value.data()!['userTransaction'][0]['transaction']);
+
+        for (int i = 0; i < value.data()!['userTransaction'].length; i++) {
+          // Assuming the day here is equivalent to the index (i)
+          if (day == i + 1) {
+            addDataToHive(value.data()!['userTransaction'][i]['transaction'],
+                value.data()!['userTransaction'][i]['filename']);
+            break;
+          }
+        }
+      } else {}
+    });
   }
 
   deleteParticularBackUpFile(int index) async {
@@ -73,7 +127,6 @@ class _BackUpScreenState extends State<BackUpScreen> {
         .doc(user!.email)
         .get()
         .then((value) async {
-
       List transactionGetFromFirebase = [];
 
       if (value.data() != null) {
@@ -81,8 +134,8 @@ class _BackUpScreenState extends State<BackUpScreen> {
 
         for (int i = 0; i < value.data()!['userTransaction'].length; i++) {
           if (index == i) {
-
-            addDataToHive(value.data()!['userTransaction'][i]['transaction'],value.data()!['userTransaction'][i]['filename']);
+            addDataToHive(value.data()!['userTransaction'][i]['transaction'],
+                value.data()!['userTransaction'][i]['filename']);
 
             break;
           }
@@ -91,66 +144,67 @@ class _BackUpScreenState extends State<BackUpScreen> {
     });
   }
 
+  addDataToHive(List transactionList, fileName) async {
+    print(transactionList);
+    print(transactionList.length);
 
-  addDataToHive(List transactionList,fileName ) async {
-   print(transactionList);
-   print(transactionList.length);
+    for (int i = 0; i < transactionList.length; i++) {
+      var categoryType;
 
+      if (transactionList[i]['detail']['categoryType'] == 'income') {
+        categoryType = CategoryType.income;
+      } else {
+        categoryType = CategoryType.expense;
+      }
+      CategoryModel category = CategoryModel(
+        id: transactionList[i]['detail']['category']['id'],
+        name: transactionList[i]['detail']['category']['name'],
+        isDeleted: transactionList[i]['detail']['category']['isDeleted'],
+        categoryType: categoryType,
+      );
 
+      TransactionModel transaction = TransactionModel(
+        id: transactionList[i]['id'],
+        amount: transactionList[i]['detail']['amount'],
+        date: transactionList[i]['detail']['date'],
+        note: transactionList[i]['detail']['note'],
+        categoryType: categoryType,
+        category: category,
+        account: AccountType.cash,
+      );
+      final transactionDB = await Hive.openBox<TransactionModel>(
+          HiveFirestoreBackupData.TRANSACTION_DB_NAME);
+      await transactionDB.put(transactionList[i]['id'], transaction);
+    }
 
-   for(int i =0; i< transactionList.length; i++){
-     var categoryType;
-
-     if(transactionList[i]['detail']['categoryType']=='income'){
-       categoryType= CategoryType.income;
-     }
-     else {
-       categoryType= CategoryType.expense;
-     }
-     CategoryModel category = CategoryModel(
-       id: transactionList[i]['detail']['category']['id'],
-       name: transactionList[i]['detail']['category']['name'],
-       isDeleted: transactionList[i]['detail']['category']['isDeleted'],
-       categoryType: categoryType,
-     );
-
-     TransactionModel transaction = TransactionModel(
-       id: transactionList[i]['id'],
-       amount: transactionList[i]['detail']['amount'],
-       date: transactionList[i]['detail']['date'],
-       note: transactionList[i]['detail']['note'],
-       categoryType: categoryType,
-       category: category,
-       account: AccountType.cash,
-     );
-     final transactionDB = await Hive.openBox<TransactionModel>(
-         HiveFirestoreBackupData.TRANSACTION_DB_NAME);
-     await transactionDB.put(transactionList[i]['id'], transaction);
-   }
-
-   Get.back();
-   Get.snackbar(
-     "",
-     "",
-     messageText: const Text('Data retrieve successfully!',style: TextStyle(color: Colors.white),),
-     backgroundColor: Colors.green,
-     titleText: const Text('Success',style: TextStyle(color: Colors.white),),
-     snackPosition: SnackPosition.TOP,
-
-
-
-     margin: EdgeInsets.symmetric(horizontal: 20,vertical: 10,),
-   );
+    Get.back();
+    Get.snackbar(
+      "",
+      "",
+      messageText: const Text(
+        'Data retrieve successfully!',
+        style: TextStyle(color: Colors.white),
+      ),
+      backgroundColor: Colors.green,
+      titleText: const Text(
+        'Success',
+        style: TextStyle(color: Colors.white),
+      ),
+      snackPosition: SnackPosition.TOP,
+      margin: EdgeInsets.symmetric(
+        horizontal: 20,
+        vertical: 10,
+      ),
+    );
   }
 
   void bottomSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
       builder: (context) {
-
         var myEmail;
-        if(FirebaseAuth.instance.currentUser!=null){
-          myEmail =FirebaseAuth.instance.currentUser!.email;
+        if (FirebaseAuth.instance.currentUser != null) {
+          myEmail = FirebaseAuth.instance.currentUser!.email;
         }
 
         return StatefulBuilder(
@@ -226,38 +280,35 @@ class _BackUpScreenState extends State<BackUpScreen> {
                               ),
                               trailing: Container(
                                 height: 32,
-                                width: 50,
+                                width: 90,
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(5),
                                   color: Colors.grey.shade800,
                                 ),
                                 child: Padding(
                                   padding: const EdgeInsets.only(left: 8.0),
-                                  child: DropdownButton<String>(
+                                  child: DropdownButton<int>(
                                     underline: Container(
                                       height: 0,
                                     ),
-                                    value: dropdownValue,
-                                    onChanged: (String? newValue) {
+                                    value: selectedDay,
+                                    onChanged: (newValue) {
                                       setState(() {
-                                        dropdownValue = newValue!;
-                                        // Perform any other actions you need when the dropdown value changes
+                                        selectedDay = newValue!;
+                                        saveSelectedMinute(selectedDay);
                                       });
+                                      // Restart timer with new duration
+                                      timer.cancel(); // Cancel previous timer
+                                      startAutomaticBackup(); // Start new timer with new duration
                                     },
-                                    items: <String>[
-                                      '1',
-                                      '2',
-                                      '3',
-                                      '4',
-                                      '5'
-                                    ] // Set items to numbers from 1 to 5
-                                        .map<DropdownMenuItem<String>>(
-                                            (String value) {
-                                      return DropdownMenuItem<String>(
-                                        value: value,
-                                        child: Text(value),
-                                      );
-                                    }).toList(),
+                                    items: List.generate(
+                                      3,
+                                      (index) => DropdownMenuItem<int>(
+                                        value: index + 1,
+                                        child: Text(
+                                            '${index + 1} day${index == 0 ? '' : 's'}'),
+                                      ),
+                                    ),
                                   ),
                                 ),
                               )),
@@ -274,9 +325,10 @@ class _BackUpScreenState extends State<BackUpScreen> {
                                         snapshot.data!.exists == true
                                     ? ListView.separated(
                                         shrinkWrap: true,
-                                        physics: NeverScrollableScrollPhysics(),
+                                        physics:
+                                            const NeverScrollableScrollPhysics(),
                                         separatorBuilder: (context, index) =>
-                                            SizedBox(
+                                            const SizedBox(
                                               height: 10,
                                             ),
                                         itemCount:
@@ -312,7 +364,7 @@ class _BackUpScreenState extends State<BackUpScreen> {
                                                       CrossAxisAlignment.start,
                                                   children: [
                                                     Text(
-                                                      'Just now',
+                                                    DateFormat.yMMMd().add_Hm().format(snapshot.data!['userTransaction'][index]['time'].toDate()),
                                                       style: TextStyle(
                                                         fontSize: 15.5,
                                                         fontWeight:
@@ -337,8 +389,8 @@ class _BackUpScreenState extends State<BackUpScreen> {
                                                 Spacer(),
                                                 GestureDetector(
                                                   onTap: () {
-                                                    getParticularBackUpFile(index);
-
+                                                    getParticularBackUpFile(
+                                                        index);
                                                   },
                                                   child: Container(
                                                     height: 45,
@@ -353,7 +405,8 @@ class _BackUpScreenState extends State<BackUpScreen> {
                                                     alignment: Alignment.center,
                                                     child: Icon(
                                                       Icons.download,
-                                                      color: AppTheme.chartColor,
+                                                      color:
+                                                          AppTheme.chartColor,
                                                     ),
                                                   ),
                                                 ),
@@ -395,42 +448,6 @@ class _BackUpScreenState extends State<BackUpScreen> {
                       ),
                     ),
                   ),
-
-            //      ListView.builder(
-            // itemCount: snapshot.data!.length,
-            // itemBuilder: (BuildContext context, int index) {
-            //   String filePath = snapshot.data![index];
-            //   return Padding(
-            //     padding: const EdgeInsets.all(8.0),
-            //     child: Card(
-            //       color: Colors.black54,
-            //       elevation: 2,
-            //       child: ListTile(
-            //         leading: const Icon(
-            //           Icons.file_copy,
-            //           color: Colors.white,
-            //         ),
-            //         title: const Text(
-            //           'File Path',
-            //           style: TextStyle(color: Colors.white),
-            //         ),
-            //         subtitle: Text(
-            //           filePath,
-            //           style:
-            //           const TextStyle(color: Colors.white),
-            //         ),
-            //         trailing: const Icon(
-            //           Icons.download_rounded,
-            //           color: Colors.white,
-            //         ),
-            //         onTap: () {
-            //           // Handle file download or any other action here
-            //         },
-            //       ),
-            //     ),
-            //   );
-            // },
-            // )
                 ],
               ),
             );
@@ -486,8 +503,8 @@ class _BackUpScreenState extends State<BackUpScreen> {
   @override
   Widget build(BuildContext context) {
     var myEmail;
-    if(FirebaseAuth.instance.currentUser!=null){
-       myEmail =FirebaseAuth.instance.currentUser!.email;
+    if (FirebaseAuth.instance.currentUser != null) {
+      myEmail = FirebaseAuth.instance.currentUser!.email;
     }
 
     return Scaffold(
@@ -530,8 +547,8 @@ class _BackUpScreenState extends State<BackUpScreen> {
           const SizedBox(
             height: 5,
           ),
-           Text(
-            myEmail??'',
+          Text(
+            myEmail ?? '',
             style: TextStyle(color: Colors.grey),
           ),
           const SizedBox(
@@ -539,13 +556,11 @@ class _BackUpScreenState extends State<BackUpScreen> {
           ),
           GestureDetector(
             onTap: () async {
+              await FirebaseAuth.instance.signOut();
+              final GoogleSignIn googleSignIn = GoogleSignIn();
+              await googleSignIn.signOut();
 
-                await  FirebaseAuth.instance.signOut();
-                final GoogleSignIn googleSignIn = GoogleSignIn();
-                await googleSignIn.signOut();
-
-                Get.back();
-
+              Get.back();
             },
             child: Container(
               decoration: BoxDecoration(
