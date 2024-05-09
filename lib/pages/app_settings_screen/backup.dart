@@ -24,6 +24,51 @@ class BackUpScreen extends StatefulWidget {
 }
 
 class _BackUpScreenState extends State<BackUpScreen> {
+  String dateString = DateTime.now().toString();
+
+  static String timeAgoSinceDate(DateTime date, {bool numericDates = true}) {
+    try {
+      final difference = DateTime.now().difference(date);
+
+      if ((difference.inDays / 365).floor() >= 2) {
+        return '${(difference.inDays / 365).floor()} years ago';
+      } else if ((difference.inDays / 365).floor() >= 1) {
+        return (numericDates) ? '1 yr ago' : 'Last year';
+      } else if ((difference.inDays / 30).floor() >= 2) {
+        return '${(difference.inDays / 30).floor()} months ago'; // Fixed: Calculate months correctly
+      } else if ((difference.inDays / 30).floor() >= 1) {
+        return (numericDates) ? '1 month ago' : 'Last month';
+      } else if ((difference.inDays / 7).floor() >= 2) {
+        return '${(difference.inDays / 7).floor()} weeks ago';
+      } else if ((difference.inDays / 7).floor() >= 1) {
+        return (numericDates) ? '1 week ago' : 'Last week';
+      } else if (difference.inDays >= 2) {
+        return '${difference.inDays} days ago';
+      } else if (difference.inDays >= 1) {
+        return (numericDates) ? '1 day ago' : 'Yesterday';
+      } else if (difference.inHours >= 2) {
+        return '${difference.inHours} hrs ago';
+      } else if (difference.inHours >= 1) {
+        return (numericDates) ? '1 hr ago' : 'An hour ago';
+      } else if (difference.inMinutes >= 2) {
+        return '${difference.inMinutes} mins ago';
+      } else if (difference.inMinutes >= 1) {
+        return (numericDates) ? '1 min ago' : 'A minute ago';
+      } else if (difference.inSeconds >= 3) {
+        return 'Few seconds ago';
+      } else if (difference.inSeconds >= 2) {
+        return 'Few seconds ago';
+      } else if (difference.inSeconds >= 1) {
+        return 'Few seconds ago';
+      } else {
+        return 'Just now';
+      }
+    } catch (e) {
+      return '...';
+    }
+  }
+
+
   bool autoBackupEnabled = true;
   int selectedDay = 1;
   late Timer timer;
@@ -55,7 +100,7 @@ class _BackUpScreenState extends State<BackUpScreen> {
 
   void startAutomaticBackup() {
     // Start a timer to trigger backup retrieval at a set duration
-    timer = Timer.periodic(Duration(days: selectedDay), (timer) async {
+    timer = Timer.periodic(Duration(minutes: selectedDay), (timer) async {
       print(selectedDay);
       // Call function to get particular backup file
       var user = FirebaseAuth.instance.currentUser;
@@ -339,6 +384,12 @@ class _BackUpScreenState extends State<BackUpScreen> {
                                                     .data!['userTransaction']
                                                     .length,
                                         itemBuilder: (context, index) {
+                                          Timestamp timestamp = snapshot.data!['userTransaction'][index]['time'];
+                                          DateTime dateTime = timestamp.toDate();
+                                          print(snapshot
+                                              .data!['userTransaction'][index]
+                                                  ['time']
+                                              .toString());
                                           return Container(
                                             padding: EdgeInsets.symmetric(
                                                 horizontal: 15, vertical: 10),
@@ -364,21 +415,16 @@ class _BackUpScreenState extends State<BackUpScreen> {
                                                       CrossAxisAlignment.start,
                                                   children: [
                                                     Text(
-                                                      DateFormat.yMMMd()
-                                                          .add_Hm()
-                                                          .format(snapshot
-                                                              .data![
-                                                                  'userTransaction']
-                                                                  [index]
-                                                                  ['time']
-                                                              .toDate()),
+                                                      timeAgoSinceDate(
+                                                        snapshot.data!['userTransaction'][index]['time'].toDate(),
+                                                      ),
                                                       style: TextStyle(
                                                         fontSize: 15.5,
-                                                        fontWeight:
-                                                            FontWeight.w600,
+                                                        fontWeight: FontWeight.w600,
                                                         color: AppTheme.white,
                                                       ),
                                                     ),
+
                                                     Text(
                                                       snapshot.data![
                                                               'userTransaction']
