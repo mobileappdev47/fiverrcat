@@ -20,6 +20,9 @@ ValueNotifier<double> incomeCurrentMonthNotifier = ValueNotifier(0);
 ValueNotifier<double> expenseCurrentMonthNotifier = ValueNotifier(0);
 ValueNotifier<double> totalCurrentMonthNotifier = ValueNotifier(0);
 
+
+DateTime selectDate = DateTime.now();
+
 class CalendarScreen extends StatefulWidget {
   const CalendarScreen({super.key});
 
@@ -37,7 +40,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
     return formattedDate;
   }
 
-  DateTime selectDate = DateTime.now();
 
   void onDaySelectedDate(DateTime selectedDay, DateTime focusedDay) {
     setState(() {
@@ -86,17 +88,16 @@ class _CalendarScreenState extends State<CalendarScreen> {
         colorM = Colors.green;
         setState(() {});
       }
-
-      meetings.add(
-        Meeting(
-          amountText,
-          startTime,
-          endTime,
-          colorM,
-          totalAmount < 0,
-        ),
-      );
-    });
+        meetings.add(
+          Meeting(
+            amountText,
+            startTime,
+            endTime,
+            colorM,
+            totalAmount < 0,
+          ),
+        );
+      });
 
     setState(() {});
     loader.value = false;
@@ -108,7 +109,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
     List<Appointment> appointments = <Appointment>[];
     appointments.add(Appointment(
       startTime: DateTime.now(),
-      endTime: DateTime.now().add(Duration(hours: 1)),
+      endTime: DateTime.now().add(const Duration(hours: 1)),
       subject: 'hy',
       color: Colors.pink,
     ));
@@ -142,9 +143,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
   @override
   void initState() {
-    _selectedDay = _focusedDay;
+    _selectedDay = selectDate;
     _selectedEvents = ValueNotifier(_getEventsForDay(_selectedDay!));
     TransactionDB.instance.refresh();
+
     //  _getDataSource();
     super.initState();
   }
@@ -218,6 +220,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
       });
       _selectedEvents.value = _getEventsForDay(selectedDay);
     }
+    selectDate = selectedDay;
     // TransactionDB.instance
     //     .filterByDate(selectedDateRange.start, selectedDateRange.end);
 
@@ -298,12 +301,23 @@ class _CalendarScreenState extends State<CalendarScreen> {
       // Extract the start and end dates of the current month
       DateTime startOfMonth =
       DateTime(visibleDates[0].year, visibleDates[0].month, 1);
-      DateTime endOfMonth = DateTime(visibleDates[visibleDates.length - 1].year,
-          visibleDates[visibleDates.length - 1].month + 1, 0);
+      DateTime endOfMonth = DateTime(
+          visibleDates[visibleDates.length - 1].year,
+          visibleDates[visibleDates.length - 1].month + 1,
+          0);
 
       // Call your filter method with start and end dates
       TransactionDB.instance.filterForHome(startOfMonth, endOfMonth);
     }
+    Future<void> filterDataForSelectMonth() async {
+      // Extract the start and end dates of the current month based on _selectedDay
+      DateTime startOfMonth = DateTime(_selectedDay!.year, _selectedDay!.month, 1);
+      DateTime endOfMonth = DateTime(_selectedDay!.year, _selectedDay!.month + 1, 0);
+
+      // Call your filter method with start and end dates
+      TransactionDB.instance.filterForHome(startOfMonth, endOfMonth);
+    }
+
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
@@ -343,6 +357,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
                       ));
                 },
                 todayTextStyle: const TextStyle(color: Colors.black),
+                initialSelectedDate: selectDate,
+                initialDisplayDate: selectDate,
                 monthViewSettings: const MonthViewSettings(
                   dayFormat: 'EEE',
                   showTrailingAndLeadingDates: false,
@@ -358,11 +374,14 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
                 onViewChanged: (viewChangedDetails) async {
                   selectedDate1.value = viewChangedDetails.visibleDates[0];
-                  SchedulerBinding.instance!
-                      .addPostFrameCallback((Duration duration) {
+                  SchedulerBinding.instance!.addPostFrameCallback((Duration duration) {
                     _calendarController.selectedDate =
                     viewChangedDetails.visibleDates[0];
+                    selectDate = _calendarController.selectedDate!;
                   });
+
+
+
                   if (viewChangedDetails.visibleDates.isNotEmpty) {
                     DateTime currentVisibleMonth =
                     viewChangedDetails.visibleDates[0];
@@ -374,12 +393,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     });
                   }
                   if (click) {
-                    final DateTime firstVisibleDate =
-                        viewChangedDetails.visibleDates.first;
+                    final DateTime firstVisibleDate = viewChangedDetails.visibleDates.first;
                     _calendarController.selectedDate = DateTime(
                         firstVisibleDate.year, firstVisibleDate.month + 1);
-                    onDaySelected(_calendarController.selectedDate!,
-                        _calendarController.selectedDate!);
+                    onDaySelected(_calendarController.selectedDate!, _calendarController.selectedDate!);
                   } else {
                     click = true;
                   }
@@ -399,8 +416,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 view: CalendarView.month,
                 // dataSource: _getCalendarDataSource(),
                 dataSource: MeetingDataSource(
-                  // []
-                  // _getDataSource(),
                   getDataSource(),
                 ),
               ),

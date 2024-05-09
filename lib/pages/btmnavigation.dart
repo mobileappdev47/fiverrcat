@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:pokercat/addexpense/db/functions/transaction_function.dart';
 import 'package:pokercat/imports.dart';
 import 'package:pokercat/pages/app_settings_screen/app_settings_screen.dart';
+import 'package:pokercat/pages/calendar_screen.dart';
 
 
 
@@ -80,8 +81,8 @@ class _BtmNaviState extends State<BtmNavi> {
   void _onItemTap(int index) {
     setState(() {
       _currentIndex = index;
-
     });
+    selectDate = DateTime.now();
   }
   @override
   Widget build(BuildContext context) {

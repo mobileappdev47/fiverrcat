@@ -21,7 +21,8 @@ import 'package:pokercat/pages/transaction_screen.dart';
 import '../addexpense/widget/transaction_helper.dart';
 
 final ValueNotifier<DateTime> selectedDate1 = ValueNotifier(DateTime.now());
-DateTime? selectedMonth;
+
+DateTime? selectedM;
 
 class Bankroll extends StatefulWidget {
   const Bankroll({super.key, this.modelFromTransation});
@@ -177,6 +178,7 @@ class _BankrollState extends State<Bankroll> {
       }
     };
   }
+  DateTime currentMonth = DateTime.now();
 
   @override
   void initState() {
@@ -206,6 +208,7 @@ class _BankrollState extends State<Bankroll> {
     }
 
     super.initState();
+    selectedDate1.value = DateTime.now();
   }
 
   @override
@@ -227,9 +230,9 @@ class _BankrollState extends State<Bankroll> {
             return Text(
               '$monthName $year',
               style: const TextStyle(
-                fontSize: 20, // Adjust the font size as needed
+                fontSize: 20,
                 fontWeight:
-                    FontWeight.bold, // Optionally, adjust the font weight
+                    FontWeight.bold,
               ),
             );
           },
@@ -265,7 +268,7 @@ class _BankrollState extends State<Bankroll> {
                     padding: const EdgeInsets.all(7.0),
                     child: Align(
                       child: LiteRollingSwitch(
-                        value: false,
+                        value: screenIsGraph,
                         width: 85,
                         textOn: '',
                         textOff: '',
@@ -277,6 +280,9 @@ class _BankrollState extends State<Bankroll> {
                         onChanged: (bool state) {
                           setState(() {
                             screenIsGraph = state;
+                            // if (!screenIsGraph) {
+                            //   selectedDate1.value = currentMonth;
+                            // }
                             // initMonthData();
                             // //january
                             //

@@ -29,14 +29,14 @@ class _BackUpScreenState extends State<BackUpScreen> {
   late Timer timer;
   late String userEmail;
 
-  Future<void> saveSelectedMinute(int day) async {
+  Future<void> saveSelectedDay(int day) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setInt('selectedMinute', day);
+    await prefs.setInt('selectedDay', day);
   }
 
-  Future<void> loadSelectedMinute() async {
+  Future<void> loadSelectedDay() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    int? day = prefs.getInt('selectedMinute');
+    int? day = prefs.getInt('selectedDay');
     if (day != null) {
       setState(() {
         selectedDay = day;
@@ -49,13 +49,13 @@ class _BackUpScreenState extends State<BackUpScreen> {
     // TODO: implement initState
     super.initState();
     fetchFilePaths();
-    loadSelectedMinute();
+    loadSelectedDay();
     startAutomaticBackup();
   }
 
   void startAutomaticBackup() {
     // Start a timer to trigger backup retrieval at a set duration
-    timer = Timer.periodic(Duration(days: selectedDay), (timer) async {
+    timer = Timer.periodic(Duration(minutes: selectedDay), (timer) async {
       print(selectedDay);
       // Call function to get particular backup file
       var user = FirebaseAuth.instance.currentUser;
@@ -295,7 +295,7 @@ class _BackUpScreenState extends State<BackUpScreen> {
                                     onChanged: (newValue) {
                                       setState(() {
                                         selectedDay = newValue!;
-                                        saveSelectedMinute(selectedDay);
+                                        saveSelectedDay(selectedDay);
                                       });
                                       // Restart timer with new duration
                                       timer.cancel(); // Cancel previous timer
@@ -364,7 +364,14 @@ class _BackUpScreenState extends State<BackUpScreen> {
                                                       CrossAxisAlignment.start,
                                                   children: [
                                                     Text(
-                                                    DateFormat.yMMMd().add_Hm().format(snapshot.data!['userTransaction'][index]['time'].toDate()),
+                                                      DateFormat.yMMMd()
+                                                          .add_Hm()
+                                                          .format(snapshot
+                                                              .data![
+                                                                  'userTransaction']
+                                                                  [index]
+                                                                  ['time']
+                                                              .toDate()),
                                                       style: TextStyle(
                                                         fontSize: 15.5,
                                                         fontWeight:
