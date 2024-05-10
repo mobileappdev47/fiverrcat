@@ -96,7 +96,7 @@ class TransactionDB implements TransactionDBFunctions {
     final list = await getAllTransactions();
     list.sort((first, second) => second.date.compareTo(first.date));
     final listForMonth = await getTransactionsForCurrentMonth();
-    final listForMyMonth = await getTransactionsForMonth(monthIndex);
+    final listForMyMonth = await getTransactionsForMonth1(monthIndex);
 
     listForMonth.sort((first, second) => second.date.compareTo(first.date));
 
@@ -143,6 +143,28 @@ class TransactionDB implements TransactionDBFunctions {
   //
   //   return results.toList();
   // }
+
+  Future<List<TransactionModel>> getTransactionsForMonth1(int month) async {
+    final now = DateTime.now();
+    final selectedYear = selectedDate1.value.year;
+
+    final startOfMonth = DateTime(selectedYear, month, 1);
+    final endOfMonth =
+    DateTime(selectedYear, month + 1, 1).subtract(const Duration(days: 1));
+
+    final box = Hive.box<TransactionModel>(TRANSACTION_DB_NAME);
+    final results = box.values.where((trxn) {
+      final trxnDate = DateTime.parse(trxn.date);
+      if (trxnDate.month == month && trxnDate.year == selectedYear) {
+        return trxnDate.isAfter(startOfMonth.subtract(const Duration(days: 1))) &&
+            trxnDate.isBefore(endOfMonth.add(const Duration(days: 1)));
+      }
+      return false;
+    });
+
+    return results.toList();
+  }
+
 
   Future<List<TransactionModel>> getTransactionsForMonth(int month) async {
     final now = DateTime.now();
@@ -468,7 +490,7 @@ class TransactionDB implements TransactionDBFunctions {
 
     int monthIndex = getMonthIndex();
 
-    final listForMyMonth = await getTransactionsForMonth(monthIndex);
+    final listForMyMonth = await getTransactionsForMonth1(monthIndex);
     transactionMyMonthListNotifier.value.clear();
     transactionMyMonthListNotifier.value.addAll(listForMyMonth);
     transactionMyMonthListNotifier.notifyListeners();
