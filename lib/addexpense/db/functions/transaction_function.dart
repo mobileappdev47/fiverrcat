@@ -126,7 +126,6 @@ class TransactionDB implements TransactionDBFunctions {
     return results.toList();
   }
 
-
   // Future<List<TransactionModel>> getTransactionsForMonth(month) async {
   //   final now = DateTime.now();
   //
@@ -150,13 +149,14 @@ class TransactionDB implements TransactionDBFunctions {
 
     final startOfMonth = DateTime(selectedYear, month, 1);
     final endOfMonth =
-    DateTime(selectedYear, month + 1, 1).subtract(const Duration(days: 1));
+        DateTime(selectedYear, month + 1, 1).subtract(const Duration(days: 1));
 
     final box = Hive.box<TransactionModel>(TRANSACTION_DB_NAME);
     final results = box.values.where((trxn) {
       final trxnDate = DateTime.parse(trxn.date);
       if (trxnDate.month == month && trxnDate.year == selectedYear) {
-        return trxnDate.isAfter(startOfMonth.subtract(const Duration(days: 1))) &&
+        return trxnDate
+                .isAfter(startOfMonth.subtract(const Duration(days: 1))) &&
             trxnDate.isBefore(endOfMonth.add(const Duration(days: 1)));
       }
       return false;
@@ -164,7 +164,6 @@ class TransactionDB implements TransactionDBFunctions {
 
     return results.toList();
   }
-
 
   Future<List<TransactionModel>> getTransactionsForMonth(int month) async {
     final now = DateTime.now();
@@ -645,11 +644,12 @@ class HiveFirestoreBackupData1 {
           // print(value.data()!['userTransaction'][0]['transaction']);
 
           for (int i = 0; i < value.data()!['userTransaction'].length; i++) {
-            finalList.add({
-              'filename': value.data()!['userTransaction'][i]['filename'],
-              'transaction': value.data()!['userTransaction'][i]['transaction'],
-              'time': value.data()!['userTransaction'][i]['time'],
-            });
+              finalList.add({
+                'filename': value.data()!['userTransaction'][i]['filename'],
+                'transaction': value.data()!['userTransaction'][i]
+                    ['transaction'],
+                'time': value.data()!['userTransaction'][i]['time'],
+              });
           }
 
           var listing = {
@@ -659,7 +659,9 @@ class HiveFirestoreBackupData1 {
             'time': DateTime.now(),
           };
 
-          finalList.add(listing);
+          if (value.data()!['userTransaction'].length <= 20) {
+            finalList.add(listing);
+          } else {}
 
           fileName =
               "backupFile${value.data()!['userTransaction'].length}.Hive";
@@ -683,37 +685,42 @@ class HiveFirestoreBackupData1 {
               .doc(email)
               .set({'userTransaction': transactionsData});
         }
+        if (value.data()!['userTransaction'].length <= 20) {
+          Get.snackbar(
+            "",
+            "",
+            messageText: Text(
+              fileName,
+              style: TextStyle(color: Colors.white),
+            ),
+            titleText: Text(
+              'Backup Created',
+              style: TextStyle(color: Colors.white),
+            ),
+            icon: Padding(
+              padding: const EdgeInsets.only(left: 8.0),
+              child: Icon(
+                Icons.backup,
+                color: Colors.white,
+                size: 30,
+              ),
+            ),
+            snackPosition: SnackPosition.TOP,
+            maxWidth: 200,
+            margin: EdgeInsets.symmetric(
+              horizontal: 50,
+              vertical: 20,
+            ),
+          );
+        } else {
+
+        }
       });
 
-      Get.snackbar(
-        "",
-        "",
-        messageText: Text(
-          fileName,
-          style: TextStyle(color: Colors.white),
-        ),
-        titleText: Text(
-          'Backup Created',
-          style: TextStyle(color: Colors.white),
-        ),
-        icon: Padding(
-          padding: const EdgeInsets.only(left: 8.0),
-          child: Icon(
-            Icons.backup,
-            color: Colors.white,
-            size: 30,
-          ),
-        ),
-        snackPosition: SnackPosition.TOP,
-        maxWidth: 200,
-        margin: EdgeInsets.symmetric(
-          horizontal: 50,
-          vertical: 20,
-        ),
-      );
+
     } catch (e) {
-      Get.snackbar('Error', 'Sorry, Something went wrong!',
-          backgroundColor: Colors.red, colorText: AppTheme.white);
+    /*  Get.snackbar('Error', 'Sorry, Something went wrong!',
+          backgroundColor: Colors.red, colorText: AppTheme.white);*/
       print('Error backing up transactions: $e');
     }
     Future<List<String>> fetchFilePaths() async {
@@ -794,7 +801,7 @@ class HiveFirestoreBackupData {
 
   static Future<List<TransactionModel>> getAllTransactions() async {
     final transactionDB =
-        await Hive.openBox<TransactionModel>(TRANSACTION_DB_NAME);
+    await Hive.openBox<TransactionModel>(TRANSACTION_DB_NAME);
     return transactionDB.values.toList();
   }
 
@@ -912,7 +919,7 @@ class HiveFirestoreBackupData {
 
           var listing = {
             'filename':
-                'backupFile${value.data()!['userTransaction'].length}.Hive',
+            'backupFile${value.data()!['userTransaction'].length}.Hive',
             'transaction': myTransactionsList,
             'time': DateTime.now(),
           };
@@ -920,7 +927,7 @@ class HiveFirestoreBackupData {
           finalList.add(listing);
 
           fileName =
-              "backupFile${value.data()!['userTransaction'].length}.Hive";
+          "backupFile${value.data()!['userTransaction'].length}.Hive";
 
           await firestore
               .collection('transactions')

@@ -141,13 +141,13 @@ class _CalendarScreenState extends State<CalendarScreen> {
   DateTime myChosenDate = DateTime.now();
   Color colorM = Colors.green;
 
+
   @override
   void initState() {
     _selectedDay = selectDate;
     _selectedEvents = ValueNotifier(_getEventsForDay(_selectedDay!));
     TransactionDB.instance.refresh();
 
-    //  _getDataSource();
     super.initState();
   }
 
@@ -296,6 +296,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
       }
     }
 
+
     List<String> months = [];
     Future<void> filterDataForCurrentMonth(List<DateTime> visibleDates) async {
       // Extract the start and end dates of the current month
@@ -309,14 +310,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
       // Call your filter method with start and end dates
       TransactionDB.instance.filterForHome(startOfMonth, endOfMonth);
     }
-    Future<void> filterDataForSelectMonth() async {
-      // Extract the start and end dates of the current month based on _selectedDay
-      DateTime startOfMonth = DateTime(_selectedDay!.year, _selectedDay!.month, 1);
-      DateTime endOfMonth = DateTime(_selectedDay!.year, _selectedDay!.month + 1, 0);
 
-      // Call your filter method with start and end dates
-      TransactionDB.instance.filterForHome(startOfMonth, endOfMonth);
-    }
 
 
     return Scaffold(
@@ -379,8 +373,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     viewChangedDetails.visibleDates[0];
                     selectDate = _calendarController.selectedDate!;
                   });
-
-
 
                   if (viewChangedDetails.visibleDates.isNotEmpty) {
                     DateTime currentVisibleMonth =

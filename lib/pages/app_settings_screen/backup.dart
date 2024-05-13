@@ -98,7 +98,7 @@ class _BackUpScreenState extends State<BackUpScreen> {
     startAutomaticBackup();
   }
 
-  void startAutomaticBackup() {
+  void  startAutomaticBackup() {
     // Start a timer to trigger backup retrieval at a set duration
     timer = Timer.periodic(Duration(days : selectedDay), (timer) async {
       print(selectedDay);
@@ -107,31 +107,8 @@ class _BackUpScreenState extends State<BackUpScreen> {
       await HiveFirestoreBackupData1.backupDataToFirestore(user!.email, 1);
     });
   }
+  List<TransactionModel> transactions = [];
 
-  Future<void> getParticularAutoBackupFile(int day) async {
-    var user = FirebaseAuth.instance.currentUser;
-
-    await FirebaseFirestore.instance
-        .collection('transactions')
-        .doc(user!.email)
-        .get()
-        .then((value) async {
-      List transactionGetFromFirebase = [];
-
-      if (value.data() != null) {
-        print(value.data()!['userTransaction'][0]['transaction']);
-
-        for (int i = 0; i < value.data()!['userTransaction'].length; i++) {
-          // Assuming the day here is equivalent to the index (i)
-          if (day == i + 1) {
-            addDataToHive(value.data()!['userTransaction'][i]['transaction'],
-                value.data()!['userTransaction'][i]['filename']);
-            break;
-          }
-        }
-      } else {}
-    });
-  }
 
   deleteParticularBackUpFile(int index) async {
     var user = FirebaseAuth.instance.currentUser;
@@ -179,6 +156,7 @@ class _BackUpScreenState extends State<BackUpScreen> {
 
         for (int i = 0; i < value.data()!['userTransaction'].length; i++) {
           if (index == i) {
+            transactions.clear();
             addDataToHive(value.data()!['userTransaction'][i]['transaction'],
                 value.data()!['userTransaction'][i]['filename']);
 
@@ -442,8 +420,7 @@ class _BackUpScreenState extends State<BackUpScreen> {
                                                 Spacer(),
                                                 GestureDetector(
                                                   onTap: () {
-                                                    getParticularBackUpFile(
-                                                        index);
+                                                    getParticularBackUpFile(index);
                                                   },
                                                   child: Container(
                                                     height: 45,
@@ -525,7 +502,7 @@ class _BackUpScreenState extends State<BackUpScreen> {
           .collection('user_transactions')
           .get();
 
-      querySnapshot.docs.forEach((doc) {
+      querySnapshot.docs.take(20).forEach((doc) {
         Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
         String filePath = data['file'];
         filePaths.add(filePath);

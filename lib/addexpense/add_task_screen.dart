@@ -11,6 +11,7 @@ import 'package:pokercat/addexpense/db/functions/category_functions.dart';
 import 'package:pokercat/addexpense/db/models/transactions/transaction_model_db.dart';
 import 'package:pokercat/addexpense/widget/transaction_helper.dart';
 import 'package:pokercat/getx_route/routes.dart';
+import 'package:pokercat/pages/calendar_screen.dart';
 import '../constant.dart';
 import '../packages/expense_repository/lib/src/models/expense.dart';
 import '../pages/graph_screen.dart';
@@ -29,7 +30,7 @@ class AddTaskScreen extends StatefulWidget {
 }
 
 class _AddTaskScreenState extends State<AddTaskScreen> {
-  DateTime selectedDate = DateTime.now();
+  // DateTime selectedDate = DateTime.now();
   TextEditingController _amountController = TextEditingController();
   String? _categoryID;
   Map<String, dynamic> monthDataForGraph = {
@@ -125,7 +126,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
       } else if (widget.modelFromTransation!.account == AccountType.cash) {
         accountTypeFromTransaction = 'cash';
       }
-      selectedDate = DateTime.parse(widget.modelFromTransation!.date);
+      selectDate = DateTime.parse(widget.modelFromTransation!.date);
       _amountController.text = widget.modelFromTransation!.amount.toString();
 
       _categoryID = categoryFromTransaction;
@@ -137,6 +138,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
     }
 
     super.initState();
+    TransactionDB.instance.refresh();
   }
 
   @override
@@ -225,14 +227,15 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                                         child: child!,
                                       );
                                     },
-                                    initialDate: selectedDate,
-                                    firstDate: DateTime.now().subtract(const Duration(days: (365 * 10)+ 3)),
+                                    initialDate: selectDate,
+                                    firstDate: DateTime.now().subtract(
+                                        const Duration(days: (365 * 10) + 3)),
                                     lastDate: DateTime.now(),
                                   );
-                                  if (date != null && date != selectedDate) {
+                                  if (date != null && date != selectDate) {
                                     setState(
                                       () {
-                                        selectedDate = date;
+                                        selectDate = date;
                                       },
                                     );
                                   }
@@ -247,7 +250,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                         ),
                         controller: TextEditingController(
                           text:
-                              '${selectedDate.year}/${selectedDate.month}/${selectedDate.day}', // display selected date in text field
+                              '${selectDate.year}/${selectDate.month}/${selectDate.day}', // display selected date in text field
                         ),
                         readOnly: true,
                         onTap: () async {
@@ -265,14 +268,14 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                                 child: child!,
                               );
                             },
-                            initialDate: selectedDate,
+                            initialDate: selectDate,
                             firstDate: DateTime(2000),
                             lastDate: DateTime.now(),
                           );
                           if (date != null && date != selectedDate) {
                             setState(
                               () {
-                                selectedDate = date;
+                                selectDate = date;
                               },
                             );
                           }
@@ -502,14 +505,18 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                                 builder: (context, newList, child) {
                                   return TextButton(
                                       onPressed: () async {
-                                        setState(() {});
                                         if (_FormKey.currentState!.validate()) {
                                           if (_amountController.text != '' &&
                                               _categoryID != null) {
+                                            addIncomeTransaction();
                                             //금액을임력안하면 빈 스트링이 돌아오기에 이렇게 내맘대로 썼음
                                             print(
                                                 '_amountController.text==${_amountController.text.runtimeType}==');
-                                            // Navigator.pop(context);
+
+                                            Navigator.pop(context);
+                                            setState(() {});
+                                            await TransactionDB.instance
+                                                .refresh();
                                           }
                                           try {
                                             await addIncomeTransaction();
@@ -517,10 +524,10 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                                             print(e.toString());
                                           }
                                         }
-
+                                        setState(() {});
                                         // context.read<CreateExpenseBloc>().add(CreateExpense(expense));
                                         //임의로
-                                      await   TransactionDB.instance.refresh();
+                                        await TransactionDB.instance.refresh();
 
                                         /*           var data = TransactionDB
                                             .instance.transactionListNotifier;
@@ -922,10 +929,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
 
                                         monthChartDataGraph = monthDataForGraph;*/
 
-
-                                        setState(() {});
-                                        Navigator.pop(context);
-
+                                        //  Navigator.pop(context);
                                       },
                                       style: TextButton.styleFrom(
                                           shape: RoundedRectangleBorder(
@@ -956,39 +960,41 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                         ),
                         child: isLoading
                             ? const Center(child: CircularProgressIndicator())
-                            :
-                        ValueListenableBuilder(
-                          valueListenable: TransactionDB
-                              .instance.transactionListNotifier,
-                          builder: (context, newList, child) {
-                            return TextButton(
-                                onPressed: () async {
-                                  setState(() {});
+                            : ValueListenableBuilder(
+                                valueListenable: TransactionDB
+                                    .instance.transactionListNotifier,
+                                builder: (context, newList, child) {
+                                  return TextButton(
+                                      onPressed: () async {
+                                        setState(() {});
 
-                                  if (_FormKey.currentState!.validate()) {
-                                    if (_amountController.text != '' &&
-                                        _categoryID != null) {
-                                      //금액을임력안하면 빈 스트링이 돌아오기에 이렇게 내맘대로 썼음
-                                      print(
-                                          '_amountController.text==${_amountController.text.runtimeType}==');
-                                      // Navigator.pop(context);
-                                    }
-                                    try{
-                                      await addExpenseTransaction();
+                                        if (_FormKey.currentState!.validate()) {
+                                          if (_amountController.text != '' &&
+                                              _categoryID != null) {
+                                            //금액을임력안하면 빈 스트링이 돌아오기에 이렇게 내맘대로 썼음
+                                            addExpenseTransaction();
+                                            print(
+                                                '_amountController.text==${_amountController.text.runtimeType}==');
+                                            setState(() {});
+                                            await TransactionDB.instance
+                                                .refresh();
 
-                                    }
-                                    catch(e){
-                                      print(e.toString());
-                                    }
-                                  }
+                                            Navigator.pop(context);
+                                          }
+                                          try {
+                                            await addExpenseTransaction();
+                                          } catch (e) {
+                                            print(e.toString());
+                                          }
+                                        }
 
-                                  // expense.amount = int.parse(expenseController.text);
+                                        // expense.amount = int.parse(expenseController.text);
 
-                                  // context.read<CreateExpenseBloc>().add(CreateExpense(expense));
-                                  //임의로
+                                        // context.read<CreateExpenseBloc>().add(CreateExpense(expense));
+                                        //임의로
 
-                                  await   TransactionDB.instance.refresh();
-                                /*
+                                        await TransactionDB.instance.refresh();
+                                        /*
                                   var data = TransactionDB
                                       .instance.transactionListNotifier;
                                   print(data.value);
@@ -1388,24 +1394,20 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                                   });
 
                                   monthChartDataGraph = monthDataForGraph;*/
-                                  setState(() {});
-                                  Navigator.pop(context);
-
+                                        setState(() {});
+                                        //Navigator.pop(context);
+                                      },
+                                      style: TextButton.styleFrom(
+                                          shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(12))),
+                                      child: const Text(
+                                        'Expense',
+                                        style: TextStyle(
+                                            fontSize: 22, color: Colors.white),
+                                      ));
                                 },
-                                style: TextButton.styleFrom(
-                                    shape: RoundedRectangleBorder(
-                                        borderRadius:
-                                        BorderRadius.circular(12))),
-                                child: const Text(
-                                  'Expense',
-                                  style: TextStyle(
-                                      fontSize: 22, color: Colors.white),
-                                ));
-                          },
-                        ),
-
-
-
+                              ),
                       )
                     ],
                   ),
@@ -1426,7 +1428,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
     if (widget.modelFromTransation == null) {
       final model = TransactionModel(
         id: DateTime.now().day + DateTime.now().hour + DateTime.now().second,
-        date: DateFormat('yyyy-MM-dd').format(selectedDate),
+        date: DateFormat('yyyy-MM-dd').format(selectDate),
         amount: parsedAmount ?? 0.0,
         account: AccountType.cash,
         categoryType: selectedCategoryType,
@@ -1439,7 +1441,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
     } else {
       final model = TransactionModel(
         id: widget.modelFromTransation!.id,
-        date: DateFormat('yyyy-MM-dd').format(selectedDate),
+        date: DateFormat('yyyy-MM-dd').format(selectDate),
         amount: parsedAmount ?? 0.0,
         account: AccountType.cash,
         categoryType: selectedCategoryType,
@@ -1461,7 +1463,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
     if (widget.modelFromTransation == null) {
       final model = TransactionModel(
         id: DateTime.now().day + DateTime.now().hour + DateTime.now().second,
-        date: DateFormat('yyyy-MM-dd').format(selectedDate),
+        date: DateFormat('yyyy-MM-dd').format(selectDate),
         amount: parsedAmount ?? 0.0,
         account: AccountType.cash,
         categoryType: selectedCategoryType,
@@ -1473,12 +1475,11 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
 
       var data = TransactionDB.instance.transactionListNotifier;
       print(data.value);
-    }
-    else {
+    } else {
       print('in side else case');
       final model = TransactionModel(
         id: widget.modelFromTransation!.id,
-        date: DateFormat('yyyy-MM-dd').format(selectedDate),
+        date: DateFormat('yyyy-MM-dd').format(selectDate),
         amount: parsedAmount ?? 0.0,
         account: AccountType.cash,
         categoryType: selectedCategoryType,
@@ -1494,7 +1495,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
 
   void textFeildClear() {
     setState(() {
-      selectedDate = DateTime.now();
+      selectDate = DateTime.now();
       _amountController.clear();
       _categoryID = null;
       _noteController.clear();
