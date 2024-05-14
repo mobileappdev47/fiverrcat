@@ -180,6 +180,17 @@ class _BankrollState extends State<Bankroll> {
   }
   DateTime currentMonth = DateTime.now();
 
+  List<TransactionModel> transactionList = [];
+
+  void fetchData() async {
+    // Fetch data from your database or any other source
+    List<TransactionModel> transactions = await TransactionDB.instance.getAllTransactions();
+
+    setState(() {
+      transactionList = transactions;
+    });
+  }
+
   @override
   void initState() {
     dateController.text = DateFormat('yyyy/MM/dd').format(DateTime.now());
@@ -209,6 +220,7 @@ class _BankrollState extends State<Bankroll> {
 
     super.initState();
     selectedDate1.value = DateTime.now();
+    fetchData();
   }
 
   @override

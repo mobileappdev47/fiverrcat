@@ -140,6 +140,11 @@ class _BackUpScreenState extends State<BackUpScreen> {
       } else {}
     });
   }
+  clearCalendarData() async {
+    final transactionDB = await Hive.openBox<TransactionModel>(
+        HiveFirestoreBackupData.TRANSACTION_DB_NAME);
+    await transactionDB.clear();
+  }
 
   getParticularBackUpFile(int index) async {
     var user = FirebaseAuth.instance.currentUser;
@@ -156,7 +161,7 @@ class _BackUpScreenState extends State<BackUpScreen> {
 
         for (int i = 0; i < value.data()!['userTransaction'].length; i++) {
           if (index == i) {
-            transactions.clear();
+            await clearCalendarData();
             addDataToHive(value.data()!['userTransaction'][i]['transaction'],
                 value.data()!['userTransaction'][i]['filename']);
 
