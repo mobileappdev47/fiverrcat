@@ -52,9 +52,9 @@ class TransactionDB implements TransactionDBFunctions {
   Future<void> addTransaction(TransactionModel value) async {
     final transactionDB =
         await Hive.openBox<TransactionModel>(TRANSACTION_DB_NAME);
-    //await transactionDB.put(value.id , value);
-    final int key = await transactionDB.add(value);
-    print(key.toString());
+    await transactionDB.put(value.id , value);
+   // final int key = await transactionDB.add(value);
+  //  print(key.toString());
     // await transactionDB.add(value);
     await updateAccountGroup(value);
     refresh();

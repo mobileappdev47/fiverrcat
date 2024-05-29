@@ -1434,7 +1434,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
     final parsedAmount = double.tryParse(amount);
     if (widget.modelFromTransation == null) {
       final model = TransactionModel(
-        id: DateTime.now().day + DateTime.now().hour + DateTime.now().second,
+        id:getLastFiveDigitsOfTimestamp()/*DateTime.now().day + DateTime.now().hour + DateTime.now().second*/,
         date: DateFormat('yyyy-MM-dd').format(selectDate),
         amount: parsedAmount ?? 0.0,
         account: AccountType.cash,
@@ -1469,7 +1469,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
     CategoryType selectedCategoryType = CategoryType.income;
     if (widget.modelFromTransation == null) {
       final model = TransactionModel(
-        id: DateTime.now().day + DateTime.now().hour + DateTime.now().second,
+        id: getLastFiveDigitsOfTimestamp()/*DateTime.now().day + DateTime.now().hour + DateTime.now().second*/,
         date: DateFormat('yyyy-MM-dd').format(selectDate),
         amount: parsedAmount ?? 0.0,
         account: AccountType.cash,
@@ -1509,5 +1509,15 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
       _noteController.clear();
       // image = null;
     });
+  }
+
+  int getLastFiveDigitsOfTimestamp() {
+    // Get the current timestamp in microseconds since epoch
+    int timestampMicroseconds = DateTime.now().microsecondsSinceEpoch;
+
+    // Get the last 5 digits
+    int lastFiveDigits = timestampMicroseconds % 10000000000;
+
+    return lastFiveDigits;
   }
 }

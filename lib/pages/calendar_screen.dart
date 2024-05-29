@@ -630,9 +630,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                                     ),
                                                   ),
                                                 ),
-                                                IconButton(onPressed: () {
-                                                  TransactionDB.instance.deleteTransaction(105);
-                                                }, icon: Icon(Icons.delete)),
+                                                // IconButton(onPressed: () {
+                                                //   TransactionDB.instance.deleteTransaction(105);
+                                                // }, icon: Icon(Icons.delete)),
 
                                                 IconButton(
                                                   onPressed: () async {
