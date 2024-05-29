@@ -5,6 +5,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:pokercat/addexpense/db/functions/background_ser.dart';
 import 'package:pokercat/addexpense/db/functions/category_functions.dart';
 import 'package:pokercat/addexpense/db/functions/transaction_function.dart';
 import 'package:pokercat/addexpense/db/models/account_group/account_group_model_db.dart';
@@ -28,6 +29,7 @@ Future<void> main() async {
       //     projectId: "pokercat-77864",
       //     storageBucket: "pokercat-77864.appspot.com"),
       );
+  initializeService();
   await Hive.initFlutter();
 
 

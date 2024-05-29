@@ -1,9 +1,20 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.havea.pokercat">
+
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+
    <application
         android:label="pokercat"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
+       <service
+           android:name="com.example.pokercat.BackgroundService"
+           android:permission="android.permission.BIND_JOB_SERVICE"
+           android:foregroundServiceType="dataSync|location"
+           android:enabled="true"
+           android:exported="true">
+       </service>
         <activity
             android:name=".MainActivity"
             android:exported="true"

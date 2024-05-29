@@ -77,6 +77,41 @@ Future<void> updateAccountGroup(TransactionModel model,
   getAllAccountGroup();
 }
 
+// Future<void> updateAccountGroup(TransactionModel model,
+//     [bool isDeleting = false]) async {
+//   final accountGroupDB = await Hive.openBox<AccountGroupModel>(ACCOUNT_DB_NAME);
+//   final accountModels = accountGroupDB.values
+//       .where((element) => element.id == model.account.name.toLowerCase())
+//       .toList();
+//
+//   // Check if accountModels is not empty
+//   if (accountModels.isNotEmpty) {
+//     final accountModel = accountModels.first;
+//
+//     if (model.categoryType == CategoryType.income) {
+//       if (isDeleting) {
+//         accountModel.amount = accountModel.amount! - model.amount;
+//       } else {
+//         accountModel.amount = accountModel.amount! + model.amount;
+//       }
+//     } else {
+//       if (isDeleting) {
+//         accountModel.amount = accountModel.amount! + model.amount;
+//       } else {
+//         accountModel.amount = accountModel.amount! - model.amount;
+//       }
+//     }
+//
+//     await accountGroupDB.put(accountModel.id, accountModel);
+//     getAllAccountGroup();
+//   } else {
+//     // Handle the case where no account model was found
+//     print('No account model found with the name: ${model.account.name.toLowerCase()}');
+//   }
+// }
+
+
+
 Future<void> selfTransfer(
     {required String accountType, required double amount}) async {
   final accountGroupDB = await Hive.openBox<AccountGroupModel>(ACCOUNT_DB_NAME);

@@ -1,4 +1,5 @@
 import 'package:flutter/scheduler.dart';
+import 'package:pokercat/addexpense/db/functions/account_group_function.dart';
 import 'package:pokercat/calander.dart';
 import 'package:pokercat/imports.dart';
 import 'package:pokercat/pages/bankroll.dart';
@@ -144,7 +145,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
     _selectedDay = selectDate;
     _selectedEvents = ValueNotifier(_getEventsForDay(_selectedDay!));
     TransactionDB.instance.refresh();
-
     super.initState();
   }
 
@@ -294,6 +294,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
     }
 
     List<String> months = [];
+
     Future<void> filterDataForCurrentMonth(List<DateTime> visibleDates) async {
       // Extract the start and end dates of the current month
       DateTime startOfMonth =
@@ -457,7 +458,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                         ),
                         Text(
                           '${currencySymboleUpdate.value} ${formatter.format(incomeData)}',
-                          style: TextStyle(
+                          style: const TextStyle(
                               color: AppTheme.pcTextIncomeColor, fontSize: 13),
                         )
                       ],
@@ -528,8 +529,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
             ValueListenableBuilder(
               valueListenable: TransactionDB.instance.transactionListNotifier,
               builder: (context, newList, child) {
-                /////maplist 는 2024-03-24: [Instance of 'TransactionModel', Instance of 'TransactionModel']같은  [날짜:TransactionModel]의 나열
-                //newList는 [Instance of 'TransactionModel', Instance of 'TransactionModel'] 같은 TransactionModel 객채의 나열
                 String myChosenDateString =
                     DateFormat('yyyy-MM-dd').format(myChosenDate).toString();
 
@@ -537,19 +536,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     SelectDate().sortByDate(newList);
                 newListData = mapList;
 
-                //keys는 2024-03-24, 2024-03-21, 2024-03-12, 2024-03-01 같은 날짜의 나열.
                 List<String> keys = mapList.keys.toList();
+                keys = [myChosenDateString];
 
-                print('============$transactionList');
-                keys = ['${myChosenDateString}'];
-
-                // 예 고민의 흔적 일단놔둠
-                print('keys = ${keys}');
-                print(
-                    'List<TransactionModel> = ${mapList['${myChosenDateString}']}');
-                print('myChosenDateString = ${myChosenDateString}');
-
-                return mapList['${myChosenDateString}'] != null
+                return mapList[myChosenDateString] != null
                     ? Padding(
                         padding: const EdgeInsets.only(top: 9),
                         child: ListView.builder(
@@ -576,6 +566,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                               }
                               return previousValue;
                             });
+
                             return Padding(
                               padding: EdgeInsets.symmetric(
                                 horizontal:
@@ -607,7 +598,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                               children: [
                                                 Container(
                                                   width: 105,
-                                                  //width: 65,
                                                   decoration:
                                                       const BoxDecoration(
                                                     color: AppTheme
@@ -632,25 +622,29 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                                                       index]))
                                                               .toString(),
                                                       style: const TextStyle(
-                                                          color: AppTheme
-                                                              .pcTextSecondayColor,
-                                                          fontWeight:
-                                                              FontWeight.bold),
+                                                        color: AppTheme
+                                                            .pcTextSecondayColor,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                      ),
                                                     ),
                                                   ),
                                                 ),
+                                                IconButton(onPressed: () {
+                                                  TransactionDB.instance.deleteTransaction(105);
+                                                }, icon: Icon(Icons.delete)),
+
                                                 IconButton(
                                                   onPressed: () async {
                                                     resetTransactionsOnly(
                                                         context,
                                                         mapList[keys[index]]!);
                                                     setState(() {
-                                                      mapList.remove(
-                                                          keys[index].length);
-                                                      keys
-                                                          .removeAt(index)
-                                                          .length;
+                                                      mapList
+                                                          .remove(keys[index]);
+                                                      keys.removeAt(index);
                                                     });
+
                                                     await TransactionDB.instance
                                                         .refresh();
                                                     setState(() {});
@@ -674,9 +668,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                                         fontSize: 13,
                                                       ),
                                                     ),
-                                                    const SizedBox(
-                                                      height: 5,
-                                                    ),
+                                                    const SizedBox(height: 5),
                                                     Text(
                                                       '- ${currencySymboleUpdate.value} ${formatter.format(expenseData)}',
                                                       style: const TextStyle(
@@ -742,7 +734,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
                         ),
                       );
               },
-            ),
+            )
+
             // ----------------------------------- Transaction History End----------------------------------------
           ],
         ),
@@ -783,6 +776,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   );
                   await TransactionDB.instance.refresh();
                   setState(() {});
+
                   // Refresh the transaction list
                   Navigator.of(context).pop();
                 },

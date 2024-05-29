@@ -4,7 +4,6 @@ import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -14,8 +13,8 @@ import 'package:pokercat/addexpense/db/functions/account_group_function.dart';
 import 'package:pokercat/addexpense/db/models/account_group/account_group_model_db.dart';
 import 'package:pokercat/constant.dart';
 import 'package:pokercat/pages/bankroll.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:uuid/uuid.dart';
 
 import '../models/category/category_model_db.dart';
 import '../models/transactions/transaction_model_db.dart';
@@ -28,7 +27,7 @@ abstract class TransactionDBFunctions {
 
   Future<List<TransactionModel>> getAllTransactions();
 
-  Future<void> deleteTransaction(TransactionModel model);
+  Future<void> deleteTransaction(int model);
 }
 
 class TransactionDB implements TransactionDBFunctions {
@@ -53,10 +52,17 @@ class TransactionDB implements TransactionDBFunctions {
   Future<void> addTransaction(TransactionModel value) async {
     final transactionDB =
         await Hive.openBox<TransactionModel>(TRANSACTION_DB_NAME);
-    await transactionDB.put(value.id, value);
+    //await transactionDB.put(value.id , value);
+    final int key = await transactionDB.add(value);
+    print(key.toString());
+    // await transactionDB.add(value);
     await updateAccountGroup(value);
     refresh();
   }
+
+
+
+
 
   int getMonthIndex() {
     String monthName = DateFormat('MMMM').format(selectedDate1.value);
@@ -91,15 +97,19 @@ class TransactionDB implements TransactionDBFunctions {
     }
   }
 
+
+
+
   Future<void> refresh() async {
+    // Fetch and sort transaction data
     int monthIndex = getMonthIndex();
     final list = await getAllTransactions();
     list.sort((first, second) => second.date.compareTo(first.date));
     final listForMonth = await getTransactionsForCurrentMonth();
     final listForMyMonth = await getTransactionsForMonth1(monthIndex);
-
     listForMonth.sort((first, second) => second.date.compareTo(first.date));
 
+    // Clear and update notifiers
     transactionListNotifier.value.clear();
     transactionMonthListNotifier.value.clear();
     transactionMyMonthListNotifier.value.clear();
@@ -108,6 +118,7 @@ class TransactionDB implements TransactionDBFunctions {
     transactionMonthListNotifier.value.addAll(listForMonth);
     transactionMyMonthListNotifier.value.addAll(listForMyMonth);
 
+    // Notify listeners
     transactionListNotifier.notifyListeners();
     transactionMonthListNotifier.notifyListeners();
     transactionMyMonthListNotifier.notifyListeners();
@@ -148,8 +159,7 @@ class TransactionDB implements TransactionDBFunctions {
     final selectedYear = selectedDate1.value.year;
 
     final startOfMonth = DateTime(selectedYear, month, 1);
-    final endOfMonth =
-        DateTime(selectedYear, month + 1, 1).subtract(const Duration(days: 1));
+    final endOfMonth = DateTime(selectedYear, month + 1, 1).subtract(const Duration(days: 1));
 
     final box = Hive.box<TransactionModel>(TRANSACTION_DB_NAME);
     final results = box.values.where((trxn) {
@@ -165,46 +175,58 @@ class TransactionDB implements TransactionDBFunctions {
     return results.toList();
   }
 
-  Future<List<TransactionModel>> getTransactionsForMonth(int month) async {
-    final now = DateTime.now();
-    final selectedYear = selectedDate1.value.year;
-
-    final startOfMonth = DateTime(selectedYear, month, 1);
-    final endOfMonth =
-        DateTime(selectedYear, month + 1, 1).subtract(const Duration(days: 1));
-
-    final box = Hive.box<TransactionModel>(TRANSACTION_DB_NAME);
-    final results = box.values.where((trxn) {
-      final trxnDate = DateTime.parse(trxn.date);
-      if (trxnDate.month == month && trxnDate.year == selectedYear) {
-        if (trxnDate.day != now.day ||
-            trxnDate.month != now.month ||
-            trxnDate.year != now.year) {
-          return trxnDate
-                  .isAfter(startOfMonth.subtract(const Duration(days: 1))) &&
-              trxnDate.isBefore(endOfMonth.add(const Duration(days: 1)));
-        }
-      }
-      return false;
-    });
-
-    return results.toList();
-  }
+  // Future<List<TransactionModel>> getTransactionsForMonth(int month) async {
+  //   final now = DateTime.now();
+  //   final selectedYear = selectedDate1.value.year;
+  //
+  //   final startOfMonth = DateTime(selectedYear, month, 1);
+  //   final endOfMonth =
+  //       DateTime(selectedYear, month + 1, 1).subtract(const Duration(days: 1));
+  //
+  //   final box = Hive.box<TransactionModel>(TRANSACTION_DB_NAME);
+  //   final results = box.values.where((trxn) {
+  //     final trxnDate = DateTime.parse(trxn.date);
+  //     if (trxnDate.month == month && trxnDate.year == selectedYear) {
+  //       if (trxnDate.day != now.day ||
+  //           trxnDate.month != now.month ||
+  //           trxnDate.year != now.year) {
+  //         return trxnDate
+  //                 .isAfter(startOfMonth.subtract(const Duration(days: 1))) &&
+  //             trxnDate.isBefore(endOfMonth.add(const Duration(days: 1)));
+  //       }
+  //     }
+  //     return false;
+  //   });
+  //
+  //   return results.toList();
+  // }
 
   @override
   Future<List<TransactionModel>> getAllTransactions() async {
-    final transactionDB =
+    final transactionBox =
         await Hive.openBox<TransactionModel>(TRANSACTION_DB_NAME);
-    return transactionDB.values.toList();
+
+
+    List<TransactionModel> transactions = transactionBox.values.toList();
+    transactions.sort((a, b) => a.date.compareTo(b.date));
+
+
+    transactions.forEach((element) {
+      print("Transaction Date: ${element.date}");
+    });
+
+    return transactions;
   }
 
   @override
-  Future<void> deleteTransaction(TransactionModel model) async {
-    final db = await Hive.openBox<TransactionModel>(TRANSACTION_DB_NAME);
-    await updateAccountGroup(model, true);
-    await db.delete(model.id);
-    refresh();
+
+  Future<void> deleteTransaction(int id) async {
+    final transactionDB = await Hive.openBox<TransactionModel>(TRANSACTION_DB_NAME);
+    await transactionDB.delete(id);
+    refresh(); // Refresh to update the UI
   }
+
+
 
   Future<void> editTransactionDb(int id, TransactionModel model) async {
     final db = await Hive.openBox<TransactionModel>(TRANSACTION_DB_NAME);
@@ -512,7 +534,398 @@ Future<String> getTransactionFilePath(String transactionId) async {
   }
 }
 
+// class HiveFirestoreBackupData1 {
+//   static const String TRANSACTION_DB_NAME = 'transaction-db';
+//   static FirebaseFirestore firestore = FirebaseFirestore.instance;
+//   static FirebaseAuth auth = FirebaseAuth.instance;
+//
+//   static Future<void> backupDataToFirestore(
+//       String? email, int backUpIndex) async {
+//     try {
+//       var user = auth.currentUser;
+//       if (user != null) {
+//         List<TransactionModel> transactionList = await getAllTransactions();
+//         await _backupTransactionsToFirestore(
+//             transactionList, user.email!, backUpIndex);
+//       } else {
+//         print('User is not authenticated. Cannot backup transactions.');
+//       }
+//     } catch (e) {
+//       print('Error backing up data to Firestore: $e');
+//     }
+//   }
+//
+//   static Future<List<TransactionModel>> getAllTransactions() async {
+//     final transactionDB =
+//         await Hive.openBox<TransactionModel>(TRANSACTION_DB_NAME);
+//     return transactionDB.values.toList();
+//   }
+//
+//   static Future<void> _backupTransactionsToFirestore(
+//       List<TransactionModel> transactionList,
+//       String email,
+//       int backUpNo) async {
+//     try {
+//       /* for (var transaction in transactionList) {
+//         CategoryModel category = transaction.category;
+//         String? filePath;
+//
+//         if (transaction.id != null) {
+//           filePath = await getTransactionFilePath(transaction.id.toString());
+//           await _saveTransactionToFile(
+//               transaction, filePath); // Save transaction to file
+//         } else {
+//           print('Transaction ID is null.');
+//         }
+//
+//         var firestoreData = {
+//           'email': email,
+//           'id': transaction.id,
+//           'amount': transaction.amount,
+//           'date': transaction.date,
+//           'account': transaction.account.name,
+//           'categoryType': transaction.categoryType.name,
+//           'category': {
+//             'id': category.id,
+//             'name': category.name,
+//             'isDeleted': category.isDeleted,
+//             'categoryType': category.categoryType.name,
+//           },
+//           'note': transaction.note,
+//           'file': filePath, // Include file path in firestoreData
+//         };
+//
+//         await firestore
+//             .collection('transactions')
+//             .doc(email)
+//             .collection('backUpFile$backUpNo')
+//             .doc(transaction.id.toString())
+//             .set(firestoreData);
+//
+//         // await firestore
+//         //     .collection('transactions')
+//         //     .doc(email)
+//         //     .set(
+//         //     {
+//         //
+//         //   "fileName":'backUpFile$backUpNo',
+//         //       "transactionData":firestoreData,
+//         //   'time':DateTime.now(),}
+//         // );
+//
+//         await firestore
+//             .collection('transactions')
+//             .doc(email)
+//             .set({
+//           'dataList': [
+//
+//             {
+//           'file': 'backUpFile$backUpNo',
+//
+//
+//             }
+//           ],
+//
+//
+//         });
+//
+//       }*/
+//
+//       List myTransactionsList = [];
+//
+//       for (int i = 0; i < transactionList.length; i++) {
+//         CategoryModel category = transactionList[i].category;
+//         myTransactionsList.add({
+//           'id': transactionList[i].id,
+//           'detail': {
+//             'id': transactionList[i].id,
+//             'amount': transactionList[i].amount,
+//             'date': transactionList[i].date,
+//             'account': transactionList[i].account.name,
+//             'categoryType': transactionList[i].categoryType.name,
+//             'category': {
+//               'id': category.id,
+//               'name': category.name,
+//               'isDeleted': category.isDeleted,
+//               'categoryType': category.categoryType.name,
+//             },
+//             'note': transactionList[i].note,
+//           }
+//         });
+//       }
+//
+//       var fileName = '';
+//       await FirebaseFirestore.instance
+//           .collection('transactions')
+//           .doc(email)
+//           .get()
+//           .then((value) async {
+//         List finalList = [];
+//
+//         if (value.data() != null) {
+//           // print(value.data()!['userTransaction'][0]['transaction']);
+//
+//           for (int i = 0; i < value.data()!['userTransaction'].length; i++) {
+//             finalList.add({
+//               'filename': value.data()!['userTransaction'][i]['filename'],
+//               'transaction': value.data()!['userTransaction'][i]['transaction'],
+//               'time': value.data()!['userTransaction'][i]['time'],
+//             });
+//           }
+//
+//           var listing = {
+//             'filename':
+//                 'backupFile${value.data()!['userTransaction'].length}.Hive',
+//             'transaction': myTransactionsList,
+//             'time': DateTime.now(),
+//           };
+//
+//           if (value.data()!['userTransaction'].length <= 20) {
+//             finalList.add(listing);
+//           } else {
+//             finalList.removeAt(0);
+//             finalList.add(listing);
+//           }
+//
+//           fileName =
+//               "backupFile${value.data()!['userTransaction'].length-1}.Hive";
+//
+//           await firestore
+//               .collection('transactions')
+//               .doc(email)
+//               .set({'userTransaction': finalList});
+//         } else {
+//           fileName = 'backupFile0.Hive';
+//           List<Map<String, dynamic>> transactionsData = [
+//             {
+//               'filename': 'backupFile0.Hive',
+//               'transaction': myTransactionsList,
+//               'time': DateTime.now(),
+//             }
+//           ];
+//
+//           await firestore
+//               .collection('transactions')
+//               .doc(email)
+//               .set({'userTransaction': transactionsData});
+//         }
+//         if (value.data()!['userTransaction'].length <= 20) {
+//           Get.snackbar(
+//             "",
+//             "",
+//             messageText: Text(
+//               fileName,
+//               style: TextStyle(color: Colors.white),
+//             ),
+//             titleText: Text(
+//               'Backup Created',
+//               style: TextStyle(color: Colors.white),
+//             ),
+//             icon: Padding(
+//               padding: const EdgeInsets.only(left: 8.0),
+//               child: Icon(
+//                 Icons.backup,
+//                 color: Colors.white,
+//                 size: 30,
+//               ),
+//             ),
+//             snackPosition: SnackPosition.TOP,
+//             maxWidth: 200,
+//             margin: EdgeInsets.symmetric(
+//               horizontal: 50,
+//               vertical: 20,
+//             ),
+//           );
+//         } else {}
+//       });
+//     } catch (e) {
+//       /*  Get.snackbar('Error', 'Sorry, Something went wrong!',
+//           backgroundColor: Colors.red, colorText: AppTheme.white);*/
+//       print('Error backing up transactions: $e');
+//     }
+//     Future<List<String>> fetchFilePaths() async {
+//       List<String> filePaths = [];
+//
+//       try {
+//         QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+//             .collection('transactions')
+//             .doc(email)
+//             .collection('user_transactions')
+//             .get();
+//
+//         querySnapshot.docs.forEach((doc) {
+//           Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+//           String filePath = data['file'];
+//           filePaths.add(filePath);
+//         });
+//       } catch (e) {
+//         print('Error fetching file paths: $e');
+//       }
+//
+//       return filePaths;
+//     }
+//   }
+//
+//   static Future<void> _saveTransactionToFile(
+//       TransactionModel transaction, String filePath) async {
+//     try {
+//       // Convert transaction object to a Map
+//       final transactionData = {
+//         'id': transaction.id,
+//         'date': transaction.date,
+//         'amount': transaction.amount,
+//         'account': transaction.account.name,
+//         'categoryType': transaction.categoryType.name,
+//         'category': {
+//           'id': transaction.category.id,
+//           'name': transaction.category.name,
+//           'isDeleted': transaction.category.isDeleted,
+//           'categoryType': transaction.category.categoryType.name,
+//         },
+//         'note': transaction.note,
+//         'image': transaction.image,
+//       };
+//
+//       // Convert the Map to a JSON string
+//       final jsonString = jsonEncode(transactionData);
+//
+//       // Write the JSON string to the file
+//       final file = File(filePath);
+//       await file.writeAsString(jsonString);
+//     } catch (e) {
+//       print('Error saving transaction to file: $e');
+//     }
+//   }
+// }
+
 class HiveFirestoreBackupData1 {
+  static const String TRANSACTION_DB_NAME = 'transaction-db';
+  static FirebaseFirestore firestore = FirebaseFirestore.instance;
+  static FirebaseAuth auth = FirebaseAuth.instance;
+
+  static Future<void> backupDataToFirestore(
+      String? email, int backUpIndex) async {
+    try {
+      var user = auth.currentUser;
+      if (user != null) {
+        List<TransactionModel> transactionList = await getAllTransactions();
+        await _backupTransactionsToFirestore(
+            transactionList, user.email!, backUpIndex);
+      } else {
+        print('User is not authenticated. Cannot backup transactions.');
+      }
+    } catch (e) {
+      print('Error backing up data to Firestore: $e');
+    }
+  }
+
+  static Future<List<TransactionModel>> getAllTransactions() async {
+    final transactionDB =
+        await Hive.openBox<TransactionModel>(TRANSACTION_DB_NAME);
+    return transactionDB.values.toList();
+  }
+
+  static Future<void> _backupTransactionsToFirestore(
+      List<TransactionModel> transactionList,
+      String email,
+      int backUpNo) async {
+    try {
+      List<Map<String, dynamic>> myTransactionsList =
+          transactionList.map((transaction) {
+        CategoryModel category = transaction.category;
+        return {
+          'id': transaction.id,
+          'detail': {
+            'id': transaction.id,
+            'amount': transaction.amount,
+            'date': transaction.date,
+            'account': transaction.account.name,
+            'categoryType': transaction.categoryType.name,
+            'category': {
+              'id': category.id,
+              'name': category.name,
+              'isDeleted': category.isDeleted,
+              'categoryType': category.categoryType.name,
+            },
+            'note': transaction.note,
+          }
+        };
+      }).toList();
+
+      DocumentSnapshot docSnapshot =
+          await firestore.collection('transactions').doc(email).get();
+      List finalList = [];
+
+      if (docSnapshot.exists) {
+        final data = docSnapshot.data() as Map<String, dynamic>;
+        finalList = List.from(data['userTransaction'] ?? []);
+      }
+
+      if (finalList.length >= 20) {
+        finalList.removeAt(0); // Remove the oldest backup if more than 20
+      }
+
+      finalList.add({
+        'filename': 'backupFile${finalList.length}.Hive',
+        'transaction': myTransactionsList,
+        'time': DateTime.now(),
+      });
+
+      await firestore
+          .collection('transactions')
+          .doc(email)
+          .set({'userTransaction': finalList});
+
+      String fileName = 'backupFile${finalList.length - 1}.Hive';
+
+      Get.snackbar(
+        "",
+        "",
+        messageText: Text(fileName, style: TextStyle(color: Colors.white)),
+        titleText:
+            Text('Backup Created', style: TextStyle(color: Colors.white)),
+        icon: Padding(
+          padding: const EdgeInsets.only(left: 8.0),
+          child: Icon(Icons.backup, color: Colors.white, size: 30),
+        ),
+        snackPosition: SnackPosition.TOP,
+        maxWidth: 200,
+        margin: EdgeInsets.symmetric(horizontal: 50, vertical: 20),
+      );
+    } catch (e) {
+      print('Error backing up transactions: $e');
+    }
+  }
+
+  static Future<void> _saveTransactionToFile(
+      TransactionModel transaction, String filePath) async {
+    try {
+      final transactionData = {
+        'id': transaction.id,
+        'date': transaction.date,
+        'amount': transaction.amount,
+        'account': transaction.account.name,
+        'categoryType': transaction.categoryType.name,
+        'category': {
+          'id': transaction.category.id,
+          'name': transaction.category.name,
+          'isDeleted': transaction.category.isDeleted,
+          'categoryType': transaction.category.categoryType.name,
+        },
+        'note': transaction.note,
+        'image': transaction.image,
+      };
+
+      final jsonString = jsonEncode(transactionData);
+      final file = File(filePath);
+      await file.writeAsString(jsonString);
+    } catch (e) {
+      print('Error saving transaction to file: $e');
+    }
+  }
+}
+
+class HiveFirestoreBackupData {
   static const String TRANSACTION_DB_NAME = 'transaction-db';
   static FirebaseFirestore firestore = FirebaseFirestore.instance;
   static FirebaseAuth auth = FirebaseAuth.instance;
@@ -644,272 +1057,6 @@ class HiveFirestoreBackupData1 {
           // print(value.data()!['userTransaction'][0]['transaction']);
 
           for (int i = 0; i < value.data()!['userTransaction'].length; i++) {
-              finalList.add({
-                'filename': value.data()!['userTransaction'][i]['filename'],
-                'transaction': value.data()!['userTransaction'][i]
-                    ['transaction'],
-                'time': value.data()!['userTransaction'][i]['time'],
-              });
-          }
-
-          var listing = {
-            'filename':
-                'backupFile${value.data()!['userTransaction'].length}.Hive',
-            'transaction': myTransactionsList,
-            'time': DateTime.now(),
-          };
-
-          if (value.data()!['userTransaction'].length <= 20) {
-            finalList.add(listing);
-          } else {}
-
-          fileName =
-              "backupFile${value.data()!['userTransaction'].length}.Hive";
-
-          await firestore
-              .collection('transactions')
-              .doc(email)
-              .set({'userTransaction': finalList});
-        } else {
-          fileName = 'backupFile0.Hive';
-          List<Map<String, dynamic>> transactionsData = [
-            {
-              'filename': 'backupFile0.Hive',
-              'transaction': myTransactionsList,
-              'time': DateTime.now(),
-            }
-          ];
-
-          await firestore
-              .collection('transactions')
-              .doc(email)
-              .set({'userTransaction': transactionsData});
-        }
-        if (value.data()!['userTransaction'].length <= 20) {
-          Get.snackbar(
-            "",
-            "",
-            messageText: Text(
-              fileName,
-              style: TextStyle(color: Colors.white),
-            ),
-            titleText: Text(
-              'Backup Created',
-              style: TextStyle(color: Colors.white),
-            ),
-            icon: Padding(
-              padding: const EdgeInsets.only(left: 8.0),
-              child: Icon(
-                Icons.backup,
-                color: Colors.white,
-                size: 30,
-              ),
-            ),
-            snackPosition: SnackPosition.TOP,
-            maxWidth: 200,
-            margin: EdgeInsets.symmetric(
-              horizontal: 50,
-              vertical: 20,
-            ),
-          );
-        } else {
-
-        }
-      });
-
-
-    } catch (e) {
-    /*  Get.snackbar('Error', 'Sorry, Something went wrong!',
-          backgroundColor: Colors.red, colorText: AppTheme.white);*/
-      print('Error backing up transactions: $e');
-    }
-    Future<List<String>> fetchFilePaths() async {
-      List<String> filePaths = [];
-
-      try {
-        QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-            .collection('transactions')
-            .doc(email)
-            .collection('user_transactions')
-            .get();
-
-        querySnapshot.docs.forEach((doc) {
-          Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-          String filePath = data['file'];
-          filePaths.add(filePath);
-        });
-      } catch (e) {
-        print('Error fetching file paths: $e');
-      }
-
-      return filePaths;
-    }
-  }
-
-  static Future<void> _saveTransactionToFile(
-      TransactionModel transaction, String filePath) async {
-    try {
-      // Convert transaction object to a Map
-      final transactionData = {
-        'id': transaction.id,
-        'date': transaction.date,
-        'amount': transaction.amount,
-        'account': transaction.account.name,
-        'categoryType': transaction.categoryType.name,
-        'category': {
-          'id': transaction.category.id,
-          'name': transaction.category.name,
-          'isDeleted': transaction.category.isDeleted,
-          'categoryType': transaction.category.categoryType.name,
-        },
-        'note': transaction.note,
-        'image': transaction.image,
-      };
-
-      // Convert the Map to a JSON string
-      final jsonString = jsonEncode(transactionData);
-
-      // Write the JSON string to the file
-      final file = File(filePath);
-      await file.writeAsString(jsonString);
-    } catch (e) {
-      print('Error saving transaction to file: $e');
-    }
-  }
-}
-
-class HiveFirestoreBackupData {
-  static const String TRANSACTION_DB_NAME = 'transaction-db';
-  static FirebaseFirestore firestore = FirebaseFirestore.instance;
-  static FirebaseAuth auth = FirebaseAuth.instance;
-
-  static Future<void> backupDataToFirestore(
-      String? email, int backUpIndex) async {
-    try {
-      var user = auth.currentUser;
-      if (user != null) {
-        List<TransactionModel> transactionList = await getAllTransactions();
-        await _backupTransactionsToFirestore(
-            transactionList, user.email!, backUpIndex);
-      } else {
-        print('User is not authenticated. Cannot backup transactions.');
-      }
-    } catch (e) {
-      print('Error backing up data to Firestore: $e');
-    }
-  }
-
-  static Future<List<TransactionModel>> getAllTransactions() async {
-    final transactionDB =
-    await Hive.openBox<TransactionModel>(TRANSACTION_DB_NAME);
-    return transactionDB.values.toList();
-  }
-
-  static Future<void> _backupTransactionsToFirestore(
-      List<TransactionModel> transactionList,
-      String email,
-      int backUpNo) async {
-    try {
-      /* for (var transaction in transactionList) {
-        CategoryModel category = transaction.category;
-        String? filePath;
-
-        if (transaction.id != null) {
-          filePath = await getTransactionFilePath(transaction.id.toString());
-          await _saveTransactionToFile(
-              transaction, filePath); // Save transaction to file
-        } else {
-          print('Transaction ID is null.');
-        }
-
-        var firestoreData = {
-          'email': email,
-          'id': transaction.id,
-          'amount': transaction.amount,
-          'date': transaction.date,
-          'account': transaction.account.name,
-          'categoryType': transaction.categoryType.name,
-          'category': {
-            'id': category.id,
-            'name': category.name,
-            'isDeleted': category.isDeleted,
-            'categoryType': category.categoryType.name,
-          },
-          'note': transaction.note,
-          'file': filePath, // Include file path in firestoreData
-        };
-
-        await firestore
-            .collection('transactions')
-            .doc(email)
-            .collection('backUpFile$backUpNo')
-            .doc(transaction.id.toString())
-            .set(firestoreData);
-
-        // await firestore
-        //     .collection('transactions')
-        //     .doc(email)
-        //     .set(
-        //     {
-        //
-        //   "fileName":'backUpFile$backUpNo',
-        //       "transactionData":firestoreData,
-        //   'time':DateTime.now(),}
-        // );
-
-        await firestore
-            .collection('transactions')
-            .doc(email)
-            .set({
-          'dataList': [
-
-            {
-          'file': 'backUpFile$backUpNo',
-
-
-            }
-          ],
-
-
-        });
-
-      }*/
-
-      List myTransactionsList = [];
-
-      for (int i = 0; i < transactionList.length; i++) {
-        CategoryModel category = transactionList[i].category;
-        myTransactionsList.add({
-          'id': transactionList[i].id,
-          'detail': {
-            'id': transactionList[i].id,
-            'amount': transactionList[i].amount,
-            'date': transactionList[i].date,
-            'account': transactionList[i].account.name,
-            'categoryType': transactionList[i].categoryType.name,
-            'category': {
-              'id': category.id,
-              'name': category.name,
-              'isDeleted': category.isDeleted,
-              'categoryType': category.categoryType.name,
-            },
-            'note': transactionList[i].note,
-          }
-        });
-      }
-
-      var fileName = '';
-      await FirebaseFirestore.instance
-          .collection('transactions')
-          .doc(email)
-          .get()
-          .then((value) async {
-        List finalList = [];
-
-        if (value.data() != null) {
-          // print(value.data()!['userTransaction'][0]['transaction']);
-
-          for (int i = 0; i < value.data()!['userTransaction'].length; i++) {
             finalList.add({
               'filename': value.data()!['userTransaction'][i]['filename'],
               'transaction': value.data()!['userTransaction'][i]['transaction'],
@@ -919,7 +1066,7 @@ class HiveFirestoreBackupData {
 
           var listing = {
             'filename':
-            'backupFile${value.data()!['userTransaction'].length}.Hive',
+                'backupFile${value.data()!['userTransaction'].length}.Hive',
             'transaction': myTransactionsList,
             'time': DateTime.now(),
           };
@@ -927,7 +1074,7 @@ class HiveFirestoreBackupData {
           finalList.add(listing);
 
           fileName =
-          "backupFile${value.data()!['userTransaction'].length}.Hive";
+              "backupFile${value.data()!['userTransaction'].length}.Hive";
 
           await firestore
               .collection('transactions')

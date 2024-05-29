@@ -16,6 +16,8 @@ import 'package:pokercat/addexpense/db/models/transactions/transaction_model_db.
 import 'package:pokercat/imports.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+
+
 class BackUpScreen extends StatefulWidget {
   BackUpScreen({super.key});
 
@@ -100,7 +102,7 @@ class _BackUpScreenState extends State<BackUpScreen> {
 
   void  startAutomaticBackup() {
     // Start a timer to trigger backup retrieval at a set duration
-    timer = Timer.periodic(Duration(days : selectedDay), (timer) async {
+    timer = Timer.periodic(Duration(minutes : selectedDay), (timer) async {
       print(selectedDay);
       // Call function to get particular backup file
       var user = FirebaseAuth.instance.currentUser;

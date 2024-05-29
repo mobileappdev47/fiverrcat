@@ -31,7 +31,7 @@ class AddTaskScreen extends StatefulWidget {
 
 class _AddTaskScreenState extends State<AddTaskScreen> {
   // DateTime selectedDate = DateTime.now();
-  TextEditingController _amountController = TextEditingController();
+  final TextEditingController _amountController = TextEditingController();
   String? _categoryID;
   Map<String, dynamic> monthDataForGraph = {
     'jan': {
@@ -96,11 +96,13 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
     }
   };
 
-  CategoryModel selectedcategoryModel = CategoryModel(
-      id: '', name: '', isDeleted: true, categoryType: CategoryType.income);
+  CategoryModel? selectedcategoryModel;
+
+  // CategoryModel selectedcategoryModel = CategoryModel(
+  //     id: '', name: '', isDeleted: true, categoryType: CategoryType.income);
 
   //빈 카테고리 모델
-  TextEditingController _noteController = TextEditingController();
+  final TextEditingController _noteController = TextEditingController();
 
   TextEditingController dateController = TextEditingController();
 
@@ -113,6 +115,12 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
 
   @override
   void initState() {
+    var firstCategory = CategoryDB().incomeCategoryNotifier.value
+        .where((e) => e.categoryType == CategoryType.income)
+        .first;
+
+    _categoryID = firstCategory.id;
+    selectedcategoryModel = firstCategory;
     dateController.text = DateFormat('yyyy/MM/dd').format(DateTime.now());
     // expense = Expense.empty;
     // expense.expenseId = const Uuid().v1();
@@ -156,11 +164,11 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
           currentFocus.unfocus();
         }
       },
-      child: Container(
+      child: SizedBox(
         height: 400.0,
         child: Container(
-          padding: EdgeInsets.all(20.0),
-          decoration: BoxDecoration(
+          padding: const EdgeInsets.all(20.0),
+          decoration: const BoxDecoration(
             color: AppTheme.pcPopUpColor,
             borderRadius: BorderRadius.only(
               topLeft: Radius.circular(20.0),
@@ -371,7 +379,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                         highlightColor: Colors.transparent,
                       ),
                       child: StatefulBuilder(builder: (context, setState2) {
-                        return DropdownButtonFormField<String>(
+                        return  DropdownButtonFormField<String>(
                           decoration: const InputDecoration(
                             enabledBorder: UnderlineInputBorder(
                               borderSide: BorderSide(
@@ -387,31 +395,33 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                           items: CategoryDB()
                               .incomeCategoryNotifier
                               .value
-                              .where(
-                                  (e) => e.categoryType == CategoryType.income)
+                              .where((e) => e.categoryType == CategoryType.income)
                               .map((e) => DropdownMenuItem(
-                                    value: e.id,
-                                    child: Text(
-                                      e.name,
-                                      style: const TextStyle(
-                                        color: AppTheme.pcTextSecondayColor,
-                                      ),
-                                    ),
-                                    onTap: () {
-                                      print(e.categoryType);
-
-                                      selectedcategoryModel = e;
-                                    },
-                                  ))
+                            value: e.id,
+                            child: Text(
+                              e.name,
+                              style: const TextStyle(
+                                color: AppTheme.pcTextSecondayColor,
+                              ),
+                            ),
+                            onTap: () {
+                              print(e.categoryType);
+                              selectedcategoryModel = e;
+                            },
+                          ))
                               .toList(),
                           onChanged: (selectedValue) {
                             setState(() {
                               _categoryID = selectedValue;
+                              selectedcategoryModel = CategoryDB()
+                                  .incomeCategoryNotifier
+                                  .value
+                                  .firstWhere((e) => e.id == selectedValue);
                             });
                           },
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return 'Required Feild';
+                              return 'Required Field';
                             } else {
                               return null;
                             }
@@ -500,8 +510,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                         child: isLoading
                             ? const Center(child: CircularProgressIndicator())
                             : ValueListenableBuilder(
-                                valueListenable: TransactionDB
-                                    .instance.transactionListNotifier,
+                                valueListenable: TransactionDB.instance.transactionListNotifier,
                                 builder: (context, newList, child) {
                                   return TextButton(
                                       onPressed: () async {
@@ -509,25 +518,25 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                                           if (_amountController.text != '' &&
                                               _categoryID != null) {
                                             addIncomeTransaction();
+                                            TransactionDB.instance.getAllTransactions();
                                             //금액을임력안하면 빈 스트링이 돌아오기에 이렇게 내맘대로 썼음
                                             print(
                                                 '_amountController.text==${_amountController.text.runtimeType}==');
 
                                             Navigator.pop(context);
                                             setState(() {});
-                                            await TransactionDB.instance
-                                                .refresh();
+                                            await TransactionDB.instance.refresh();
                                           }
-                                          try {
-                                            await addIncomeTransaction();
-                                          } catch (e) {
-                                            print(e.toString());
-                                          }
+                                          // try {
+                                          // //  await addIncomeTransaction();
+                                          // } catch (e) {
+                                          //   print(e.toString());
+                                          // }
                                         }
                                         setState(() {});
                                         // context.read<CreateExpenseBloc>().add(CreateExpense(expense));
                                         //임의로
-                                        await TransactionDB.instance.refresh();
+                                       // await TransactionDB.instance.refresh();
 
                                         /*           var data = TransactionDB
                                             .instance.transactionListNotifier;
@@ -976,13 +985,11 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                                             print(
                                                 '_amountController.text==${_amountController.text.runtimeType}==');
                                             setState(() {});
-                                            await TransactionDB.instance
-                                                .refresh();
-
                                             Navigator.pop(context);
+                                            await TransactionDB.instance.refresh();
                                           }
                                           try {
-                                            await addExpenseTransaction();
+                                           // await addExpenseTransaction();
                                           } catch (e) {
                                             print(e.toString());
                                           }
@@ -1475,6 +1482,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
 
       var data = TransactionDB.instance.transactionListNotifier;
       print(data.value);
+
     } else {
       print('in side else case');
       final model = TransactionModel(
