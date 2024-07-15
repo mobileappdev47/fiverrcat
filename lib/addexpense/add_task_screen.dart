@@ -115,7 +115,9 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
 
   @override
   void initState() {
-    var firstCategory = CategoryDB().incomeCategoryNotifier.value
+    var firstCategory = CategoryDB()
+        .incomeCategoryNotifier
+        .value
         .where((e) => e.categoryType == CategoryType.income)
         .first;
 
@@ -379,7 +381,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                         highlightColor: Colors.transparent,
                       ),
                       child: StatefulBuilder(builder: (context, setState2) {
-                        return  DropdownButtonFormField<String>(
+                        return DropdownButtonFormField<String>(
                           decoration: const InputDecoration(
                             enabledBorder: UnderlineInputBorder(
                               borderSide: BorderSide(
@@ -395,20 +397,21 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                           items: CategoryDB()
                               .incomeCategoryNotifier
                               .value
-                              .where((e) => e.categoryType == CategoryType.income)
+                              .where(
+                                  (e) => e.categoryType == CategoryType.income)
                               .map((e) => DropdownMenuItem(
-                            value: e.id,
-                            child: Text(
-                              e.name,
-                              style: const TextStyle(
-                                color: AppTheme.pcTextSecondayColor,
-                              ),
-                            ),
-                            onTap: () {
-                              print(e.categoryType);
-                              selectedcategoryModel = e;
-                            },
-                          ))
+                                    value: e.id,
+                                    child: Text(
+                                      e.name,
+                                      style: const TextStyle(
+                                        color: AppTheme.pcTextSecondayColor,
+                                      ),
+                                    ),
+                                    onTap: () {
+                                      print(e.categoryType);
+                                      selectedcategoryModel = e;
+                                    },
+                                  ))
                               .toList(),
                           onChanged: (selectedValue) {
                             setState(() {
@@ -510,7 +513,8 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                         child: isLoading
                             ? const Center(child: CircularProgressIndicator())
                             : ValueListenableBuilder(
-                                valueListenable: TransactionDB.instance.transactionListNotifier,
+                                valueListenable: TransactionDB
+                                    .instance.transactionListNotifier,
                                 builder: (context, newList, child) {
                                   return TextButton(
                                       onPressed: () async {
@@ -518,14 +522,16 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                                           if (_amountController.text != '' &&
                                               _categoryID != null) {
                                             addIncomeTransaction();
-                                            TransactionDB.instance.getAllTransactions();
+                                            TransactionDB.instance
+                                                .getAllTransactions();
                                             //금액을임력안하면 빈 스트링이 돌아오기에 이렇게 내맘대로 썼음
                                             print(
                                                 '_amountController.text==${_amountController.text.runtimeType}==');
 
                                             Navigator.pop(context);
                                             setState(() {});
-                                            await TransactionDB.instance.refresh();
+                                            await TransactionDB.instance
+                                                .refresh();
                                           }
                                           // try {
                                           // //  await addIncomeTransaction();
@@ -536,7 +542,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                                         setState(() {});
                                         // context.read<CreateExpenseBloc>().add(CreateExpense(expense));
                                         //임의로
-                                       // await TransactionDB.instance.refresh();
+                                        // await TransactionDB.instance.refresh();
 
                                         /*           var data = TransactionDB
                                             .instance.transactionListNotifier;
@@ -986,10 +992,11 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                                                 '_amountController.text==${_amountController.text.runtimeType}==');
                                             setState(() {});
                                             Navigator.pop(context);
-                                            await TransactionDB.instance.refresh();
+                                            await TransactionDB.instance
+                                                .refresh();
                                           }
                                           try {
-                                           // await addExpenseTransaction();
+                                            // await addExpenseTransaction();
                                           } catch (e) {
                                             print(e.toString());
                                           }
@@ -1434,7 +1441,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
     final parsedAmount = double.tryParse(amount);
     if (widget.modelFromTransation == null) {
       final model = TransactionModel(
-        id:getLastFiveDigitsOfTimestamp()/*DateTime.now().day + DateTime.now().hour + DateTime.now().second*/,
+        id: getLastFiveDigitsOfTimestamp() /*DateTime.now().day + DateTime.now().hour + DateTime.now().second*/,
         date: DateFormat('yyyy-MM-dd').format(selectDate),
         amount: parsedAmount ?? 0.0,
         account: AccountType.cash,
@@ -1469,7 +1476,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
     CategoryType selectedCategoryType = CategoryType.income;
     if (widget.modelFromTransation == null) {
       final model = TransactionModel(
-        id: getLastFiveDigitsOfTimestamp()/*DateTime.now().day + DateTime.now().hour + DateTime.now().second*/,
+        id: getLastFiveDigitsOfTimestamp() /*DateTime.now().day + DateTime.now().hour + DateTime.now().second*/,
         date: DateFormat('yyyy-MM-dd').format(selectDate),
         amount: parsedAmount ?? 0.0,
         account: AccountType.cash,
@@ -1482,7 +1489,6 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
 
       var data = TransactionDB.instance.transactionListNotifier;
       print(data.value);
-
     } else {
       print('in side else case');
       final model = TransactionModel(
@@ -1516,7 +1522,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
     int timestampMicroseconds = DateTime.now().microsecondsSinceEpoch;
 
     // Get the last 5 digits
-    int lastFiveDigits = timestampMicroseconds % 10000000000;
+    int lastFiveDigits = timestampMicroseconds % 1000000000;
 
     return lastFiveDigits;
   }

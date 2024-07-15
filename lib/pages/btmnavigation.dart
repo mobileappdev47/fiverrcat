@@ -58,8 +58,8 @@ class _BtmNaviState extends State<BtmNavi> {
               children: [
                 TextButton(
                   onPressed: () async {
-                    final UserCredential userCredential = await signInWithGoogle();
-                    final String userEmail = userCredential.user!.email.toString();
+                    final UserCredential? userCredential = await signInWithGoogle();
+                    final String userEmail = userCredential!.user!.email.toString();
                     await FirebaseBackupDataRetrieval1.getUserTransactionsAndStore();
                    Get.back();
                   },

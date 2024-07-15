@@ -1,6 +1,5 @@
 import 'dart:async';
-import 'dart:convert';
-import 'dart:io';
+
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -8,7 +7,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:hive/hive.dart';
-import 'package:intl/intl.dart';
 import 'package:pokercat/addexpense/db/functions/transaction_function.dart';
 import 'package:pokercat/addexpense/db/models/account_group/account_group_model_db.dart';
 import 'package:pokercat/addexpense/db/models/category/category_model_db.dart';
@@ -79,6 +77,8 @@ class _BackUpScreenState extends State<BackUpScreen> {
   Future<void> saveSelectedDay(int day) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setInt('selectedDay', day);
+
+    // Restart the background service with the new day
   }
 
   Future<void> loadSelectedDay() async {
@@ -102,7 +102,7 @@ class _BackUpScreenState extends State<BackUpScreen> {
 
   void  startAutomaticBackup() {
     // Start a timer to trigger backup retrieval at a set duration
-    timer = Timer.periodic(Duration(days : selectedDay), (timer) async {
+    timer = Timer.periodic(Duration(minutes : selectedDay), (timer) async {
       print(selectedDay);
       // Call function to get particular backup file
       var user = FirebaseAuth.instance.currentUser;
@@ -249,10 +249,10 @@ class _BackUpScreenState extends State<BackUpScreen> {
               ),
               child: Column(
                 children: [
-                  SizedBox(
+                  const SizedBox(
                     height: 10,
                   ),
-                  Text(
+                  const Text(
                     'Backups',
                     style: TextStyle(
                         color: Colors.white,
@@ -288,7 +288,7 @@ class _BackUpScreenState extends State<BackUpScreen> {
                               value: autoBackupEnabled,
                               onChanged: (newValue) {
                                 setState.call(
-                                  () {
+                                      () {
                                     autoBackupEnabled = newValue;
                                   },
                                 );
@@ -333,7 +333,7 @@ class _BackUpScreenState extends State<BackUpScreen> {
                                     },
                                     items: List.generate(
                                       3,
-                                      (index) => DropdownMenuItem<int>(
+                                          (index) => DropdownMenuItem<int>(
                                         value: index + 1,
                                         child: Text(
                                             '${index + 1} day${index == 0 ? '' : 's'}'),
@@ -350,134 +350,134 @@ class _BackUpScreenState extends State<BackUpScreen> {
                             builder: (context, snapshot) {
                               return Padding(
                                 padding:
-                                    const EdgeInsets.symmetric(horizontal: 20),
+                                const EdgeInsets.symmetric(horizontal: 20),
                                 child: snapshot.data != null &&
-                                        snapshot.data!.exists == true
+                                    snapshot.data!.exists == true
                                     ? ListView.separated(
-                                        shrinkWrap: true,
-                                        physics:
-                                            const NeverScrollableScrollPhysics(),
-                                        separatorBuilder: (context, index) =>
-                                            const SizedBox(
-                                              height: 10,
+                                    shrinkWrap: true,
+                                    physics:
+                                    const NeverScrollableScrollPhysics(),
+                                    separatorBuilder: (context, index) =>
+                                    const SizedBox(
+                                      height: 10,
+                                    ),
+                                    itemCount:
+                                    snapshot.data!['userTransaction'] ==
+                                        null
+                                        ? 0
+                                        : snapshot
+                                        .data!['userTransaction']
+                                        .length,
+                                    itemBuilder: (context, index) {
+                                      Timestamp timestamp = snapshot.data!['userTransaction'][index]['time'];
+                                      DateTime dateTime = timestamp.toDate();
+                                      print(snapshot
+                                          .data!['userTransaction'][index]
+                                      ['time']
+                                          .toString());
+                                      return Container(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 15, vertical: 10),
+                                        decoration: BoxDecoration(
+                                          borderRadius:
+                                          BorderRadius.circular(16),
+                                          color: Colors.white
+                                              .withOpacity(0.08),
+                                        ),
+                                        child: Row(
+                                          crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                          children: [
+                                            Icon(
+                                              CupertinoIcons.doc_text_fill,
+                                              color: AppTheme.chartColor,
                                             ),
-                                        itemCount:
-                                            snapshot.data!['userTransaction'] ==
-                                                    null
-                                                ? 0
-                                                : snapshot
-                                                    .data!['userTransaction']
-                                                    .length,
-                                        itemBuilder: (context, index) {
-                                          Timestamp timestamp = snapshot.data!['userTransaction'][index]['time'];
-                                          DateTime dateTime = timestamp.toDate();
-                                          print(snapshot
-                                              .data!['userTransaction'][index]
-                                                  ['time']
-                                              .toString());
-                                          return Container(
-                                            padding: EdgeInsets.symmetric(
-                                                horizontal: 15, vertical: 10),
-                                            decoration: BoxDecoration(
-                                              borderRadius:
-                                                  BorderRadius.circular(16),
-                                              color: Colors.white
-                                                  .withOpacity(0.08),
+                                            SizedBox(
+                                              width: 10,
                                             ),
-                                            child: Row(
+                                            Column(
                                               crossAxisAlignment:
-                                                  CrossAxisAlignment.center,
+                                              CrossAxisAlignment.start,
                                               children: [
-                                                Icon(
-                                                  CupertinoIcons.doc_text_fill,
-                                                  color: AppTheme.chartColor,
-                                                ),
-                                                SizedBox(
-                                                  width: 10,
-                                                ),
-                                                Column(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    Text(
-                                                      timeAgoSinceDate(
-                                                        snapshot.data!['userTransaction'][index]['time'].toDate(),
-                                                      ),
-                                                      style: TextStyle(
-                                                        fontSize: 15.5,
-                                                        fontWeight: FontWeight.w600,
-                                                        color: AppTheme.white,
-                                                      ),
-                                                    ),
-
-                                                    Text(
-                                                      snapshot.data![
-                                                              'userTransaction']
-                                                          [index]['filename'],
-                                                      style: TextStyle(
-                                                        fontSize: 13,
-                                                        fontWeight:
-                                                            FontWeight.w500,
-                                                        color: AppTheme.white
-                                                            .withOpacity(0.8),
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                                Spacer(),
-                                                GestureDetector(
-                                                  onTap: () {
-                                                    getParticularBackUpFile(index);
-                                                  },
-                                                  child: Container(
-                                                    height: 45,
-                                                    width: 45,
-                                                    decoration: BoxDecoration(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              10),
-                                                      color: Colors.white
-                                                          .withOpacity(0.08),
-                                                    ),
-                                                    alignment: Alignment.center,
-                                                    child: Icon(
-                                                      Icons.download,
-                                                      color:
-                                                          AppTheme.chartColor,
-                                                    ),
+                                                Text(
+                                                  timeAgoSinceDate(
+                                                    snapshot.data!['userTransaction'][index]['time'].toDate(),
+                                                  ),
+                                                  style: const TextStyle(
+                                                    fontSize: 15.5,
+                                                    fontWeight: FontWeight.w600,
+                                                    color: AppTheme.white,
                                                   ),
                                                 ),
-                                                SizedBox(
-                                                  width: 10,
-                                                ),
-                                                GestureDetector(
-                                                  onTap: () {
-                                                    deleteParticularBackUpFile(
-                                                        index);
-                                                  },
-                                                  child: Container(
-                                                    height: 45,
-                                                    width: 45,
-                                                    decoration: BoxDecoration(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              10),
-                                                      color: Colors.white
-                                                          .withOpacity(0.08),
-                                                    ),
-                                                    alignment: Alignment.center,
-                                                    child: Icon(
-                                                      Icons.close,
-                                                      color:
-                                                          AppTheme.chartColor,
-                                                    ),
+
+                                                Text(
+                                                  snapshot.data![
+                                                  'userTransaction']
+                                                  [index]['filename'],
+                                                  style: TextStyle(
+                                                    fontSize: 13,
+                                                    fontWeight:
+                                                    FontWeight.w500,
+                                                    color: AppTheme.white
+                                                        .withOpacity(0.8),
                                                   ),
                                                 ),
                                               ],
                                             ),
-                                          );
-                                        })
-                                    : SizedBox(),
+                                            const Spacer(),
+                                            GestureDetector(
+                                              onTap: () {
+                                                getParticularBackUpFile(index);
+                                              },
+                                              child: Container(
+                                                height: 45,
+                                                width: 45,
+                                                decoration: BoxDecoration(
+                                                  borderRadius:
+                                                  BorderRadius.circular(
+                                                      10),
+                                                  color: Colors.white
+                                                      .withOpacity(0.08),
+                                                ),
+                                                alignment: Alignment.center,
+                                                child: const Icon(
+                                                  Icons.download,
+                                                  color:
+                                                  AppTheme.chartColor,
+                                                ),
+                                              ),
+                                            ),
+                                            const SizedBox(
+                                              width: 10,
+                                            ),
+                                            GestureDetector(
+                                              onTap: () {
+                                                deleteParticularBackUpFile(
+                                                    index);
+                                              },
+                                              child: Container(
+                                                height: 45,
+                                                width: 45,
+                                                decoration: BoxDecoration(
+                                                  borderRadius:
+                                                  BorderRadius.circular(
+                                                      10),
+                                                  color: Colors.white
+                                                      .withOpacity(0.08),
+                                                ),
+                                                alignment: Alignment.center,
+                                                child: const Icon(
+                                                  Icons.close,
+                                                  color:
+                                                  AppTheme.chartColor,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    })
+                                    : const SizedBox(),
                               );
                             },
                           ),

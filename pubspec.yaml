@@ -32,7 +32,7 @@ dependencies:
   currency_text_input_formatter: ^2.1.11
   table_calendar: ^3.0.9
   lite_rolling_switch: ^1.0.1
-
+  flutter_local_notifications:
   animated_splash_screen: ^1.3.0
   flutter:
     sdk: flutter

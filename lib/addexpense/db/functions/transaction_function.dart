@@ -798,6 +798,7 @@ Future<String> getTransactionFilePath(String transactionId) async {
 //   }
 // }
 
+
 class HiveFirestoreBackupData1 {
   static const String TRANSACTION_DB_NAME = 'transaction-db';
   static FirebaseFirestore firestore = FirebaseFirestore.instance;
@@ -809,8 +810,7 @@ class HiveFirestoreBackupData1 {
       var user = auth.currentUser;
       if (user != null) {
         List<TransactionModel> transactionList = await getAllTransactions();
-        await _backupTransactionsToFirestore(
-            transactionList, user.email!, backUpIndex);
+        await _backupTransactionsToFirestore(transactionList, user.email!, backUpIndex);
       } else {
         print('User is not authenticated. Cannot backup transactions.');
       }

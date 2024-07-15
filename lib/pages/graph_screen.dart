@@ -1024,7 +1024,7 @@ class _GraphScreenState extends State<GraphScreen> {
                   trackballBehavior: TrackballBehavior(
                     enable: true,
 
-                    markerSettings: TrackballMarkerSettings(
+                    markerSettings: const TrackballMarkerSettings(
                         height: 10,
                         width: 10,
                         // markerVisibility: TrackballVisibilityMode.visible,
